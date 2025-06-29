@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,22 +23,52 @@ export const FiltersPanel: React.FC<FiltersPanelProps> = ({
 }) => {
   const [filters, setFilters] = useState({
     laboratorio: '',
+    areaTerapeutica: '',
+    farmaco: '',
+    molecula: '',
+    mecanismoAccion: '',
+    subAreaTratamiento: '',
+    alteracionGenetica: '',
+    lineaTratamiento: '',
     estado: [],
     fechaDesde: '',
-    fechaHasta: '',
-    alteracionGenetica: ''
+    fechaHasta: ''
   });
 
   const uniqueLaboratorios = useMemo(() => {
     return [...new Set(medications.map(med => med.nombre_lab).filter(Boolean))];
   }, [medications]);
 
-  const uniqueStates = useMemo(() => {
-    return [...new Set(medications.map(med => med.estado_en_espana).filter(Boolean))];
+  const uniqueAreasTerapeuticas = useMemo(() => {
+    return [...new Set(medications.map(med => med.area_terapeutica).filter(Boolean))];
   }, [medications]);
 
-  const uniqueAlteraciones = useMemo(() => {
+  const uniqueFarmacos = useMemo(() => {
+    return [...new Set(medications.map(med => med.nombre_del_farmaco).filter(Boolean))];
+  }, [medications]);
+
+  const uniqueMoleculas = useMemo(() => {
+    return [...new Set(medications.map(med => med.nombre_de_la_molecula).filter(Boolean))];
+  }, [medications]);
+
+  const uniqueMecanismosAccion = useMemo(() => {
+    return [...new Set(medications.map(med => med.mecanismo_de_accion).filter(Boolean))];
+  }, [medications]);
+
+  const uniqueSubAreasTratamiento = useMemo(() => {
+    return [...new Set(medications.map(med => med.sub_area_de_tratamiento).filter(Boolean))];
+  }, [medications]);
+
+  const uniqueAlteracionesGeneticas = useMemo(() => {
     return [...new Set(medications.map(med => med.alteracion_genetica_dirigida).filter(Boolean))];
+  }, [medications]);
+
+  const uniqueLineasTratamiento = useMemo(() => {
+    return [...new Set(medications.map(med => med.linea_de_tratamiento).filter(Boolean))];
+  }, [medications]);
+
+  const uniqueStates = useMemo(() => {
+    return [...new Set(medications.map(med => med.estado_en_espana).filter(Boolean))];
   }, [medications]);
 
   const handleFilterChange = (key: string, value: any) => {
@@ -49,10 +80,16 @@ export const FiltersPanel: React.FC<FiltersPanelProps> = ({
   const clearFilters = () => {
     const emptyFilters = {
       laboratorio: '',
+      areaTerapeutica: '',
+      farmaco: '',
+      molecula: '',
+      mecanismoAccion: '',
+      subAreaTratamiento: '',
+      alteracionGenetica: '',
+      lineaTratamiento: '',
       estado: [],
       fechaDesde: '',
-      fechaHasta: '',
-      alteracionGenetica: ''
+      fechaHasta: ''
     };
     setFilters(emptyFilters);
     onFiltersChange(emptyFilters);
@@ -80,7 +117,7 @@ export const FiltersPanel: React.FC<FiltersPanelProps> = ({
           </Button>
         </CardHeader>
         
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 max-h-96 overflow-y-auto">
           <div>
             <label className="text-sm font-medium mb-2 block">Laboratorio</label>
             <Select
@@ -99,6 +136,57 @@ export const FiltersPanel: React.FC<FiltersPanelProps> = ({
           </div>
 
           <div>
+            <label className="text-sm font-medium mb-2 block">Área Terapéutica</label>
+            <Select
+              value={filters.areaTerapeutica}
+              onValueChange={(value) => handleFilterChange('areaTerapeutica', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccionar área" />
+              </SelectTrigger>
+              <SelectContent>
+                {uniqueAreasTerapeuticas.map((area) => (
+                  <SelectItem key={area} value={area}>{area}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium mb-2 block">Fármaco</label>
+            <Select
+              value={filters.farmaco}
+              onValueChange={(value) => handleFilterChange('farmaco', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccionar fármaco" />
+              </SelectTrigger>
+              <SelectContent>
+                {uniqueFarmacos.slice(0, 50).map((farmaco) => (
+                  <SelectItem key={farmaco} value={farmaco}>{farmaco}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium mb-2 block">Línea de Tratamiento</label>
+            <Select
+              value={filters.lineaTratamiento}
+              onValueChange={(value) => handleFilterChange('lineaTratamiento', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccionar línea" />
+              </SelectTrigger>
+              <SelectContent>
+                {uniqueLineasTratamiento.map((linea) => (
+                  <SelectItem key={linea} value={linea}>{linea}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
             <label className="text-sm font-medium mb-2 block">Alteración Genética</label>
             <Select
               value={filters.alteracionGenetica}
@@ -108,7 +196,7 @@ export const FiltersPanel: React.FC<FiltersPanelProps> = ({
                 <SelectValue placeholder="Seleccionar alteración" />
               </SelectTrigger>
               <SelectContent>
-                {uniqueAlteraciones.map((alt) => (
+                {uniqueAlteracionesGeneticas.slice(0, 50).map((alt) => (
                   <SelectItem key={alt} value={alt}>{alt}</SelectItem>
                 ))}
               </SelectContent>
@@ -117,7 +205,7 @@ export const FiltersPanel: React.FC<FiltersPanelProps> = ({
 
           <div>
             <label className="text-sm font-medium mb-3 block">Estado en España</label>
-            <div className="space-y-2 max-h-40 overflow-y-auto">
+            <div className="space-y-2 max-h-32 overflow-y-auto">
               {uniqueStates.map((estado) => (
                 <div key={estado} className="flex items-center space-x-2">
                   <Checkbox

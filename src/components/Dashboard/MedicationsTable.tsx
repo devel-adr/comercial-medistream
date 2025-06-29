@@ -43,12 +43,15 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
         const searchLower = searchTerm.toLowerCase();
         const searchFields = [
           med.nombre_lab,
+          med.area_terapeutica,
+          med.nombre_del_farmaco,
+          med.nombre_de_la_molecula,
+          med.mecanismo_de_accion,
+          med.sub_area_de_tratamiento,
           med.alteracion_genetica_dirigida,
           med.linea_de_tratamiento,
           med.estado_en_espana,
-          med.ensayos_clinicos_relevantes,
-          med.nombre_del_farmaco,
-          med.nombre_de_la_molecula
+          med.ensayos_clinicos_relevantes
         ];
         if (!searchFields.some(field => 
           field && field.toString().toLowerCase().includes(searchLower)
@@ -164,12 +167,12 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
       </CardHeader>
       
       <CardContent>
-        <div className="rounded-lg border overflow-hidden">
+        <div className="rounded-lg border overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50 dark:bg-gray-800">
                 <TableHead 
-                  className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 min-w-[120px]"
                   onClick={() => handleSort('nombre_lab')}
                 >
                   <div className="flex items-center space-x-2">
@@ -178,7 +181,16 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                   </div>
                 </TableHead>
                 <TableHead 
-                  className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 min-w-[140px]"
+                  onClick={() => handleSort('area_terapeutica')}
+                >
+                  <div className="flex items-center space-x-2">
+                    <span>Área Terapéutica</span>
+                    <SortIcon column="area_terapeutica" />
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 min-w-[150px]"
                   onClick={() => handleSort('nombre_del_farmaco')}
                 >
                   <div className="flex items-center space-x-2">
@@ -187,7 +199,34 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                   </div>
                 </TableHead>
                 <TableHead 
-                  className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 min-w-[150px]"
+                  onClick={() => handleSort('nombre_de_la_molecula')}
+                >
+                  <div className="flex items-center space-x-2">
+                    <span>Molécula</span>
+                    <SortIcon column="nombre_de_la_molecula" />
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 min-w-[160px]"
+                  onClick={() => handleSort('mecanismo_de_accion')}
+                >
+                  <div className="flex items-center space-x-2">
+                    <span>Mecanismo de Acción</span>
+                    <SortIcon column="mecanismo_de_accion" />
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 min-w-[160px]"
+                  onClick={() => handleSort('sub_area_de_tratamiento')}
+                >
+                  <div className="flex items-center space-x-2">
+                    <span>Sub Área Tratamiento</span>
+                    <SortIcon column="sub_area_de_tratamiento" />
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 min-w-[160px]"
                   onClick={() => handleSort('alteracion_genetica_dirigida')}
                 >
                   <div className="flex items-center space-x-2">
@@ -196,7 +235,7 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                   </div>
                 </TableHead>
                 <TableHead 
-                  className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 min-w-[140px]"
                   onClick={() => handleSort('linea_de_tratamiento')}
                 >
                   <div className="flex items-center space-x-2">
@@ -205,7 +244,7 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                   </div>
                 </TableHead>
                 <TableHead 
-                  className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 min-w-[130px]"
                   onClick={() => handleSort('estado_en_espana')}
                 >
                   <div className="flex items-center space-x-2">
@@ -214,7 +253,7 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                   </div>
                 </TableHead>
                 <TableHead 
-                  className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 min-w-[130px]"
                   onClick={() => handleSort('fecha_de_aprobacion_espana')}
                 >
                   <div className="flex items-center space-x-2">
@@ -222,7 +261,16 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                     <SortIcon column="fecha_de_aprobacion_espana" />
                   </div>
                 </TableHead>
-                <TableHead>Acciones</TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 min-w-[180px]"
+                  onClick={() => handleSort('ensayos_clinicos_relevantes')}
+                >
+                  <div className="flex items-center space-x-2">
+                    <span>Ensayos Clínicos</span>
+                    <SortIcon column="ensayos_clinicos_relevantes" />
+                  </div>
+                </TableHead>
+                <TableHead className="min-w-[100px]">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -235,7 +283,19 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                     {medication.nombre_lab || 'N/A'}
                   </TableCell>
                   <TableCell className="max-w-xs truncate">
+                    {medication.area_terapeutica || 'N/A'}
+                  </TableCell>
+                  <TableCell className="max-w-xs truncate">
                     {medication.nombre_del_farmaco || 'N/A'}
+                  </TableCell>
+                  <TableCell className="max-w-xs truncate">
+                    {medication.nombre_de_la_molecula || 'N/A'}
+                  </TableCell>
+                  <TableCell className="max-w-xs truncate">
+                    {medication.mecanismo_de_accion || 'N/A'}
+                  </TableCell>
+                  <TableCell className="max-w-xs truncate">
+                    {medication.sub_area_de_tratamiento || 'N/A'}
                   </TableCell>
                   <TableCell className="max-w-xs truncate">
                     {medication.alteracion_genetica_dirigida || 'N/A'}
@@ -250,6 +310,9 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                   </TableCell>
                   <TableCell>
                     {medication.fecha_de_aprobacion_espana || 'N/A'}
+                  </TableCell>
+                  <TableCell className="max-w-xs truncate">
+                    {medication.ensayos_clinicos_relevantes || 'N/A'}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-2">
