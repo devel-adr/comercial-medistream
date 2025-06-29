@@ -42,11 +42,13 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
       if (searchTerm) {
         const searchLower = searchTerm.toLowerCase();
         const searchFields = [
-          med.nombre_laboratorio,
+          med.nombre_lab,
           med.alteracion_genetica_dirigida,
-          med.linea_tratamiento,
-          med.estado_espana,
-          med.ensayos_clinicos_relevantes
+          med.linea_de_tratamiento,
+          med.estado_en_espana,
+          med.ensayos_clinicos_relevantes,
+          med.nombre_del_farmaco,
+          med.nombre_de_la_molecula
         ];
         if (!searchFields.some(field => 
           field && field.toString().toLowerCase().includes(searchLower)
@@ -56,7 +58,7 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
       }
 
       // Filtros específicos
-      if (activeFilters.laboratorio && med.nombre_laboratorio !== activeFilters.laboratorio) {
+      if (activeFilters.laboratorio && med.nombre_lab !== activeFilters.laboratorio) {
         return false;
       }
       
@@ -64,18 +66,18 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
         return false;
       }
       
-      if (activeFilters.estado.length > 0 && !activeFilters.estado.includes(med.estado_espana)) {
+      if (activeFilters.estado && activeFilters.estado.length > 0 && !activeFilters.estado.includes(med.estado_en_espana)) {
         return false;
       }
       
-      if (activeFilters.fechaDesde && med.fecha_aprobacion_espana) {
-        if (new Date(med.fecha_aprobacion_espana) < new Date(activeFilters.fechaDesde)) {
+      if (activeFilters.fechaDesde && med.fecha_de_aprobacion_espana) {
+        if (new Date(med.fecha_de_aprobacion_espana) < new Date(activeFilters.fechaDesde)) {
           return false;
         }
       }
       
-      if (activeFilters.fechaHasta && med.fecha_aprobacion_espana) {
-        if (new Date(med.fecha_aprobacion_espana) > new Date(activeFilters.fechaHasta)) {
+      if (activeFilters.fechaHasta && med.fecha_de_aprobacion_espana) {
+        if (new Date(med.fecha_de_aprobacion_espana) > new Date(activeFilters.fechaHasta)) {
           return false;
         }
       }
@@ -168,11 +170,20 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
               <TableRow className="bg-gray-50 dark:bg-gray-800">
                 <TableHead 
                   className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-                  onClick={() => handleSort('nombre_laboratorio')}
+                  onClick={() => handleSort('nombre_lab')}
                 >
                   <div className="flex items-center space-x-2">
                     <span>Laboratorio</span>
-                    <SortIcon column="nombre_laboratorio" />
+                    <SortIcon column="nombre_lab" />
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                  onClick={() => handleSort('nombre_del_farmaco')}
+                >
+                  <div className="flex items-center space-x-2">
+                    <span>Fármaco</span>
+                    <SortIcon column="nombre_del_farmaco" />
                   </div>
                 </TableHead>
                 <TableHead 
@@ -186,29 +197,29 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                 </TableHead>
                 <TableHead 
                   className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-                  onClick={() => handleSort('linea_tratamiento')}
+                  onClick={() => handleSort('linea_de_tratamiento')}
                 >
                   <div className="flex items-center space-x-2">
                     <span>Línea Tratamiento</span>
-                    <SortIcon column="linea_tratamiento" />
+                    <SortIcon column="linea_de_tratamiento" />
                   </div>
                 </TableHead>
                 <TableHead 
                   className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-                  onClick={() => handleSort('estado_espana')}
+                  onClick={() => handleSort('estado_en_espana')}
                 >
                   <div className="flex items-center space-x-2">
                     <span>Estado España</span>
-                    <SortIcon column="estado_espana" />
+                    <SortIcon column="estado_en_espana" />
                   </div>
                 </TableHead>
                 <TableHead 
                   className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-                  onClick={() => handleSort('fecha_aprobacion_espana')}
+                  onClick={() => handleSort('fecha_de_aprobacion_espana')}
                 >
                   <div className="flex items-center space-x-2">
                     <span>Fecha Aprobación</span>
-                    <SortIcon column="fecha_aprobacion_espana" />
+                    <SortIcon column="fecha_de_aprobacion_espana" />
                   </div>
                 </TableHead>
                 <TableHead>Acciones</TableHead>
@@ -217,28 +228,28 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
             <TableBody>
               {paginatedData.map((medication, index) => (
                 <TableRow 
-                  key={index} 
+                  key={medication.ID_NUM || index} 
                   className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 >
                   <TableCell className="font-medium">
-                    {medication.nombre_laboratorio || 'N/A'}
+                    {medication.nombre_lab || 'N/A'}
+                  </TableCell>
+                  <TableCell className="max-w-xs truncate">
+                    {medication.nombre_del_farmaco || 'N/A'}
                   </TableCell>
                   <TableCell className="max-w-xs truncate">
                     {medication.alteracion_genetica_dirigida || 'N/A'}
                   </TableCell>
                   <TableCell>
-                    {medication.linea_tratamiento || 'N/A'}
+                    {medication.linea_de_tratamiento || 'N/A'}
                   </TableCell>
                   <TableCell>
-                    <Badge className={getStatusColor(medication.estado_espana)}>
-                      {medication.estado_espana || 'Sin estado'}
+                    <Badge className={getStatusColor(medication.estado_en_espana)}>
+                      {medication.estado_en_espana || 'Sin estado'}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {medication.fecha_aprobacion_espana 
-                      ? new Date(medication.fecha_aprobacion_espana).toLocaleDateString('es-ES')
-                      : 'N/A'
-                    }
+                    {medication.fecha_de_aprobacion_espana || 'N/A'}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-2">

@@ -1,11 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = 'https://ygusrelepdzolqtntkoj.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlndXNyZWxlcGR6b2xxdG50a29qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEwMjIwMjksImV4cCI6MjA2NjU5ODAyOX0.-IrhyxBDl6zjdI0nmxE7nDm8o8AUZy9UXuDEGlV4n_8';
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+import { supabase } from '@/integrations/supabase/client';
 
 export const useSupabaseData = (refreshInterval = 30000) => {
   const [data, setData] = useState([]);
@@ -19,7 +14,7 @@ export const useSupabaseData = (refreshInterval = 30000) => {
       const { data: medications, error } = await supabase
         .from('test')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('ID_NUM', { ascending: false });
 
       if (error) {
         throw error;

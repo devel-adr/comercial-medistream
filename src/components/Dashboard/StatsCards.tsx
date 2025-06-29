@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,16 +11,16 @@ interface StatsCardsProps {
 export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loading }) => {
   const totalMedications = medications.length;
   const approvedThisYear = medications.filter(med => {
-    if (!med.fecha_aprobacion_espana) return false;
-    const year = new Date(med.fecha_aprobacion_espana).getFullYear();
+    if (!med.fecha_de_aprobacion_espana) return false;
+    const year = new Date(med.fecha_de_aprobacion_espana).getFullYear();
     return year === new Date().getFullYear();
   }).length;
   
   const inTrials = medications.filter(med => 
-    med.estado_espana && med.estado_espana.toLowerCase().includes('ensayo')
+    med.estado_en_espana && med.estado_en_espana.toLowerCase().includes('ensayo')
   ).length;
   
-  const uniqueLabs = new Set(medications.map(med => med.nombre_laboratorio)).size;
+  const uniqueLabs = new Set(medications.map(med => med.nombre_lab)).size;
 
   const stats = [
     {

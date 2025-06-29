@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,11 +29,11 @@ export const FiltersPanel: React.FC<FiltersPanelProps> = ({
   });
 
   const uniqueLaboratorios = useMemo(() => {
-    return [...new Set(medications.map(med => med.nombre_laboratorio).filter(Boolean))];
+    return [...new Set(medications.map(med => med.nombre_lab).filter(Boolean))];
   }, [medications]);
 
   const uniqueStates = useMemo(() => {
-    return [...new Set(medications.map(med => med.estado_espana).filter(Boolean))];
+    return [...new Set(medications.map(med => med.estado_en_espana).filter(Boolean))];
   }, [medications]);
 
   const uniqueAlteraciones = useMemo(() => {
