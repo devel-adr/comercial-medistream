@@ -133,7 +133,7 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
 
   if (loading) {
     return (
-      <Card>
+      <Card className="w-full">
         <CardContent className="p-6">
           <div className="animate-pulse space-y-4">
             <div className="h-10 bg-gray-200 rounded"></div>
@@ -147,225 +147,249 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
   }
 
   return (
-    <Card className="shadow-lg">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-xl font-semibold">
-            Medicamentos ({filteredAndSortedData.length})
-          </CardTitle>
-          <div className="flex items-center space-x-4">
-            <div className="relative">
+    <div className="w-full max-w-full">
+      <Card className="shadow-lg">
+        <CardHeader>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <CardTitle className="text-xl font-semibold">
+              Medicamentos ({filteredAndSortedData.length})
+            </CardTitle>
+            <div className="relative w-full sm:w-64">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
                 placeholder="Buscar medicamentos..."
                 value={searchTerm}
                 onChange={(e) => onSearchChange(e.target.value)}
-                className="pl-10 w-64"
+                className="pl-10"
               />
             </div>
           </div>
-        </div>
-      </CardHeader>
-      
-      <CardContent>
-        <ScrollArea className="w-full">
-          <div className="rounded-lg border">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-gray-50 dark:bg-gray-800">
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 min-w-[120px]"
-                    onClick={() => handleSort('nombre_lab')}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <span>Laboratorio</span>
-                      <SortIcon column="nombre_lab" />
-                    </div>
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 min-w-[140px]"
-                    onClick={() => handleSort('area_terapeutica')}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <span>Área Terapéutica</span>
-                      <SortIcon column="area_terapeutica" />
-                    </div>
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 min-w-[150px]"
-                    onClick={() => handleSort('nombre_del_farmaco')}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <span>Fármaco</span>
-                      <SortIcon column="nombre_del_farmaco" />
-                    </div>
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 min-w-[150px]"
-                    onClick={() => handleSort('nombre_de_la_molecula')}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <span>Molécula</span>
-                      <SortIcon column="nombre_de_la_molecula" />
-                    </div>
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 min-w-[160px]"
-                    onClick={() => handleSort('mecanismo_de_accion')}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <span>Mecanismo de Acción</span>
-                      <SortIcon column="mecanismo_de_accion" />
-                    </div>
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 min-w-[160px]"
-                    onClick={() => handleSort('sub_area_de_tratamiento')}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <span>Sub Área Tratamiento</span>
-                      <SortIcon column="sub_area_de_tratamiento" />
-                    </div>
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 min-w-[160px]"
-                    onClick={() => handleSort('alteracion_genetica_dirigida')}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <span>Alteración Genética</span>
-                      <SortIcon column="alteracion_genetica_dirigida" />
-                    </div>
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 min-w-[140px]"
-                    onClick={() => handleSort('linea_de_tratamiento')}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <span>Línea Tratamiento</span>
-                      <SortIcon column="linea_de_tratamiento" />
-                    </div>
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 min-w-[130px]"
-                    onClick={() => handleSort('estado_en_espana')}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <span>Estado España</span>
-                      <SortIcon column="estado_en_espana" />
-                    </div>
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 min-w-[130px]"
-                    onClick={() => handleSort('fecha_de_aprobacion_espana')}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <span>Fecha Aprobación</span>
-                      <SortIcon column="fecha_de_aprobacion_espana" />
-                    </div>
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 min-w-[180px]"
-                    onClick={() => handleSort('ensayos_clinicos_relevantes')}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <span>Ensayos Clínicos</span>
-                      <SortIcon column="ensayos_clinicos_relevantes" />
-                    </div>
-                  </TableHead>
-                  <TableHead className="min-w-[100px]">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedData.map((medication, index) => (
-                  <TableRow 
-                    key={medication.ID_NUM || index} 
-                    className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                  >
-                    <TableCell className="font-medium">
-                      {medication.nombre_lab || 'N/A'}
-                    </TableCell>
-                    <TableCell className="max-w-xs truncate">
-                      {medication.area_terapeutica || 'N/A'}
-                    </TableCell>
-                    <TableCell className="max-w-xs truncate">
-                      {medication.nombre_del_farmaco || 'N/A'}
-                    </TableCell>
-                    <TableCell className="max-w-xs truncate">
-                      {medication.nombre_de_la_molecula || 'N/A'}
-                    </TableCell>
-                    <TableCell className="max-w-xs truncate">
-                      {medication.mecanismo_de_accion || 'N/A'}
-                    </TableCell>
-                    <TableCell className="max-w-xs truncate">
-                      {medication.sub_area_de_tratamiento || 'N/A'}
-                    </TableCell>
-                    <TableCell className="max-w-xs truncate">
-                      {medication.alteracion_genetica_dirigida || 'N/A'}
-                    </TableCell>
-                    <TableCell>
-                      {medication.linea_de_tratamiento || 'N/A'}
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getStatusColor(medication.estado_en_espana)}>
-                        {medication.estado_en_espana || 'Sin estado'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {medication.fecha_de_aprobacion_espana || 'N/A'}
-                    </TableCell>
-                    <TableCell className="max-w-xs truncate">
-                      {medication.ensayos_clinicos_relevantes || 'N/A'}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <Button variant="ghost" size="sm">
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        {medication.fuente_url && (
-                          <Button variant="ghost" size="sm" asChild>
-                            <a href={medication.fuente_url} target="_blank" rel="noopener noreferrer">
-                              <Link className="w-4 h-4" />
-                            </a>
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+        </CardHeader>
+        
+        <CardContent className="p-0">
+          <div className="overflow-hidden">
+            <ScrollArea className="w-full">
+              <div className="min-w-[1400px]">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-gray-50 dark:bg-gray-800">
+                      <TableHead 
+                        className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[140px] sticky left-0 bg-gray-50 dark:bg-gray-800 z-10"
+                        onClick={() => handleSort('nombre_lab')}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <span className="font-semibold">Laboratorio</span>
+                          <SortIcon column="nombre_lab" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[160px]"
+                        onClick={() => handleSort('area_terapeutica')}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <span className="font-semibold">Área Terapéutica</span>
+                          <SortIcon column="area_terapeutica" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[180px]"
+                        onClick={() => handleSort('nombre_del_farmaco')}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <span className="font-semibold">Fármaco</span>
+                          <SortIcon column="nombre_del_farmaco" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[160px]"
+                        onClick={() => handleSort('nombre_de_la_molecula')}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <span className="font-semibold">Molécula</span>
+                          <SortIcon column="nombre_de_la_molecula" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[180px]"
+                        onClick={() => handleSort('mecanismo_de_accion')}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <span className="font-semibold">Mecanismo de Acción</span>
+                          <SortIcon column="mecanismo_de_accion" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[180px]"
+                        onClick={() => handleSort('sub_area_de_tratamiento')}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <span className="font-semibold">Sub Área Tratamiento</span>
+                          <SortIcon column="sub_area_de_tratamiento" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[180px]"
+                        onClick={() => handleSort('alteracion_genetica_dirigida')}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <span className="font-semibold">Alteración Genética</span>
+                          <SortIcon column="alteracion_genetica_dirigida" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[160px]"
+                        onClick={() => handleSort('linea_de_tratamiento')}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <span className="font-semibold">Línea Tratamiento</span>
+                          <SortIcon column="linea_de_tratamiento" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[140px]"
+                        onClick={() => handleSort('estado_en_espana')}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <span className="font-semibold">Estado España</span>
+                          <SortIcon column="estado_en_espana" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[140px]"
+                        onClick={() => handleSort('fecha_de_aprobacion_espana')}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <span className="font-semibold">Fecha Aprobación</span>
+                          <SortIcon column="fecha_de_aprobacion_espana" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[200px]"
+                        onClick={() => handleSort('ensayos_clinicos_relevantes')}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <span className="font-semibold">Ensayos Clínicos</span>
+                          <SortIcon column="ensayos_clinicos_relevantes" />
+                        </div>
+                      </TableHead>
+                      <TableHead className="w-[100px] sticky right-0 bg-gray-50 dark:bg-gray-800 z-10">
+                        <span className="font-semibold">Acciones</span>
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedData.map((medication, index) => (
+                      <TableRow 
+                        key={medication.ID_NUM || index} 
+                        className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                      >
+                        <TableCell className="font-medium sticky left-0 bg-white dark:bg-gray-900 z-10">
+                          <div className="max-w-[120px] truncate" title={medication.nombre_lab}>
+                            {medication.nombre_lab || 'N/A'}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="max-w-[140px] truncate" title={medication.area_terapeutica}>
+                            {medication.area_terapeutica || 'N/A'}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="max-w-[160px] truncate" title={medication.nombre_del_farmaco}>
+                            {medication.nombre_del_farmaco || 'N/A'}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="max-w-[140px] truncate" title={medication.nombre_de_la_molecula}>
+                            {medication.nombre_de_la_molecula || 'N/A'}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="max-w-[160px] truncate" title={medication.mecanismo_de_accion}>
+                            {medication.mecanismo_de_accion || 'N/A'}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="max-w-[160px] truncate" title={medication.sub_area_de_tratamiento}>
+                            {medication.sub_area_de_tratamiento || 'N/A'}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="max-w-[160px] truncate" title={medication.alteracion_genetica_dirigida}>
+                            {medication.alteracion_genetica_dirigida || 'N/A'}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="max-w-[140px] truncate" title={medication.linea_de_tratamiento}>
+                            {medication.linea_de_tratamiento || 'N/A'}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={getStatusColor(medication.estado_en_espana)}>
+                            {medication.estado_en_espana || 'Sin estado'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="max-w-[120px] truncate" title={medication.fecha_de_aprobacion_espana}>
+                            {medication.fecha_de_aprobacion_espana || 'N/A'}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="max-w-[180px] truncate" title={medication.ensayos_clinicos_relevantes}>
+                            {medication.ensayos_clinicos_relevantes || 'N/A'}
+                          </div>
+                        </TableCell>
+                        <TableCell className="sticky right-0 bg-white dark:bg-gray-900 z-10">
+                          <div className="flex items-center space-x-1">
+                            <Button variant="ghost" size="sm">
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                            {medication.fuente_url && (
+                              <Button variant="ghost" size="sm" asChild>
+                                <a href={medication.fuente_url} target="_blank" rel="noopener noreferrer">
+                                  <Link className="w-4 h-4" />
+                                </a>
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </ScrollArea>
           </div>
-        </ScrollArea>
 
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between mt-6">
-            <div className="text-sm text-gray-600 dark:text-gray-300">
-              Mostrando {(currentPage - 1) * itemsPerPage + 1} a {Math.min(currentPage * itemsPerPage, filteredAndSortedData.length)} de {filteredAndSortedData.length} resultados
+          {totalPages > 1 && (
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 border-t">
+              <div className="text-sm text-gray-600 dark:text-gray-300">
+                Mostrando {(currentPage - 1) * itemsPerPage + 1} a {Math.min(currentPage * itemsPerPage, filteredAndSortedData.length)} de {filteredAndSortedData.length} resultados
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                >
+                  Anterior
+                </Button>
+                <span className="text-sm font-medium px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded">
+                  {currentPage} / {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  Siguiente
+                </Button>
+              </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                disabled={currentPage === 1}
-              >
-                Anterior
-              </Button>
-              <span className="text-sm font-medium">
-                Página {currentPage} de {totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                disabled={currentPage === totalPages}
-              >
-                Siguiente
-              </Button>
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 };
