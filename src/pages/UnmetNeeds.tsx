@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +25,7 @@ const UnmetNeeds = () => {
   const [sortConfig, setSortConfig] = useState({ key: '', direction: 'asc' });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const selectAllRef = useRef<HTMLButtonElement>(null);
 
   const { data: unmetNeeds, loading, error } = useUnmetNeedsData();
 
@@ -70,6 +71,21 @@ const UnmetNeeds = () => {
   }, [filteredAndSortedData, currentPage]);
 
   const totalPages = Math.ceil(filteredAndSortedData.length / itemsPerPage);
+
+  const isAllSelected = paginatedData.length > 0 && 
+    paginatedData.every(item => selectedRows.has(item.id_UN_table?.toString()));
+  
+  const isSomeSelected = paginatedData.some(item => selectedRows.has(item.id_UN_table?.toString()));
+
+  // Handle indeterminate state for select all checkbox
+  useEffect(() => {
+    if (selectAllRef.current) {
+      const checkbox = selectAllRef.current.querySelector('input[type="checkbox"]') as HTMLInputElement;
+      if (checkbox) {
+        checkbox.indeterminate = isSomeSelected && !isAllSelected;
+      }
+    }
+  }, [isSomeSelected, isAllSelected]);
 
   const handleSort = (key: string) => {
     setSortConfig(prev => ({
@@ -154,11 +170,6 @@ const UnmetNeeds = () => {
       ? <ArrowUp className="w-4 h-4" />
       : <ArrowDown className="w-4 h-4" />;
   };
-
-  const isAllSelected = paginatedData.length > 0 && 
-    paginatedData.every(item => selectedRows.has(item.id_UN_table?.toString()));
-  
-  const isSomeSelected = paginatedData.some(item => selectedRows.has(item.id_UN_table?.toString()));
 
   if (loading) {
     return (
@@ -264,13 +275,9 @@ const UnmetNeeds = () => {
                           <TableRow className="border-b">
                             <TableHead className="w-[60px] text-center">
                               <Checkbox
+                                ref={selectAllRef}
                                 checked={isAllSelected}
                                 onCheckedChange={handleSelectAll}
-                                ref={(ref) => {
-                                  if (ref) {
-                                    ref.indeterminate = isSomeSelected && !isAllSelected;
-                                  }
-                                }}
                               />
                             </TableHead>
                             <TableHead 
