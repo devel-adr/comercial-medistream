@@ -77,34 +77,46 @@ export type Database = {
       }
       UnmetNeeds_table: {
         Row: {
+          area_terapeutica: string
           conclusion: string
+          farmaco: string
           horizonte_temporal: string
           id_NUM_DD: number
           id_UN_NUM: string
           id_UN_table: number
           impacto: string
+          lab: string
+          molecula: string
           oportunidad_estrategica: string | null
           racional: string
           unmet_need: string
         }
         Insert: {
+          area_terapeutica: string
           conclusion: string
+          farmaco: string
           horizonte_temporal: string
           id_NUM_DD: number
           id_UN_NUM: string
           id_UN_table?: number
           impacto: string
+          lab: string
+          molecula: string
           oportunidad_estrategica?: string | null
           racional: string
           unmet_need: string
         }
         Update: {
+          area_terapeutica?: string
           conclusion?: string
+          farmaco?: string
           horizonte_temporal?: string
           id_NUM_DD?: number
           id_UN_NUM?: string
           id_UN_table?: number
           impacto?: string
+          lab?: string
+          molecula?: string
           oportunidad_estrategica?: string | null
           racional?: string
           unmet_need?: string

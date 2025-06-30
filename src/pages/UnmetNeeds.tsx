@@ -17,8 +17,12 @@ const formatOptions = ['Programa', 'Webinar', 'Podcast'];
 
 const UnmetNeeds = () => {
   const [filters, setFilters] = useState({
-    laboratorio: '',
-    farmaco: ''
+    lab: '',
+    area_terapeutica: '',
+    farmaco: '',
+    molecula: '',
+    impacto: '',
+    horizonte_temporal: ''
   });
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [formatSelections, setFormatSelections] = useState<Record<string, string>>({});
@@ -31,16 +35,32 @@ const UnmetNeeds = () => {
 
   // Get unique values for filters
   const uniqueOptions = useMemo(() => ({
-    laboratorios: [...new Set(unmetNeeds.map(item => item.laboratorio).filter(Boolean))].sort(),
-    farmacos: [...new Set(unmetNeeds.map(item => item.farmaco).filter(Boolean))].sort()
+    labs: [...new Set(unmetNeeds.map(item => item.lab).filter(Boolean))].sort(),
+    areasTerapeuticas: [...new Set(unmetNeeds.map(item => item.area_terapeutica).filter(Boolean))].sort(),
+    farmacos: [...new Set(unmetNeeds.map(item => item.farmaco).filter(Boolean))].sort(),
+    moleculas: [...new Set(unmetNeeds.map(item => item.molecula).filter(Boolean))].sort(),
+    impactos: [...new Set(unmetNeeds.map(item => item.impacto).filter(Boolean))].sort(),
+    horizontesTemporales: [...new Set(unmetNeeds.map(item => item.horizonte_temporal).filter(Boolean))].sort()
   }), [unmetNeeds]);
 
   const filteredAndSortedData = useMemo(() => {
     let filtered = unmetNeeds.filter(item => {
-      if (filters.laboratorio && item.laboratorio !== filters.laboratorio) {
+      if (filters.lab && item.lab !== filters.lab) {
+        return false;
+      }
+      if (filters.area_terapeutica && item.area_terapeutica !== filters.area_terapeutica) {
         return false;
       }
       if (filters.farmaco && item.farmaco !== filters.farmaco) {
+        return false;
+      }
+      if (filters.molecula && item.molecula !== filters.molecula) {
+        return false;
+      }
+      if (filters.impacto && item.impacto !== filters.impacto) {
+        return false;
+      }
+      if (filters.horizonte_temporal && item.horizonte_temporal !== filters.horizonte_temporal) {
         return false;
       }
       return true;
@@ -217,20 +237,38 @@ const UnmetNeeds = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="text-sm font-medium mb-2 block">Laboratorio</label>
                   <Select
-                    value={filters.laboratorio}
-                    onValueChange={(value) => setFilters(prev => ({ ...prev, laboratorio: value === 'all' ? '' : value }))}
+                    value={filters.lab}
+                    onValueChange={(value) => setFilters(prev => ({ ...prev, lab: value === 'all' ? '' : value }))}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar laboratorio" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Todos los laboratorios</SelectItem>
-                      {uniqueOptions.laboratorios.map((lab) => (
+                      {uniqueOptions.labs.map((lab) => (
                         <SelectItem key={lab} value={lab}>{lab}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Área Terapéutica</label>
+                  <Select
+                    value={filters.area_terapeutica}
+                    onValueChange={(value) => setFilters(prev => ({ ...prev, area_terapeutica: value === 'all' ? '' : value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar área" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas las áreas</SelectItem>
+                      {uniqueOptions.areasTerapeuticas.map((area) => (
+                        <SelectItem key={area} value={area}>{area}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -253,6 +291,60 @@ const UnmetNeeds = () => {
                     </SelectContent>
                   </Select>
                 </div>
+
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Molécula</label>
+                  <Select
+                    value={filters.molecula}
+                    onValueChange={(value) => setFilters(prev => ({ ...prev, molecula: value === 'all' ? '' : value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar molécula" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas las moléculas</SelectItem>
+                      {uniqueOptions.moleculas.map((molecula) => (
+                        <SelectItem key={molecula} value={molecula}>{molecula}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Impacto</label>
+                  <Select
+                    value={filters.impacto}
+                    onValueChange={(value) => setFilters(prev => ({ ...prev, impacto: value === 'all' ? '' : value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar impacto" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos los impactos</SelectItem>
+                      {uniqueOptions.impactos.map((impacto) => (
+                        <SelectItem key={impacto} value={impacto}>{impacto}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Horizonte Temporal</label>
+                  <Select
+                    value={filters.horizonte_temporal}
+                    onValueChange={(value) => setFilters(prev => ({ ...prev, horizonte_temporal: value === 'all' ? '' : value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar horizonte" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos los horizontes</SelectItem>
+                      {uniqueOptions.horizontesTemporales.map((horizonte) => (
+                        <SelectItem key={horizonte} value={horizonte}>{horizonte}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -269,7 +361,7 @@ const UnmetNeeds = () => {
               <div className="w-full">
                 <ScrollArea className="w-full">
                   <div className="w-full overflow-x-auto">
-                    <div className="min-w-[1200px]">
+                    <div className="min-w-[1400px]">
                       <Table className="w-full">
                         <TableHeader className="sticky top-0 z-10 bg-gray-50 dark:bg-gray-800">
                           <TableRow className="border-b">
@@ -289,14 +381,23 @@ const UnmetNeeds = () => {
                                 <SortIcon column="unmet_need" />
                               </div>
                             </TableHead>
+                            <TableHead className="w-[120px]">
+                              <span className="font-semibold">Laboratorio</span>
+                            </TableHead>
                             <TableHead className="w-[150px]">
+                              <span className="font-semibold">Área Terapéutica</span>
+                            </TableHead>
+                            <TableHead className="w-[120px]">
+                              <span className="font-semibold">Fármaco</span>
+                            </TableHead>
+                            <TableHead className="w-[120px]">
+                              <span className="font-semibold">Molécula</span>
+                            </TableHead>
+                            <TableHead className="w-[100px]">
                               <span className="font-semibold">Impacto</span>
                             </TableHead>
                             <TableHead className="w-[150px]">
                               <span className="font-semibold">Horizonte Temporal</span>
-                            </TableHead>
-                            <TableHead className="w-[200px]">
-                              <span className="font-semibold">Oportunidad Estratégica</span>
                             </TableHead>
                             <TableHead className="w-[120px]">
                               <span className="font-semibold">Formato</span>
@@ -327,6 +428,26 @@ const UnmetNeeds = () => {
                                   </div>
                                 </TableCell>
                                 <TableCell>
+                                  <div className="w-[100px] text-sm" title={item.lab}>
+                                    {item.lab || 'N/A'}
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="w-[130px] text-sm" title={item.area_terapeutica}>
+                                    {item.area_terapeutica || 'N/A'}
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="w-[100px] text-sm" title={item.farmaco}>
+                                    {item.farmaco || 'N/A'}
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="w-[100px] text-sm" title={item.molecula}>
+                                    {item.molecula || 'N/A'}
+                                  </div>
+                                </TableCell>
+                                <TableCell>
                                   <Badge variant="outline">
                                     {item.impacto || 'N/A'}
                                   </Badge>
@@ -334,11 +455,6 @@ const UnmetNeeds = () => {
                                 <TableCell>
                                   <div className="w-[130px] text-sm" title={item.horizonte_temporal}>
                                     {item.horizonte_temporal || 'N/A'}
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <div className="w-[180px] text-sm" title={item.oportunidad_estrategica}>
-                                    {item.oportunidad_estrategica || 'N/A'}
                                   </div>
                                 </TableCell>
                                 <TableCell>
