@@ -11,7 +11,7 @@ import { Filter, BarChart3, ArrowUp, ArrowDown } from 'lucide-react';
 import { Navigation } from '@/components/Navigation';
 import { useUnmetNeedsData } from '@/hooks/useUnmetNeedsData';
 import { ThemeProvider } from '@/components/ThemeProvider';
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 
 const formatOptions = ['Programa', 'Webinar', 'Podcast'];
 
@@ -222,13 +222,13 @@ const UnmetNeeds = () => {
                   <label className="text-sm font-medium mb-2 block">Laboratorio</label>
                   <Select
                     value={filters.laboratorio}
-                    onValueChange={(value) => setFilters(prev => ({ ...prev, laboratorio: value }))}
+                    onValueChange={(value) => setFilters(prev => ({ ...prev, laboratorio: value === 'all' ? '' : value }))}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar laboratorio" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Todos los laboratorios</SelectItem>
+                      <SelectItem value="all">Todos los laboratorios</SelectItem>
                       {uniqueOptions.laboratorios.map((lab) => (
                         <SelectItem key={lab} value={lab}>{lab}</SelectItem>
                       ))}
@@ -240,13 +240,13 @@ const UnmetNeeds = () => {
                   <label className="text-sm font-medium mb-2 block">Fármaco</label>
                   <Select
                     value={filters.farmaco}
-                    onValueChange={(value) => setFilters(prev => ({ ...prev, farmaco: value }))}
+                    onValueChange={(value) => setFilters(prev => ({ ...prev, farmaco: value === 'all' ? '' : value }))}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar fármaco" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Todos los fármacos</SelectItem>
+                      <SelectItem value="all">Todos los fármacos</SelectItem>
                       {uniqueOptions.farmacos.map((farmaco) => (
                         <SelectItem key={farmaco} value={farmaco}>{farmaco}</SelectItem>
                       ))}
@@ -343,15 +343,16 @@ const UnmetNeeds = () => {
                                 </TableCell>
                                 <TableCell>
                                   <Select
-                                    value={formatSelections[item.id_UN_table?.toString()] || ''}
+                                    value={formatSelections[item.id_UN_table?.toString()] || 'none'}
                                     onValueChange={(value) => 
-                                      handleFormatChange(item.id_UN_table?.toString(), value)
+                                      handleFormatChange(item.id_UN_table?.toString(), value === 'none' ? '' : value)
                                     }
                                   >
                                     <SelectTrigger className="w-[100px]">
                                       <SelectValue placeholder="Formato" />
                                     </SelectTrigger>
                                     <SelectContent>
+                                      <SelectItem value="none">Seleccionar</SelectItem>
                                       {formatOptions.map((format) => (
                                         <SelectItem key={format} value={format}>
                                           {format}
