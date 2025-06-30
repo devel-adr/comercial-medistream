@@ -57,6 +57,60 @@ export type Database = {
         }
         Relationships: []
       }
+      UnmetNeeds_docu: {
+        Row: {
+          contenido_UN: string
+          ID_NUM_DD: number
+          id_UN_docu: number
+        }
+        Insert: {
+          contenido_UN: string
+          ID_NUM_DD: number
+          id_UN_docu?: number
+        }
+        Update: {
+          contenido_UN?: string
+          ID_NUM_DD?: number
+          id_UN_docu?: number
+        }
+        Relationships: []
+      }
+      UnmetNeeds_table: {
+        Row: {
+          conclusion: string
+          horizonte_temporal: string
+          id_NUM_DD: number
+          id_UN_NUM: string
+          id_UN_table: number
+          impacto: string
+          oportunidad_estrategica: string | null
+          racional: string
+          unmet_need: string
+        }
+        Insert: {
+          conclusion: string
+          horizonte_temporal: string
+          id_NUM_DD: number
+          id_UN_NUM: string
+          id_UN_table?: number
+          impacto: string
+          oportunidad_estrategica?: string | null
+          racional: string
+          unmet_need: string
+        }
+        Update: {
+          conclusion?: string
+          horizonte_temporal?: string
+          id_NUM_DD?: number
+          id_UN_NUM?: string
+          id_UN_table?: number
+          impacto?: string
+          oportunidad_estrategica?: string | null
+          racional?: string
+          unmet_need?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

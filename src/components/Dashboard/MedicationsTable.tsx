@@ -280,11 +280,7 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                           <Checkbox
                             checked={isAllSelected}
                             onCheckedChange={handleSelectAll}
-                            ref={(ref) => {
-                              if (ref) {
-                                ref.indeterminate = isSomeSelected && !isAllSelected;
-                              }
-                            }}
+                            {...(isSomeSelected && !isAllSelected ? { 'data-indeterminate': true } : {})}
                           />
                         </TableHead>
                         <TableHead className="w-[50px] text-center font-semibold">UM</TableHead>
