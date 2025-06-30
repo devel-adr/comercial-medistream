@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, FileText, CalendarDays, BarChart } from 'lucide-react';
+import { TrendingUp, FileText, CalendarDays, BarChart, Building, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
 
 interface StatsCardsProps {
   medications: any[];
@@ -10,17 +11,37 @@ interface StatsCardsProps {
 
 export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loading }) => {
   const totalMedications = medications.length;
-  const approvedThisYear = medications.filter(med => {
-    if (!med.fecha_de_aprobacion_espana) return false;
-    const year = new Date(med.fecha_de_aprobacion_espana).getFullYear();
-    return year === new Date().getFullYear();
-  }).length;
+  
+  const approvedMeds = medications.filter(med => 
+    med.estado_en_espana && med.estado_en_espana.toLowerCase().includes('aprobado')
+  ).length;
   
   const inTrials = medications.filter(med => 
     med.estado_en_espana && med.estado_en_espana.toLowerCase().includes('ensayo')
   ).length;
   
-  const uniqueLabs = new Set(medications.map(med => med.nombre_lab)).size;
+  const pendingMeds = medications.filter(med => 
+    med.estado_en_espana && med.estado_en_espana.toLowerCase().includes('pendiente')
+  ).length;
+  
+  const uniqueLabs = new Set(medications.map(med => med.nombre_lab).filter(Boolean)).size;
+  
+  const currentYear = new Date().getFullYear();
+  const approvedThisYear = medications.filter(med => {
+    if (!med.fecha_de_aprobacion_espana) return false;
+    try {
+      const year = new Date(med.fecha_de_aprobacion_espana).getFullYear();
+      return year === currentYear;
+    } catch {
+      return false;
+    }
+  }).length;
+
+  const uniqueTherapeuticAreas = new Set(medications.map(med => med.area_terapeutica).filter(Boolean)).size;
+  
+  const medicationsWithClinicalTrials = medications.filter(med => 
+    med.ensayos_clinicos_relevantes && med.ensayos_clinicos_relevantes.trim() !== ''
+  ).length;
 
   const stats = [
     {
@@ -28,38 +49,66 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loadin
       value: totalMedications,
       icon: FileText,
       color: 'bg-blue-500',
-      trend: '+12%'
+      description: 'Medicamentos registrados'
     },
     {
-      title: 'Aprobados 2024',
-      value: approvedThisYear,
-      icon: CalendarDays,
+      title: 'Laboratorios',
+      value: uniqueLabs,
+      icon: Building,
+      color: 'bg-purple-500',
+      description: 'Laboratorios únicos'
+    },
+    {
+      title: 'Aprobados',
+      value: approvedMeds,
+      icon: CheckCircle,
       color: 'bg-green-500',
-      trend: '+8%'
+      description: 'Medicamentos aprobados'
     },
     {
       title: 'En Ensayos',
       value: inTrials,
       icon: BarChart,
       color: 'bg-orange-500',
-      trend: '+15%'
+      description: 'En fase de ensayos'
     },
     {
-      title: 'Laboratorios',
-      value: uniqueLabs,
+      title: 'Pendientes',
+      value: pendingMeds,
+      icon: Clock,
+      color: 'bg-yellow-500',
+      description: 'Pendientes de aprobación'
+    },
+    {
+      title: `Aprobados ${currentYear}`,
+      value: approvedThisYear,
+      icon: CalendarDays,
+      color: 'bg-indigo-500',
+      description: 'Aprobados este año'
+    },
+    {
+      title: 'Áreas Terapéuticas',
+      value: uniqueTherapeuticAreas,
       icon: TrendingUp,
-      color: 'bg-purple-500',
-      trend: '+3%'
+      color: 'bg-teal-500',
+      description: 'Áreas diferentes'
+    },
+    {
+      title: 'Con Ensayos Clínicos',
+      value: medicationsWithClinicalTrials,
+      icon: AlertTriangle,
+      color: 'bg-red-500',
+      description: 'Con información de ensayos'
     }
   ];
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {[1, 2, 3, 4].map((i) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
           <Card key={i} className="animate-pulse">
-            <CardContent className="p-6">
-              <div className="h-20 bg-gray-200 rounded"></div>
+            <CardContent className="p-4">
+              <div className="h-16 bg-gray-200 rounded"></div>
             </CardContent>
           </Card>
         ))}
@@ -68,11 +117,13 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loadin
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {stats.map((stat, index) => {
         const Icon = stat.icon;
+        const percentage = totalMedications > 0 ? ((stat.value / totalMedications) * 100).toFixed(1) : '0';
+        
         return (
-          <Card key={index} className="hover:shadow-lg transition-shadow duration-200">
+          <Card key={index} className="hover:shadow-lg transition-shadow duration-200 cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">
                 {stat.title}
@@ -82,15 +133,20 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loadin
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">
+              <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
                 {stat.value.toLocaleString()}
               </div>
-              <div className="flex items-center space-x-2 mt-2">
-                <Badge variant="secondary" className="text-green-600 bg-green-100">
-                  {stat.trend}
-                </Badge>
-                <span className="text-xs text-gray-500">vs mes anterior</span>
-              </div>
+              <p className="text-xs text-gray-500 mb-2">
+                {stat.description}
+              </p>
+              {index > 1 && totalMedications > 0 && (
+                <div className="flex items-center space-x-2">
+                  <Badge variant="secondary" className="text-blue-600 bg-blue-100">
+                    {percentage}%
+                  </Badge>
+                  <span className="text-xs text-gray-500">del total</span>
+                </div>
+              )}
             </CardContent>
           </Card>
         );

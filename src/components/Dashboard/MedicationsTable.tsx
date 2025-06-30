@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -6,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Search, Eye, Link, ArrowUp, ArrowDown } from 'lucide-react';
+import { MedicationDetailModal } from './MedicationDetailModal';
 
 interface MedicationsTableProps {
   medications: any[];
@@ -24,6 +26,8 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
 }) => {
   const [sortConfig, setSortConfig] = useState({ key: '', direction: 'asc' });
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedMedication, setSelectedMedication] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const itemsPerPage = 10;
 
   const getStatusColor = (status: string) => {
@@ -65,7 +69,31 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
         return false;
       }
       
+      if (activeFilters.areaTerapeutica && med.area_terapeutica !== activeFilters.areaTerapeutica) {
+        return false;
+      }
+      
+      if (activeFilters.farmaco && med.nombre_del_farmaco !== activeFilters.farmaco) {
+        return false;
+      }
+      
+      if (activeFilters.molecula && med.nombre_de_la_molecula !== activeFilters.molecula) {
+        return false;
+      }
+      
+      if (activeFilters.mecanismoAccion && med.mecanismo_de_accion !== activeFilters.mecanismoAccion) {
+        return false;
+      }
+      
+      if (activeFilters.subAreaTratamiento && med.sub_area_de_tratamiento !== activeFilters.subAreaTratamiento) {
+        return false;
+      }
+      
       if (activeFilters.alteracionGenetica && med.alteracion_genetica_dirigida !== activeFilters.alteracionGenetica) {
+        return false;
+      }
+      
+      if (activeFilters.lineaTratamiento && med.linea_de_tratamiento !== activeFilters.lineaTratamiento) {
         return false;
       }
       
@@ -121,6 +149,11 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
     }));
   };
 
+  const handleViewDetails = (medication: any) => {
+    setSelectedMedication(medication);
+    setIsModalOpen(true);
+  };
+
   const SortIcon = ({ column }: { column: string }) => {
     if (sortConfig.key !== column) {
       return <ArrowUp className="w-4 h-4 opacity-30" />;
@@ -156,7 +189,7 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
             <div className="relative w-full sm:w-64">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
-                placeholder="Buscar medicamentos..."
+                placeholder="Buscar por laboratorio..."
                 value={searchTerm}
                 onChange={(e) => onSearchChange(e.target.value)}
                 className="pl-10"
@@ -166,195 +199,132 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
         </CardHeader>
         
         <CardContent className="p-0">
-          <div className="w-full overflow-hidden border rounded-lg">
-            <ScrollArea className="w-full h-[600px]">
-              <div className="w-full min-w-[1400px]">
-                <Table className="w-full">
-                  <TableHeader className="sticky top-0 z-20 bg-gray-50 dark:bg-gray-800">
-                    <TableRow className="border-b">
-                      <TableHead 
-                        className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[140px] sticky left-0 bg-gray-50 dark:bg-gray-800 z-30 border-r"
-                        onClick={() => handleSort('nombre_lab')}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <span className="font-semibold">Laboratorio</span>
-                          <SortIcon column="nombre_lab" />
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[160px]"
-                        onClick={() => handleSort('area_terapeutica')}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <span className="font-semibold">Área Terapéutica</span>
-                          <SortIcon column="area_terapeutica" />
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[180px]"
-                        onClick={() => handleSort('nombre_del_farmaco')}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <span className="font-semibold">Fármaco</span>
-                          <SortIcon column="nombre_del_farmaco" />
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[160px]"
-                        onClick={() => handleSort('nombre_de_la_molecula')}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <span className="font-semibold">Molécula</span>
-                          <SortIcon column="nombre_de_la_molecula" />
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[180px]"
-                        onClick={() => handleSort('mecanismo_de_accion')}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <span className="font-semibold">Mecanismo de Acción</span>
-                          <SortIcon column="mecanismo_de_accion" />
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[180px]"
-                        onClick={() => handleSort('sub_area_de_tratamiento')}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <span className="font-semibold">Sub Área Tratamiento</span>
-                          <SortIcon column="sub_area_de_tratamiento" />
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[180px]"
-                        onClick={() => handleSort('alteracion_genetica_dirigida')}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <span className="font-semibold">Alteración Genética</span>
-                          <SortIcon column="alteracion_genetica_dirigida" />
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[160px]"
-                        onClick={() => handleSort('linea_de_tratamiento')}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <span className="font-semibold">Línea Tratamiento</span>
-                          <SortIcon column="linea_de_tratamiento" />
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[140px]"
-                        onClick={() => handleSort('estado_en_espana')}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <span className="font-semibold">Estado España</span>
-                          <SortIcon column="estado_en_espana" />
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[140px]"
-                        onClick={() => handleSort('fecha_de_aprobacion_espana')}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <span className="font-semibold">Fecha Aprobación</span>
-                          <SortIcon column="fecha_de_aprobacion_espana" />
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[200px]"
-                        onClick={() => handleSort('ensayos_clinicos_relevantes')}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <span className="font-semibold">Ensayos Clínicos</span>
-                          <SortIcon column="ensayos_clinicos_relevantes" />
-                        </div>
-                      </TableHead>
-                      <TableHead className="w-[100px] sticky right-0 bg-gray-50 dark:bg-gray-800 z-30 border-l">
-                        <span className="font-semibold">Acciones</span>
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {paginatedData.map((medication, index) => (
-                      <TableRow 
-                        key={medication.ID_NUM || index} 
-                        className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-b"
-                      >
-                        <TableCell className="font-medium sticky left-0 bg-white dark:bg-gray-900 z-20 border-r">
-                          <div className="w-[120px] truncate" title={medication.nombre_lab}>
-                            {medication.nombre_lab || 'N/A'}
+          <div className="w-full overflow-hidden">
+            <ScrollArea className="w-full">
+              <div className="w-full overflow-x-auto">
+                <div className="min-w-[1200px]">
+                  <Table className="w-full">
+                    <TableHeader className="sticky top-0 z-10 bg-gray-50 dark:bg-gray-800">
+                      <TableRow className="border-b">
+                        <TableHead 
+                          className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[120px]"
+                          onClick={() => handleSort('nombre_lab')}
+                        >
+                          <div className="flex items-center space-x-2">
+                            <span className="font-semibold">Laboratorio</span>
+                            <SortIcon column="nombre_lab" />
                           </div>
-                        </TableCell>
-                        <TableCell className="p-3">
-                          <div className="w-[140px] truncate" title={medication.area_terapeutica}>
-                            {medication.area_terapeutica || 'N/A'}
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[140px]"
+                          onClick={() => handleSort('area_terapeutica')}
+                        >
+                          <div className="flex items-center space-x-2">
+                            <span className="font-semibold">Área Terapéutica</span>
+                            <SortIcon column="area_terapeutica" />
                           </div>
-                        </TableCell>
-                        <TableCell className="p-3">
-                          <div className="w-[160px] truncate" title={medication.nombre_del_farmaco}>
-                            {medication.nombre_del_farmaco || 'N/A'}
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[150px]"
+                          onClick={() => handleSort('nombre_del_farmaco')}
+                        >
+                          <div className="flex items-center space-x-2">
+                            <span className="font-semibold">Fármaco</span>
+                            <SortIcon column="nombre_del_farmaco" />
                           </div>
-                        </TableCell>
-                        <TableCell className="p-3">
-                          <div className="w-[140px] truncate" title={medication.nombre_de_la_molecula}>
-                            {medication.nombre_de_la_molecula || 'N/A'}
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[130px]"
+                          onClick={() => handleSort('nombre_de_la_molecula')}
+                        >
+                          <div className="flex items-center space-x-2">
+                            <span className="font-semibold">Molécula</span>
+                            <SortIcon column="nombre_de_la_molecula" />
                           </div>
-                        </TableCell>
-                        <TableCell className="p-3">
-                          <div className="w-[160px] truncate" title={medication.mecanismo_de_accion}>
-                            {medication.mecanismo_de_accion || 'N/A'}
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[120px]"
+                          onClick={() => handleSort('estado_en_espana')}
+                        >
+                          <div className="flex items-center space-x-2">
+                            <span className="font-semibold">Estado</span>
+                            <SortIcon column="estado_en_espana" />
                           </div>
-                        </TableCell>
-                        <TableCell className="p-3">
-                          <div className="w-[160px] truncate" title={medication.sub_area_de_tratamiento}>
-                            {medication.sub_area_de_tratamiento || 'N/A'}
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[120px]"
+                          onClick={() => handleSort('fecha_de_aprobacion_espana')}
+                        >
+                          <div className="flex items-center space-x-2">
+                            <span className="font-semibold">Fecha</span>
+                            <SortIcon column="fecha_de_aprobacion_espana" />
                           </div>
-                        </TableCell>
-                        <TableCell className="p-3">
-                          <div className="w-[160px] truncate" title={medication.alteracion_genetica_dirigida}>
-                            {medication.alteracion_genetica_dirigida || 'N/A'}
-                          </div>
-                        </TableCell>
-                        <TableCell className="p-3">
-                          <div className="w-[140px] truncate" title={medication.linea_de_tratamiento}>
-                            {medication.linea_de_tratamiento || 'N/A'}
-                          </div>
-                        </TableCell>
-                        <TableCell className="p-3">
-                          <Badge className={getStatusColor(medication.estado_en_espana)}>
-                            {medication.estado_en_espana || 'Sin estado'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="p-3">
-                          <div className="w-[120px] truncate" title={medication.fecha_de_aprobacion_espana}>
-                            {medication.fecha_de_aprobacion_espana || 'N/A'}
-                          </div>
-                        </TableCell>
-                        <TableCell className="p-3">
-                          <div className="w-[180px] truncate" title={medication.ensayos_clinicos_relevantes}>
-                            {medication.ensayos_clinicos_relevantes || 'N/A'}
-                          </div>
-                        </TableCell>
-                        <TableCell className="sticky right-0 bg-white dark:bg-gray-900 z-20 border-l">
-                          <div className="flex items-center space-x-1">
-                            <Button variant="ghost" size="sm">
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                            {medication.fuente_url && (
-                              <Button variant="ghost" size="sm" asChild>
-                                <a href={medication.fuente_url} target="_blank" rel="noopener noreferrer">
-                                  <Link className="w-4 h-4" />
-                                </a>
-                              </Button>
-                            )}
-                          </div>
-                        </TableCell>
+                        </TableHead>
+                        <TableHead className="w-[100px]">
+                          <span className="font-semibold">Acciones</span>
+                        </TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {paginatedData.map((medication, index) => (
+                        <TableRow 
+                          key={medication.ID_NUM || index} 
+                          className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-b"
+                        >
+                          <TableCell className="font-medium">
+                            <div className="w-[100px] truncate" title={medication.nombre_lab}>
+                              {medication.nombre_lab || 'N/A'}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="w-[120px] truncate" title={medication.area_terapeutica}>
+                              {medication.area_terapeutica || 'N/A'}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="w-[130px] truncate" title={medication.nombre_del_farmaco}>
+                              {medication.nombre_del_farmaco || 'N/A'}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="w-[110px] truncate" title={medication.nombre_de_la_molecula}>
+                              {medication.nombre_de_la_molecula || 'N/A'}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge className={getStatusColor(medication.estado_en_espana)}>
+                              {medication.estado_en_espana || 'Sin estado'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="w-[100px] truncate" title={medication.fecha_de_aprobacion_espana}>
+                              {medication.fecha_de_aprobacion_espana || 'N/A'}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center space-x-1">
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => handleViewDetails(medication)}
+                                title="Ver detalles completos"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                              {medication.fuente_url && (
+                                <Button variant="ghost" size="sm" asChild>
+                                  <a href={medication.fuente_url} target="_blank" rel="noopener noreferrer" title="Ver fuente">
+                                    <Link className="w-4 h-4" />
+                                  </a>
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
             </ScrollArea>
           </div>
@@ -389,6 +359,15 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
           )}
         </CardContent>
       </Card>
+
+      <MedicationDetailModal
+        medication={selectedMedication}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedMedication(null);
+        }}
+      />
     </div>
   );
 };

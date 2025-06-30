@@ -23,10 +23,10 @@ export const Header: React.FC<HeaderProps> = ({ onToggleFilters }) => {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  Dashboard Farmacéutico
+                  DRUG DEALER
                 </h1>
                 <p className="text-sm text-gray-600 dark:text-gray-300">
-                  Análisis y seguimiento de medicamentos
+                  Base de datos de laboratorios farmacéuticos
                 </p>
               </div>
             </div>
