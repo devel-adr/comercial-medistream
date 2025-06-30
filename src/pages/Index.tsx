@@ -8,6 +8,7 @@ import { MedicationsTable } from '@/components/Dashboard/MedicationsTable';
 import { FiltersPanel } from '@/components/Dashboard/FiltersPanel';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { Navigation } from '@/components/Navigation';
 
 const Index = () => {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
@@ -19,6 +20,8 @@ const Index = () => {
   return (
     <ThemeProvider>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+        <Navigation />
+        
         <Header onToggleFilters={() => setIsFiltersOpen(!isFiltersOpen)} />
         
         <div className="container mx-auto px-4 py-6 space-y-6">
