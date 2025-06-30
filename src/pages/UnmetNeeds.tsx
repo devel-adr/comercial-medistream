@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
-import { Filter, BarChart3, ArrowUp, ArrowDown, Search, Eye, Grid3x3, Timeline, TableIcon } from 'lucide-react';
+import { Filter, BarChart3, ArrowUp, ArrowDown, Search, Eye, Grid3x3, Clock, TableIcon } from 'lucide-react';
 import { Navigation } from '@/components/Navigation';
 import { useUnmetNeedsData } from '@/hooks/useUnmetNeedsData';
 import { ThemeProvider } from '@/components/ThemeProvider';
@@ -412,7 +412,7 @@ const UnmetNeeds = () => {
                     onClick={() => setViewMode('timeline')}
                     className="text-xs uppercase tracking-wider font-medium"
                   >
-                    <Timeline className="w-4 h-4 mr-1" />
+                    <Clock className="w-4 h-4 mr-1" />
                     Vista Timeline
                   </Button>
                   <Button
