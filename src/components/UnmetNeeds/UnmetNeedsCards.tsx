@@ -66,16 +66,14 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
                   <Badge className={`${getImpactColor(item.impacto)} px-2 py-1 text-xs font-semibold uppercase tracking-wider`}>
                     {item.impacto || 'Sin clasificar'}
                   </Badge>
-                  {onViewDetails && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onViewDetails(item)}
-                      className="h-8 w-8 p-0 hover:bg-blue-100 dark:hover:bg-blue-900/20"
-                    >
-                      <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                    </Button>
-                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onViewDetails && onViewDetails(item)}
+                    className="h-8 w-8 p-0 hover:bg-blue-100 dark:hover:bg-blue-900/20"
+                  >
+                    <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  </Button>
                 </div>
               </div>
 
