@@ -21,32 +21,27 @@ export const UnmetNeedsKPIs: React.FC<UnmetNeedsKPIsProps> = ({ data }) => {
     {
       label: 'Total Unmet Needs',
       value: totalNeeds,
-      gradient: 'from-blue-600 to-indigo-600',
-      textColor: 'text-blue-400'
+      gradient: 'from-blue-600 to-indigo-600'
     },
     {
       label: 'Impacto Alto',
       value: highImpactNeeds,
-      gradient: 'from-red-500 to-pink-600',
-      textColor: 'text-red-400'
+      gradient: 'from-red-500 to-pink-600'
     },
     {
       label: 'Impacto Medio',
       value: mediumImpactNeeds,
-      gradient: 'from-orange-500 to-yellow-500',
-      textColor: 'text-orange-400'
+      gradient: 'from-orange-500 to-yellow-500'
     },
     {
       label: 'Corto Plazo',
       value: shortTermNeeds,
-      gradient: 'from-green-600 to-emerald-600',
-      textColor: 'text-green-400'
+      gradient: 'from-green-600 to-emerald-600'
     },
     {
       label: 'Áreas Cubiertas',
       value: uniqueAreas,
-      gradient: 'from-purple-600 to-indigo-600',
-      textColor: 'text-purple-400'
+      gradient: 'from-purple-600 to-indigo-600'
     }
   ];
 
@@ -58,7 +53,7 @@ export const UnmetNeedsKPIs: React.FC<UnmetNeedsKPIsProps> = ({ data }) => {
           <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/5 to-white/10"></div>
           <CardContent className="relative p-6 text-center">
             <div className="mb-3">
-              <div className={`text-4xl font-bold ${kpi.textColor} mb-2`}>
+              <div className="text-4xl font-bold text-white mb-2">
                 {kpi.value}
               </div>
               <div className="text-sm text-white/80 uppercase tracking-wider font-medium">

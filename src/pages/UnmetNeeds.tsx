@@ -7,19 +7,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
-import { Filter, BarChart3, ArrowUp, ArrowDown, Search, Eye, Grid3x3, Clock, TableIcon, FileText } from 'lucide-react';
+import { Filter, BarChart3, ArrowUp, ArrowDown, Search, Eye, Grid3x3, TableIcon } from 'lucide-react';
 import { Navigation } from '@/components/Navigation';
 import { useUnmetNeedsData } from '@/hooks/useUnmetNeedsData';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { toast } from "@/hooks/use-toast";
 import { UnmetNeedsKPIs } from '@/components/UnmetNeeds/UnmetNeedsKPIs';
 import { UnmetNeedsCards } from '@/components/UnmetNeeds/UnmetNeedsCards';
-import { UnmetNeedsTimeline } from '@/components/UnmetNeeds/UnmetNeedsTimeline';
 import { UnmetNeedsDetailModal } from '@/components/UnmetNeeds/UnmetNeedsDetailModal';
-import { UnmetNeedsDocModal } from '@/components/UnmetNeeds/UnmetNeedsDocModal';
 
 const formatOptions = ['Programa', 'Webinar', 'Podcast'];
-type ViewMode = 'cards' | 'timeline' | 'table';
+type ViewMode = 'cards' | 'table';
 
 const UnmetNeeds = () => {
   const [filters, setFilters] = useState({
@@ -38,9 +36,6 @@ const UnmetNeeds = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('cards');
   const [selectedUnmetNeed, setSelectedUnmetNeed] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [selectedDocId, setSelectedDocId] = useState<number | null>(null);
-  const [selectedDocTitle, setSelectedDocTitle] = useState<string>('');
-  const [isDocModalOpen, setIsDocModalOpen] = useState(false);
   const itemsPerPage = 10;
   const selectAllRef = useRef<HTMLButtonElement>(null);
 
@@ -167,12 +162,6 @@ const UnmetNeeds = () => {
   const handleViewDetails = (unmetNeed: any) => {
     setSelectedUnmetNeed(unmetNeed);
     setIsDetailModalOpen(true);
-  };
-
-  const handleViewDoc = (unmetNeed: any) => {
-    setSelectedDocId(unmetNeed.id_NUM_DD);
-    setSelectedDocTitle(unmetNeed.unmet_need || unmetNeed.farmaco || 'Unmet Need');
-    setIsDocModalOpen(true);
   };
 
   const handleGenerateTactics = () => {
@@ -417,15 +406,6 @@ const UnmetNeeds = () => {
                     Vista Cards
                   </Button>
                   <Button
-                    variant={viewMode === 'timeline' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setViewMode('timeline')}
-                    className="text-xs uppercase tracking-wider font-medium"
-                  >
-                    <Clock className="w-4 h-4 mr-1" />
-                    Vista Timeline
-                  </Button>
-                  <Button
                     variant={viewMode === 'table' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setViewMode('table')}
@@ -454,14 +434,6 @@ const UnmetNeeds = () => {
                   onSelectForTactics={handleSelectRow}
                   selectedIds={selectedRows}
                 />
-              </CardContent>
-            </Card>
-          )}
-
-          {viewMode === 'timeline' && (
-            <Card className="shadow-lg">
-              <CardContent className="p-6">
-                <UnmetNeedsTimeline data={filteredAndSortedData} />
               </CardContent>
             </Card>
           )}
@@ -630,15 +602,6 @@ const UnmetNeeds = () => {
                                       >
                                         <Eye className="w-4 h-4" />
                                       </Button>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => handleViewDoc(item)}
-                                        className="p-2"
-                                        title="Ver documentación"
-                                      >
-                                        <FileText className="w-4 h-4" />
-                                      </Button>
                                     </div>
                                   </TableCell>
                                 </TableRow>
@@ -724,17 +687,6 @@ const UnmetNeeds = () => {
               setSelectedUnmetNeed(null);
             }}
             unmetNeed={selectedUnmetNeed}
-          />
-
-          <UnmetNeedsDocModal
-            isOpen={isDocModalOpen}
-            onClose={() => {
-              setIsDocModalOpen(false);
-              setSelectedDocId(null);
-              setSelectedDocTitle('');
-            }}
-            unmetNeedId={selectedDocId}
-            unmetNeedTitle={selectedDocTitle}
           />
         </div>
       </div>
