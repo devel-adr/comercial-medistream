@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BarChart3, FileText, Users, Target, Clock, Lightbulb } from 'lucide-react';
+import { BarChart3, FileText, Users, Target, Clock, Lightbulb, Eye } from 'lucide-react';
 
 interface UnmetNeedsCardsProps {
   data: any[];
@@ -13,6 +13,7 @@ interface UnmetNeedsCardsProps {
   formatSelections: Record<string, string>;
   onFormatChange: (id: string, format: string) => void;
   formatOptions: string[];
+  onViewDetails?: (unmetNeed: any) => void;
 }
 
 export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
@@ -21,7 +22,8 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
   selectedIds,
   formatSelections,
   onFormatChange,
-  formatOptions
+  formatOptions,
+  onViewDetails
 }) => {
   const getImpactColor = (impacto: string) => {
     if (!impacto) return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
@@ -60,9 +62,21 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
                 <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                   #{item.id_UN_table || index + 1}
                 </div>
-                <Badge className={`${getImpactColor(item.impacto)} px-2 py-1 text-xs font-semibold uppercase tracking-wider`}>
-                  {item.impacto || 'Sin clasificar'}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge className={`${getImpactColor(item.impacto)} px-2 py-1 text-xs font-semibold uppercase tracking-wider`}>
+                    {item.impacto || 'Sin clasificar'}
+                  </Badge>
+                  {onViewDetails && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onViewDetails(item)}
+                      className="h-8 w-8 p-0 hover:bg-blue-100 dark:hover:bg-blue-900/20"
+                    >
+                      <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    </Button>
+                  )}
+                </div>
               </div>
 
               {/* Basic Info Grid */}
@@ -147,7 +161,7 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
                       <SelectValue placeholder="Formato" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">Seleccionar</SelectItem>
+                      <SelectItem value="none">Formato</SelectItem>
                       {formatOptions.map((format) => (
                         <SelectItem key={format} value={format}>
                           {format}
