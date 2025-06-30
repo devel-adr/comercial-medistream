@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -147,7 +146,7 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
   }
 
   return (
-    <div className="w-full max-w-full">
+    <div className="w-full">
       <Card className="shadow-lg">
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -167,14 +166,14 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
         </CardHeader>
         
         <CardContent className="p-0">
-          <div className="overflow-hidden">
-            <ScrollArea className="w-full">
-              <div className="min-w-[1400px]">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-gray-50 dark:bg-gray-800">
+          <div className="w-full overflow-hidden border rounded-lg">
+            <ScrollArea className="w-full h-[600px]">
+              <div className="w-full min-w-[1400px]">
+                <Table className="w-full">
+                  <TableHeader className="sticky top-0 z-20 bg-gray-50 dark:bg-gray-800">
+                    <TableRow className="border-b">
                       <TableHead 
-                        className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[140px] sticky left-0 bg-gray-50 dark:bg-gray-800 z-10"
+                        className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[140px] sticky left-0 bg-gray-50 dark:bg-gray-800 z-30 border-r"
                         onClick={() => handleSort('nombre_lab')}
                       >
                         <div className="flex items-center space-x-2">
@@ -272,7 +271,7 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                           <SortIcon column="ensayos_clinicos_relevantes" />
                         </div>
                       </TableHead>
-                      <TableHead className="w-[100px] sticky right-0 bg-gray-50 dark:bg-gray-800 z-10">
+                      <TableHead className="w-[100px] sticky right-0 bg-gray-50 dark:bg-gray-800 z-30 border-l">
                         <span className="font-semibold">Acciones</span>
                       </TableHead>
                     </TableRow>
@@ -281,64 +280,64 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                     {paginatedData.map((medication, index) => (
                       <TableRow 
                         key={medication.ID_NUM || index} 
-                        className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                        className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-b"
                       >
-                        <TableCell className="font-medium sticky left-0 bg-white dark:bg-gray-900 z-10">
-                          <div className="max-w-[120px] truncate" title={medication.nombre_lab}>
+                        <TableCell className="font-medium sticky left-0 bg-white dark:bg-gray-900 z-20 border-r">
+                          <div className="w-[120px] truncate" title={medication.nombre_lab}>
                             {medication.nombre_lab || 'N/A'}
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <div className="max-w-[140px] truncate" title={medication.area_terapeutica}>
+                        <TableCell className="p-3">
+                          <div className="w-[140px] truncate" title={medication.area_terapeutica}>
                             {medication.area_terapeutica || 'N/A'}
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <div className="max-w-[160px] truncate" title={medication.nombre_del_farmaco}>
+                        <TableCell className="p-3">
+                          <div className="w-[160px] truncate" title={medication.nombre_del_farmaco}>
                             {medication.nombre_del_farmaco || 'N/A'}
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <div className="max-w-[140px] truncate" title={medication.nombre_de_la_molecula}>
+                        <TableCell className="p-3">
+                          <div className="w-[140px] truncate" title={medication.nombre_de_la_molecula}>
                             {medication.nombre_de_la_molecula || 'N/A'}
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <div className="max-w-[160px] truncate" title={medication.mecanismo_de_accion}>
+                        <TableCell className="p-3">
+                          <div className="w-[160px] truncate" title={medication.mecanismo_de_accion}>
                             {medication.mecanismo_de_accion || 'N/A'}
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <div className="max-w-[160px] truncate" title={medication.sub_area_de_tratamiento}>
+                        <TableCell className="p-3">
+                          <div className="w-[160px] truncate" title={medication.sub_area_de_tratamiento}>
                             {medication.sub_area_de_tratamiento || 'N/A'}
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <div className="max-w-[160px] truncate" title={medication.alteracion_genetica_dirigida}>
+                        <TableCell className="p-3">
+                          <div className="w-[160px] truncate" title={medication.alteracion_genetica_dirigida}>
                             {medication.alteracion_genetica_dirigida || 'N/A'}
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <div className="max-w-[140px] truncate" title={medication.linea_de_tratamiento}>
+                        <TableCell className="p-3">
+                          <div className="w-[140px] truncate" title={medication.linea_de_tratamiento}>
                             {medication.linea_de_tratamiento || 'N/A'}
                           </div>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="p-3">
                           <Badge className={getStatusColor(medication.estado_en_espana)}>
                             {medication.estado_en_espana || 'Sin estado'}
                           </Badge>
                         </TableCell>
-                        <TableCell>
-                          <div className="max-w-[120px] truncate" title={medication.fecha_de_aprobacion_espana}>
+                        <TableCell className="p-3">
+                          <div className="w-[120px] truncate" title={medication.fecha_de_aprobacion_espana}>
                             {medication.fecha_de_aprobacion_espana || 'N/A'}
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <div className="max-w-[180px] truncate" title={medication.ensayos_clinicos_relevantes}>
+                        <TableCell className="p-3">
+                          <div className="w-[180px] truncate" title={medication.ensayos_clinicos_relevantes}>
                             {medication.ensayos_clinicos_relevantes || 'N/A'}
                           </div>
                         </TableCell>
-                        <TableCell className="sticky right-0 bg-white dark:bg-gray-900 z-10">
+                        <TableCell className="sticky right-0 bg-white dark:bg-gray-900 z-20 border-l">
                           <div className="flex items-center space-x-1">
                             <Button variant="ghost" size="sm">
                               <Eye className="w-4 h-4" />
