@@ -198,13 +198,27 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
     setIsAnalyzing(true);
     
     try {
+      // Prepare detailed medication data
+      const selectedMedicationsData = Array.from(selectedMedicationIds).map(idNum => {
+        const medication = medications.find(med => med.ID_NUM?.toString() === idNum);
+        return {
+          ID_NUM: medication?.ID_NUM,
+          laboratorio: medication?.nombre_lab,
+          area_terapeutica: medication?.area_terapeutica,
+          farmaco: medication?.nombre_del_farmaco,
+          molecula: medication?.nombre_de_la_molecula
+        };
+      }).filter(Boolean); // Remove any undefined entries
+
+      console.log('Sending medication data to webhook:', selectedMedicationsData);
+
       const response = await fetch('https://develms.app.n8n.cloud/webhook-test/unmet_needs', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          id_nums: Array.from(selectedMedicationIds)
+          medications: selectedMedicationsData
         }),
       });
 
