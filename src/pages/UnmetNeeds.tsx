@@ -430,9 +430,11 @@ const UnmetNeeds = () => {
               <CardContent>
                 <UnmetNeedsCards
                   data={filteredAndSortedData}
-                  onViewDetails={handleViewDetails}
                   onSelectForTactics={handleSelectRow}
                   selectedIds={selectedRows}
+                  formatSelections={formatSelections}
+                  onFormatChange={handleFormatChange}
+                  formatOptions={formatOptions}
                 />
               </CardContent>
             </Card>
@@ -450,7 +452,7 @@ const UnmetNeeds = () => {
                 <div className="w-full">
                   <ScrollArea className="w-full">
                     <div className="w-full overflow-x-auto">
-                      <div className="min-w-[900px]">
+                      <div className="min-w-[1200px]">
                         <Table className="w-full">
                           <TableHeader className="sticky top-0 z-10 bg-gray-50 dark:bg-gray-800">
                             <TableRow className="border-b">
@@ -463,24 +465,6 @@ const UnmetNeeds = () => {
                               </TableHead>
                               <TableHead 
                                 className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[120px]"
-                                onClick={() => handleSort('lab')}
-                              >
-                                <div className="flex items-center space-x-2">
-                                  <span className="font-semibold">Lab</span>
-                                  <SortIcon column="lab" />
-                                </div>
-                              </TableHead>
-                              <TableHead 
-                                className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[150px]"
-                                onClick={() => handleSort('area_terapeutica')}
-                              >
-                                <div className="flex items-center space-x-2">
-                                  <span className="font-semibold">Área</span>
-                                  <SortIcon column="area_terapeutica" />
-                                </div>
-                              </TableHead>
-                              <TableHead 
-                                className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[120px]"
                                 onClick={() => handleSort('farmaco')}
                               >
                                 <div className="flex items-center space-x-2">
@@ -489,37 +473,43 @@ const UnmetNeeds = () => {
                                 </div>
                               </TableHead>
                               <TableHead 
-                                className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[120px]"
-                                onClick={() => handleSort('molecula')}
+                                className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[250px]"
+                                onClick={() => handleSort('unmet_need')}
                               >
                                 <div className="flex items-center space-x-2">
-                                  <span className="font-semibold">Molécula</span>
-                                  <SortIcon column="molecula" />
+                                  <span className="font-semibold">Unmet Need</span>
+                                  <SortIcon column="unmet_need" />
                                 </div>
                               </TableHead>
                               <TableHead 
-                                className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[100px]"
-                                onClick={() => handleSort('impacto')}
+                                className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[200px]"
+                                onClick={() => handleSort('racional')}
                               >
                                 <div className="flex items-center space-x-2">
-                                  <span className="font-semibold">Impacto</span>
-                                  <SortIcon column="impacto" />
+                                  <span className="font-semibold">Racional</span>
+                                  <SortIcon column="racional" />
                                 </div>
                               </TableHead>
                               <TableHead 
-                                className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[150px]"
-                                onClick={() => handleSort('horizonte_temporal')}
+                                className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[200px]"
+                                onClick={() => handleSort('oportunidad_estrategica')}
                               >
                                 <div className="flex items-center space-x-2">
-                                  <span className="font-semibold">Horizonte Temporal</span>
-                                  <SortIcon column="horizonte_temporal" />
+                                  <span className="font-semibold">Oportunidad</span>
+                                  <SortIcon column="oportunidad_estrategica" />
+                                </div>
+                              </TableHead>
+                              <TableHead 
+                                className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[200px]"
+                                onClick={() => handleSort('conclusion')}
+                              >
+                                <div className="flex items-center space-x-2">
+                                  <span className="font-semibold">Conclusión</span>
+                                  <SortIcon column="conclusion" />
                                 </div>
                               </TableHead>
                               <TableHead className="w-[120px]">
                                 <span className="font-semibold">Formato</span>
-                              </TableHead>
-                              <TableHead className="w-[120px]">
-                                <span className="font-semibold">Acciones</span>
                               </TableHead>
                             </TableRow>
                           </TableHeader>
@@ -542,33 +532,28 @@ const UnmetNeeds = () => {
                                     />
                                   </TableCell>
                                   <TableCell>
-                                    <div className="w-[100px] text-sm" title={item.lab}>
-                                      {item.lab || 'N/A'}
-                                    </div>
-                                  </TableCell>
-                                  <TableCell>
-                                    <div className="w-[130px] text-sm" title={item.area_terapeutica}>
-                                      {item.area_terapeutica || 'N/A'}
-                                    </div>
-                                  </TableCell>
-                                  <TableCell>
                                     <div className="w-[100px] text-sm" title={item.farmaco}>
                                       {item.farmaco || 'N/A'}
                                     </div>
                                   </TableCell>
                                   <TableCell>
-                                    <div className="w-[100px] text-sm" title={item.molecula}>
-                                      {item.molecula || 'N/A'}
+                                    <div className="w-[230px] text-sm line-clamp-3" title={item.unmet_need}>
+                                      {item.unmet_need || 'N/A'}
                                     </div>
                                   </TableCell>
                                   <TableCell>
-                                    <Badge variant="outline">
-                                      {item.impacto || 'N/A'}
-                                    </Badge>
+                                    <div className="w-[180px] text-sm line-clamp-3" title={item.racional}>
+                                      {item.racional || 'N/A'}
+                                    </div>
                                   </TableCell>
                                   <TableCell>
-                                    <div className="w-[130px] text-sm" title={item.horizonte_temporal}>
-                                      {item.horizonte_temporal || 'N/A'}
+                                    <div className="w-[180px] text-sm line-clamp-3" title={item.oportunidad_estrategica}>
+                                      {item.oportunidad_estrategica || 'N/A'}
+                                    </div>
+                                  </TableCell>
+                                  <TableCell>
+                                    <div className="w-[180px] text-sm line-clamp-3" title={item.conclusion}>
+                                      {item.conclusion || 'N/A'}
                                     </div>
                                   </TableCell>
                                   <TableCell>
@@ -590,19 +575,6 @@ const UnmetNeeds = () => {
                                         ))}
                                       </SelectContent>
                                     </Select>
-                                  </TableCell>
-                                  <TableCell>
-                                    <div className="flex items-center space-x-1">
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => handleViewDetails(item)}
-                                        className="p-2"
-                                        title="Ver detalles"
-                                      >
-                                        <Eye className="w-4 h-4" />
-                                      </Button>
-                                    </div>
                                   </TableCell>
                                 </TableRow>
                               );
