@@ -468,7 +468,7 @@ const UnmetNeeds = () => {
                 <div className="w-full">
                   <ScrollArea className="w-full">
                     <div className="w-full overflow-x-auto">
-                      <div className="min-w-[1400px]">
+                      <div className="min-w-[900px]">
                         <Table className="w-full">
                           <TableHeader className="sticky top-0 z-10 bg-gray-50 dark:bg-gray-800">
                             <TableRow className="border-b">
@@ -480,31 +480,58 @@ const UnmetNeeds = () => {
                                 />
                               </TableHead>
                               <TableHead 
-                                className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[200px]"
-                                onClick={() => handleSort('unmet_need')}
+                                className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[120px]"
+                                onClick={() => handleSort('lab')}
                               >
                                 <div className="flex items-center space-x-2">
-                                  <span className="font-semibold">Unmet Need</span>
-                                  <SortIcon column="unmet_need" />
+                                  <span className="font-semibold">Lab</span>
+                                  <SortIcon column="lab" />
                                 </div>
                               </TableHead>
-                              <TableHead className="w-[120px]">
-                                <span className="font-semibold">Laboratorio</span>
+                              <TableHead 
+                                className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[150px]"
+                                onClick={() => handleSort('area_terapeutica')}
+                              >
+                                <div className="flex items-center space-x-2">
+                                  <span className="font-semibold">Área</span>
+                                  <SortIcon column="area_terapeutica" />
+                                </div>
                               </TableHead>
-                              <TableHead className="w-[150px]">
-                                <span className="font-semibold">Área Terapéutica</span>
+                              <TableHead 
+                                className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[120px]"
+                                onClick={() => handleSort('farmaco')}
+                              >
+                                <div className="flex items-center space-x-2">
+                                  <span className="font-semibold">Fármaco</span>
+                                  <SortIcon column="farmaco" />
+                                </div>
                               </TableHead>
-                              <TableHead className="w-[120px]">
-                                <span className="font-semibold">Fármaco</span>
+                              <TableHead 
+                                className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[120px]"
+                                onClick={() => handleSort('molecula')}
+                              >
+                                <div className="flex items-center space-x-2">
+                                  <span className="font-semibold">Molécula</span>
+                                  <SortIcon column="molecula" />
+                                </div>
                               </TableHead>
-                              <TableHead className="w-[120px]">
-                                <span className="font-semibold">Molécula</span>
+                              <TableHead 
+                                className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[100px]"
+                                onClick={() => handleSort('impacto')}
+                              >
+                                <div className="flex items-center space-x-2">
+                                  <span className="font-semibold">Impacto</span>
+                                  <SortIcon column="impacto" />
+                                </div>
                               </TableHead>
-                              <TableHead className="w-[100px]">
-                                <span className="font-semibold">Impacto</span>
-                              </TableHead>
-                              <TableHead className="w-[150px]">
-                                <span className="font-semibold">Horizonte Temporal</span>
+                              <TableHead 
+                                className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[150px]"
+                                onClick={() => handleSort('horizonte_temporal')}
+                              >
+                                <div className="flex items-center space-x-2">
+                                  <span className="font-semibold">Horizonte Temporal</span>
+                                  <SortIcon column="horizonte_temporal" />
+                                </div>
                               </TableHead>
                               <TableHead className="w-[120px]">
                                 <span className="font-semibold">Formato</span>
@@ -531,11 +558,6 @@ const UnmetNeeds = () => {
                                         handleSelectRow(item.id_UN_table?.toString(), checked === true)
                                       }
                                     />
-                                  </TableCell>
-                                  <TableCell>
-                                    <div className="w-[180px] text-sm" title={item.unmet_need}>
-                                      {item.unmet_need || 'N/A'}
-                                    </div>
                                   </TableCell>
                                   <TableCell>
                                     <div className="w-[100px] text-sm" title={item.lab}>
