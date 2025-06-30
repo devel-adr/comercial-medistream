@@ -43,6 +43,13 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
     return 'border-gray-200';
   };
 
+  const handleViewDetails = (item: any) => {
+    console.log('Eye button clicked for item:', item);
+    if (onViewDetails) {
+      onViewDetails(item);
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
       {data.map((item, index) => {
@@ -69,8 +76,13 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => onViewDetails && onViewDetails(item)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleViewDetails(item);
+                    }}
                     className="h-8 w-8 p-0 hover:bg-blue-100 dark:hover:bg-blue-900/20"
+                    type="button"
                   >
                     <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                   </Button>
