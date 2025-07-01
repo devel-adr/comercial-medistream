@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNotification } from '@/contexts/NotificationContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Volume2, Mail, LogOut, User, Play, Palette, Bell } from 'lucide-react';
+import { playNotificationSound } from '@/utils/notificationSounds';
 
 interface SettingsPanelProps {
   isOpen: boolean;
@@ -42,31 +43,14 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose })
   };
 
   const handleSoundChange = (sound: string) => {
+    console.log('Sound changed to:', sound);
     setSelectedSound(sound);
     updateSettings({ soundType: sound });
   };
 
-  const testNotificationSound = () => {
-    // Test the notification sound
-    const audio = new Audio();
-    const volume = settings.volume;
-    
-    const getSoundData = (soundType: string) => {
-      switch(soundType) {
-        case 'chime':
-          return 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBjiH0fPTgjEIJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBjiH0fPTgjEIJHfH8N2QQAoUXrTp66hVFApGn+DyvmQ=';
-        case 'ding':
-          return 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBjiH0fPTgjEIJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBjiH0fPTgjEIJHfH8N2QQAoUXrTp66hVFApGn+DyvmQ=';
-        case 'notification':
-          return 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBjiH0fPTgjEIJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBjiH0fPTgjEIJHfH8N2QQAoUXrTp66hVFApGn+DyvmQ=';
-        default:
-          return 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBjiH0fPTgjEIJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBjiH0fPTgjEIJHfH8N2QQAoUXrTp66hVFApGn+DyvmQ=';
-      }
-    };
-    
-    audio.src = getSoundData(selectedSound);
-    audio.volume = volume;
-    audio.play().catch(console.error);
+  const testNotificationSound = async () => {
+    console.log('Testing notification sound:', selectedSound, 'with volume:', settings.volume);
+    await playNotificationSound(selectedSound, settings.volume);
   };
 
   const handleContactDeveloper = () => {

@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export const useUnmetNeedsData = (refreshInterval = 30000) => {
@@ -7,6 +7,7 @@ export const useUnmetNeedsData = (refreshInterval = 30000) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(new Date());
+  const previousCountRef = useRef(0);
 
   const fetchData = async () => {
     try {
@@ -20,21 +21,25 @@ export const useUnmetNeedsData = (refreshInterval = 30000) => {
         throw error;
       }
 
-      console.log('Unmet Needs data fetched successfully:', unmetNeeds?.length, 'records');
+      const newCount = unmetNeeds?.length || 0;
+      console.log('Unmet Needs data fetched successfully:', newCount, 'records');
       
-      // Check if we have new data (more records than before)
-      if (data.length > 0 && unmetNeeds && unmetNeeds.length > data.length) {
-        console.log('New UnmetNeeds data detected:', unmetNeeds.length - data.length, 'new records');
+      // Check if we have new data (only after initial load)
+      if (!loading && previousCountRef.current > 0 && newCount > previousCountRef.current) {
+        const newRecords = newCount - previousCountRef.current;
+        console.log('New UnmetNeeds data detected:', newRecords, 'new records');
+        
         // Dispatch custom event for data update
         window.dispatchEvent(new CustomEvent('dataUpdated', { 
           detail: { 
             type: 'unmetNeeds', 
-            count: unmetNeeds.length,
-            newRecords: unmetNeeds.length - data.length
+            count: newCount,
+            newRecords: newRecords
           } 
         }));
       }
       
+      previousCountRef.current = newCount;
       setData(unmetNeeds || []);
       setLastUpdated(new Date());
       setError(null);
