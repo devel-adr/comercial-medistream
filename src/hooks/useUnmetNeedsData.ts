@@ -21,15 +21,6 @@ export const useUnmetNeedsData = (refreshInterval = 30000) => {
       }
 
       console.log('Unmet Needs data fetched successfully:', unmetNeeds?.length, 'records');
-      
-      // Check if data has changed and trigger notification
-      if (data.length > 0 && unmetNeeds && unmetNeeds.length !== data.length) {
-        // Dispatch custom event for data update
-        window.dispatchEvent(new CustomEvent('dataUpdated', { 
-          detail: { type: 'unmetNeeds', count: unmetNeeds.length } 
-        }));
-      }
-      
       setData(unmetNeeds || []);
       setLastUpdated(new Date());
       setError(null);

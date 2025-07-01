@@ -1,66 +1,100 @@
 
 import React, { useState } from 'react';
-import { Search } from 'lucide-react';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { Search, Loader } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
-interface AnalysisBarProps {
-  onSearch?: (searchTerm: string) => void;
-}
+export const AnalysisBar: React.FC = () => {
+  const [analysisText, setAnalysisText] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
-export const AnalysisBar: React.FC<AnalysisBarProps> = ({ onSearch }) => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const handleAnalysis = async () => {
+    if (!analysisText.trim()) {
+      toast({
+        title: "Error",
+        description: "Por favor, introduce un texto para analizar",
+        variant: "destructive",
+      });
+      return;
+    }
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (onSearch) {
-      onSearch(searchTerm);
+    setIsLoading(true);
+    console.log("Iniciando análisis:", analysisText);
+
+    try {
+      const response = await fetch('https://develms.app.n8n.cloud/webhook/starter', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: analysisText,
+          timestamp: new Date().toISOString(),
+          source: 'dashboard-farmaceutico'
+        }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Análisis completado",
+          description: "El análisis se ha enviado correctamente al sistema",
+        });
+        setAnalysisText('');
+      } else {
+        throw new Error('Error en la respuesta del servidor');
+      }
+    } catch (error) {
+      console.error('Error en análisis:', error);
+      toast({
+        title: "Error en el análisis",
+        description: "No se pudo completar el análisis. Inténtalo de nuevo.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleAnalysisClick = () => {
-    window.open('https://develms.app.n8n.cloud/webhook/unmet_needs', '_blank');
-  };
-
   return (
-    <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg p-6 text-white shadow-lg">
-      <div className="flex items-center justify-between">
-        <div className="flex-1 mr-6">
-          <h2 className="text-xl font-bold mb-2">Búsqueda de Fármacos</h2>
-          <p className="text-purple-100 mb-4">
-            Busca información sobre fármacos y análisis de mercado
-          </p>
-          <form onSubmit={handleSearch} className="flex gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                type="text"
-                placeholder="Buscar fármacos, moléculas, laboratorios..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/70 focus:bg-white/30"
-              />
-            </div>
-            <Button 
-              type="submit"
-              className="bg-white text-purple-600 hover:bg-purple-50"
-            >
-              Buscar
-            </Button>
-          </form>
-        </div>
-        <div className="flex flex-col items-center space-y-2">
-          <div className="text-4xl opacity-60">
-            🔬
+    <Card className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xl">
+      <CardContent className="p-6">
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-xl font-semibold mb-2">Análisis de Laboratorio</h2>
+            <p className="text-blue-100">
+              Introduce información del laboratorio o medicamento para análisis automático
+            </p>
           </div>
-          <button
-            onClick={handleAnalysisClick}
-            className="bg-white/20 text-white px-4 py-2 rounded-lg font-semibold hover:bg-white/30 transition-colors text-sm"
-          >
-            Unmet Needs
-          </button>
+          
+          <div className="flex space-x-4">
+            <Input
+              placeholder="Ej: Análisis de eficacia del medicamento X en ensayos fase III..."
+              value={analysisText}
+              onChange={(e) => setAnalysisText(e.target.value)}
+              className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-blue-200"
+              disabled={isLoading}
+            />
+            
+            <Button
+              onClick={handleAnalysis}
+              disabled={isLoading}
+              className="bg-white text-blue-600 hover:bg-blue-50 px-8"
+            >
+              {isLoading ? (
+                <Loader className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  <Search className="w-5 h-5 mr-2" />
+                  Analizar
+                </>
+              )}
+            </Button>
+          </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };

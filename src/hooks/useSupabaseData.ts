@@ -21,15 +21,6 @@ export const useSupabaseData = (refreshInterval = 30000) => {
       }
 
       console.log('Data fetched successfully:', medications?.length, 'records');
-      
-      // Check if data has changed and trigger notification
-      if (data.length > 0 && medications && medications.length !== data.length) {
-        // Dispatch custom event for data update
-        window.dispatchEvent(new CustomEvent('dataUpdated', { 
-          detail: { type: 'medications', count: medications.length } 
-        }));
-      }
-      
       setData(medications || []);
       setLastUpdated(new Date());
       setError(null);
