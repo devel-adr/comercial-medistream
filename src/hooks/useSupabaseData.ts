@@ -8,6 +8,7 @@ export const useSupabaseData = (refreshInterval = 30000) => {
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(new Date());
   const previousCountRef = useRef(0);
+  const isInitialLoadRef = useRef(true);
 
   const fetchData = async () => {
     try {
@@ -25,7 +26,7 @@ export const useSupabaseData = (refreshInterval = 30000) => {
       console.log('Data fetched successfully:', newCount, 'records');
       
       // Check if we have new data (only after initial load)
-      if (!loading && previousCountRef.current > 0 && newCount > previousCountRef.current) {
+      if (!isInitialLoadRef.current && previousCountRef.current > 0 && newCount > previousCountRef.current) {
         const newRecords = newCount - previousCountRef.current;
         console.log('New DrugDealer data detected:', newRecords, 'new records');
         
@@ -39,7 +40,12 @@ export const useSupabaseData = (refreshInterval = 30000) => {
         }));
       }
       
+      // Update refs
       previousCountRef.current = newCount;
+      if (isInitialLoadRef.current) {
+        isInitialLoadRef.current = false;
+      }
+      
       setData(medications || []);
       setLastUpdated(new Date());
       setError(null);
