@@ -9,7 +9,7 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      test: {
+      DrugDealer_table: {
         Row: {
           alteracion_genetica_dirigida: string
           area_terapeutica: string
@@ -54,24 +54,6 @@ export type Database = {
           nombre_del_farmaco?: string
           nombre_lab?: string
           sub_area_de_tratamiento?: string
-        }
-        Relationships: []
-      }
-      UnmetNeeds_docu: {
-        Row: {
-          contenido_UN: string
-          ID_NUM_DD: number
-          id_UN_docu: number
-        }
-        Insert: {
-          contenido_UN: string
-          ID_NUM_DD: number
-          id_UN_docu?: number
-        }
-        Update: {
-          contenido_UN?: string
-          ID_NUM_DD?: number
-          id_UN_docu?: number
         }
         Relationships: []
       }
@@ -120,6 +102,24 @@ export type Database = {
           oportunidad_estrategica?: string | null
           racional?: string
           unmet_need?: string
+        }
+        Relationships: []
+      }
+      Users_logIn: {
+        Row: {
+          email: string
+          ID: number
+          pwd: string
+        }
+        Insert: {
+          email: string
+          ID?: number
+          pwd: string
+        }
+        Update: {
+          email?: string
+          ID?: number
+          pwd?: string
         }
         Relationships: []
       }
