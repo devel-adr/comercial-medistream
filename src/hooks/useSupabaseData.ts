@@ -12,7 +12,7 @@ export const useSupabaseData = (refreshInterval = 30000) => {
     try {
       console.log('Fetching data from Supabase...');
       const { data: medications, error } = await supabase
-        .from('test')
+        .from('test1')
         .select('*')
         .order('ID_NUM', { ascending: false });
 
