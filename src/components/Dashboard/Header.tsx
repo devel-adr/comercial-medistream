@@ -6,16 +6,28 @@ import { Filter, Bell, Settings, Search } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { useNotification } from '@/contexts/NotificationContext';
 import { SettingsPanel } from './SettingsPanel';
+import { NotificationPanel } from './NotificationPanel';
 
 interface HeaderProps {
   onToggleFilters: () => void;
+}
+
+interface NotificationItem {
+  id: string;
+  type: 'medications' | 'unmetNeeds';
+  title: string;
+  message: string;
+  timestamp: Date;
+  count: number;
+  newRecords: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({ onToggleFilters }) => {
   const { theme, toggleTheme } = useTheme();
   const { showNotification } = useNotification();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [notificationCount, setNotificationCount] = useState(0);
+  const [isNotificationPanelOpen, setIsNotificationPanelOpen] = useState(false);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
   // Request notification permissions on component mount
   useEffect(() => {
@@ -28,11 +40,23 @@ export const Header: React.FC<HeaderProps> = ({ onToggleFilters }) => {
   useEffect(() => {
     const handleDataUpdate = (event: any) => {
       console.log('Data update detected:', event.detail);
-      setNotificationCount(prev => prev + 1);
       
-      const { type, count } = event.detail;
+      const { type, count, newRecords } = event.detail;
+      
+      const newNotification: NotificationItem = {
+        id: Date.now().toString(),
+        type: type,
+        title: type === 'medications' ? 'Nuevos datos de DrugDealer' : 'Nuevos datos de Unmet Needs',
+        message: `Se han añadido ${newRecords} nuevos registros`,
+        timestamp: new Date(),
+        count,
+        newRecords
+      };
+
+      setNotifications(prev => [newNotification, ...prev].slice(0, 20)); // Keep only last 20 notifications
+      
       let title = 'Nuevos datos disponibles';
-      let message = `Se han actualizado los datos de ${type === 'medications' ? 'fármacos' : 'necesidades no cubiertas'}`;
+      let message = `Se han actualizado los datos de ${type === 'medications' ? 'DrugDealer' : 'Unmet Needs'}`;
       
       showNotification(title, message);
     };
@@ -46,7 +70,11 @@ export const Header: React.FC<HeaderProps> = ({ onToggleFilters }) => {
   }, [showNotification]);
 
   const handleNotificationClick = () => {
-    setNotificationCount(0);
+    setIsNotificationPanelOpen(true);
+  };
+
+  const handleClearNotifications = () => {
+    setNotifications([]);
   };
 
   return (
@@ -89,9 +117,9 @@ export const Header: React.FC<HeaderProps> = ({ onToggleFilters }) => {
                   className="relative"
                 >
                   <Bell className="w-5 h-5" />
-                  {notificationCount > 0 && (
+                  {notifications.length > 0 && (
                     <Badge className="absolute -top-1 -right-1 w-5 h-5 p-0 flex items-center justify-center text-xs bg-red-500 animate-pulse">
-                      {notificationCount > 9 ? '9+' : notificationCount}
+                      {notifications.length > 9 ? '9+' : notifications.length}
                     </Badge>
                   )}
                 </Button>
@@ -121,6 +149,13 @@ export const Header: React.FC<HeaderProps> = ({ onToggleFilters }) => {
       <SettingsPanel 
         isOpen={isSettingsOpen} 
         onClose={() => setIsSettingsOpen(false)} 
+      />
+      
+      <NotificationPanel
+        isOpen={isNotificationPanelOpen}
+        onClose={() => setIsNotificationPanelOpen(false)}
+        notifications={notifications}
+        onClearNotifications={handleClearNotifications}
       />
     </>
   );
