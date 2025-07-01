@@ -7,7 +7,6 @@ import { StatsCards } from '@/components/Dashboard/StatsCards';
 import { MedicationsTable } from '@/components/Dashboard/MedicationsTable';
 import { FiltersPanel } from '@/components/Dashboard/FiltersPanel';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
-import { useNotifications } from '@/hooks/useNotifications';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { Navigation } from '@/components/Navigation';
 
@@ -16,24 +15,14 @@ const Index = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilters, setActiveFilters] = useState({});
   
-  const { data: medications, loading, error, refresh, lastUpdated } = useSupabaseData();
-  const { checkForUpdates } = useNotifications();
-
-  useEffect(() => {
-    if (medications.length > 0) {
-      checkForUpdates(medications, 'medications');
-    }
-  }, [medications, checkForUpdates]);
+  const { data: medications, loading, error, refresh } = useSupabaseData();
 
   return (
     <ThemeProvider>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
         <Navigation />
         
-        <Header 
-          onToggleFilters={() => setIsFiltersOpen(!isFiltersOpen)}
-          dataLastUpdated={lastUpdated}
-        />
+        <Header onToggleFilters={() => setIsFiltersOpen(!isFiltersOpen)} />
         
         <div className="container mx-auto px-4 py-6 space-y-6">
           <AnalysisBar />

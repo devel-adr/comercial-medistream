@@ -10,9 +10,9 @@ export const useSupabaseData = (refreshInterval = 30000) => {
 
   const fetchData = async () => {
     try {
-      console.log('Fetching data from test table...');
+      console.log('Fetching data from Supabase...');
       const { data: medications, error } = await supabase
-        .from('test')
+        .from('test1')
         .select('*')
         .order('ID_NUM', { ascending: false });
 
@@ -24,7 +24,7 @@ export const useSupabaseData = (refreshInterval = 30000) => {
       setData(medications || []);
       setLastUpdated(new Date());
       setError(null);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error fetching data:', err);
       setError(err.message);
     } finally {
