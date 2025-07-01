@@ -18,48 +18,33 @@ export const AnalysisBar: React.FC<AnalysisBarProps> = ({ onSearch }) => {
     }
   };
 
-  const handleAnalysisClick = () => {
-    window.open('https://develms.app.n8n.cloud/webhook/unmet_needs', '_blank');
-  };
-
   return (
-    <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg p-6 text-white shadow-lg">
-      <div className="flex items-center justify-between">
-        <div className="flex-1 mr-6">
-          <h2 className="text-xl font-bold mb-2">Búsqueda de Fármacos</h2>
-          <p className="text-purple-100 mb-4">
-            Busca información sobre fármacos y análisis de mercado
+    <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-6 text-white shadow-lg">
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-xl font-bold mb-2">Análisis de Laboratorio</h2>
+          <p className="text-blue-100 mb-4">
+            Introduce información del laboratorio o medicamento para análisis automático
           </p>
-          <form onSubmit={handleSearch} className="flex gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                type="text"
-                placeholder="Buscar fármacos, moléculas, laboratorios..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/70 focus:bg-white/30"
-              />
-            </div>
-            <Button 
-              type="submit"
-              className="bg-white text-purple-600 hover:bg-purple-50"
-            >
-              Buscar
-            </Button>
-          </form>
         </div>
-        <div className="flex flex-col items-center space-y-2">
-          <div className="text-4xl opacity-60">
-            🔬
+        <form onSubmit={handleSearch} className="flex gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              type="text"
+              placeholder="Ej: Análisis de eficacia del medicamento X en ensayos fase III..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/70 focus:bg-white/30"
+            />
           </div>
-          <button
-            onClick={handleAnalysisClick}
-            className="bg-white/20 text-white px-4 py-2 rounded-lg font-semibold hover:bg-white/30 transition-colors text-sm"
+          <Button 
+            type="submit"
+            className="bg-white text-blue-600 hover:bg-blue-50"
           >
-            Unmet Needs
-          </button>
-        </div>
+            Analizar
+          </Button>
+        </form>
       </div>
     </div>
   );
