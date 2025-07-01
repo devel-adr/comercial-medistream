@@ -47,7 +47,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const unmetNeedsCountRef = useRef(0);
   const isInitializedRef = useRef(false);
   const lastNotificationRef = useRef<{ type: string; timestamp: number; count: number } | null>(null);
-  const soundPlayingRef = useRef(false);
+  const lastSoundPlayedRef = useRef<number>(0);
 
   // Listen for data updates from both hooks
   useEffect(() => {
@@ -159,28 +159,28 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       }
     }
 
-    // Only play sound once per notification
-    if (!soundPlayingRef.current) {
+    // Play sound only once per notification with proper timing control
+    const now = Date.now();
+    if (now - lastSoundPlayedRef.current > 2000) { // At least 2 seconds between sounds
+      lastSoundPlayedRef.current = now;
       playNotificationSoundHandler();
+    } else {
+      console.log('Sound played recently, skipping to prevent overlap');
     }
   };
 
   const playNotificationSoundHandler = async () => {
-    if (!settings.enabled || soundPlayingRef.current) {
-      console.log('Notifications disabled or sound already playing, skipping sound');
+    if (!settings.enabled) {
+      console.log('Notifications disabled, skipping sound');
       return;
     }
     
-    soundPlayingRef.current = true;
     console.log('Playing notification sound with settings:', settings);
     
     try {
       await playNotificationSound(settings.soundType || 'default', settings.volume);
-    } finally {
-      // Reset flag after sound completes
-      setTimeout(() => {
-        soundPlayingRef.current = false;
-      }, 1000);
+    } catch (error) {
+      console.error('Error playing notification sound:', error);
     }
   };
 

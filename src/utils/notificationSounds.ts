@@ -2,6 +2,7 @@
 // Simple sound generation for different notification types
 let currentAudio: AudioContext | null = null;
 let isPlaying = false;
+let playStartTime = 0;
 
 export const generateTone = (frequency: number, duration: number, volume: number = 0.5) => {
   // Stop any currently playing audio
@@ -46,13 +47,16 @@ export const generateTone = (frequency: number, duration: number, volume: number
 };
 
 export const playNotificationSound = async (soundType: string, volume: number) => {
-  // Prevent multiple simultaneous sound playbacks
-  if (isPlaying) {
-    console.log('Sound already playing, skipping...');
+  const now = Date.now();
+  
+  // Prevent multiple simultaneous sound playbacks with stricter timing
+  if (isPlaying && (now - playStartTime) < 3000) {
+    console.log('Sound already playing or played recently, skipping...');
     return;
   }
 
   isPlaying = true;
+  playStartTime = now;
   console.log('Playing notification sound:', soundType, 'with volume:', volume);
   
   try {
@@ -86,9 +90,9 @@ export const playNotificationSound = async (soundType: string, volume: number) =
   } catch (error) {
     console.error('Error playing notification sound:', error);
   } finally {
-    // Add a small delay before allowing the next sound
+    // Reset flag after a longer delay to ensure sounds don't overlap
     setTimeout(() => {
       isPlaying = false;
-    }, 500);
+    }, 1500);
   }
 };
