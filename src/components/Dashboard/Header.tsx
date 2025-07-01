@@ -12,22 +12,11 @@ interface HeaderProps {
   onToggleFilters: () => void;
 }
 
-interface NotificationItem {
-  id: string;
-  type: 'medications' | 'unmetNeeds';
-  title: string;
-  message: string;
-  timestamp: Date;
-  count: number;
-  newRecords: number;
-}
-
 export const Header: React.FC<HeaderProps> = ({ onToggleFilters }) => {
   const { theme, toggleTheme } = useTheme();
-  const { showNotification } = useNotification();
+  const { notifications, clearNotifications } = useNotification();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isNotificationPanelOpen, setIsNotificationPanelOpen] = useState(false);
-  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
   // Request notification permissions on component mount
   useEffect(() => {
@@ -36,45 +25,12 @@ export const Header: React.FC<HeaderProps> = ({ onToggleFilters }) => {
     }
   }, []);
 
-  // Listen for data updates to trigger notifications
-  useEffect(() => {
-    const handleDataUpdate = (event: any) => {
-      console.log('Data update detected:', event.detail);
-      
-      const { type, count, newRecords } = event.detail;
-      
-      const newNotification: NotificationItem = {
-        id: Date.now().toString(),
-        type: type,
-        title: type === 'medications' ? 'Nuevos datos de DrugDealer' : 'Nuevos datos de Unmet Needs',
-        message: `Se han añadido ${newRecords} nuevos registros`,
-        timestamp: new Date(),
-        count,
-        newRecords
-      };
-
-      setNotifications(prev => [newNotification, ...prev].slice(0, 20)); // Keep only last 20 notifications
-      
-      let title = 'Nuevos datos disponibles';
-      let message = `Se han actualizado los datos de ${type === 'medications' ? 'DrugDealer' : 'Unmet Needs'}`;
-      
-      showNotification(title, message);
-    };
-
-    // Listen for custom events that indicate data updates
-    window.addEventListener('dataUpdated', handleDataUpdate);
-    
-    return () => {
-      window.removeEventListener('dataUpdated', handleDataUpdate);
-    };
-  }, [showNotification]);
-
   const handleNotificationClick = () => {
     setIsNotificationPanelOpen(true);
   };
 
   const handleClearNotifications = () => {
-    setNotifications([]);
+    clearNotifications();
   };
 
   return (

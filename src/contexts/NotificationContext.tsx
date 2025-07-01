@@ -1,6 +1,8 @@
 
 import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
 import { playNotificationSound } from '@/utils/notificationSounds';
+import { useSupabaseData } from '@/hooks/useSupabaseData';
+import { useUnmetNeedsData } from '@/hooks/useUnmetNeedsData';
 
 interface NotificationSettings {
   volume: number;
@@ -8,11 +10,23 @@ interface NotificationSettings {
   soundType?: string;
 }
 
+interface NotificationItem {
+  id: string;
+  type: 'medications' | 'unmetNeeds';
+  title: string;
+  message: string;
+  timestamp: Date;
+  count: number;
+  newRecords: number;
+}
+
 interface NotificationContextType {
   settings: NotificationSettings;
   updateSettings: (settings: Partial<NotificationSettings>) => void;
   showNotification: (title: string, message: string) => void;
   playNotificationSound: () => void;
+  notifications: NotificationItem[];
+  clearNotifications: () => void;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
@@ -22,6 +36,67 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const saved = localStorage.getItem('notification_settings');
     return saved ? JSON.parse(saved) : { volume: 0.5, enabled: true, soundType: 'default' };
   });
+
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+
+  // Initialize data hooks to track changes globally
+  const { data: medicationsData } = useSupabaseData();
+  const { data: unmetNeedsData } = useUnmetNeedsData();
+
+  const medicationsCountRef = useRef(0);
+  const unmetNeedsCountRef = useRef(0);
+  const isInitializedRef = useRef(false);
+
+  // Listen for data updates from both hooks
+  useEffect(() => {
+    const handleDataUpdate = (event: any) => {
+      console.log('Data update detected in context:', event.detail);
+      
+      const { type, count, newRecords } = event.detail;
+      
+      const newNotification: NotificationItem = {
+        id: Date.now().toString(),
+        type: type,
+        title: type === 'medications' ? 'Nuevos datos de DrugDealer' : 'Nuevos datos de Unmet Needs',
+        message: `Se han añadido ${newRecords} nuevos registros`,
+        timestamp: new Date(),
+        count,
+        newRecords
+      };
+
+      setNotifications(prev => [newNotification, ...prev].slice(0, 20)); // Keep only last 20 notifications
+      
+      let title = 'Nuevos datos disponibles';
+      let message = `Se han actualizado los datos de ${type === 'medications' ? 'DrugDealer' : 'Unmet Needs'}`;
+      
+      showNotification(title, message);
+    };
+
+    // Listen for custom events that indicate data updates
+    window.addEventListener('dataUpdated', handleDataUpdate);
+    
+    return () => {
+      window.removeEventListener('dataUpdated', handleDataUpdate);
+    };
+  }, []);
+
+  // Track data changes and initialize counts
+  useEffect(() => {
+    if (medicationsData.length > 0) {
+      if (!isInitializedRef.current) {
+        medicationsCountRef.current = medicationsData.length;
+      }
+    }
+  }, [medicationsData]);
+
+  useEffect(() => {
+    if (unmetNeedsData.length > 0) {
+      if (!isInitializedRef.current) {
+        unmetNeedsCountRef.current = unmetNeedsData.length;
+        isInitializedRef.current = true;
+      }
+    }
+  }, [unmetNeedsData]);
 
   const updateSettings = (newSettings: Partial<NotificationSettings>) => {
     const updated = { ...settings, ...newSettings };
@@ -69,12 +144,18 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     await playNotificationSound(settings.soundType || 'default', settings.volume);
   };
 
+  const clearNotifications = () => {
+    setNotifications([]);
+  };
+
   return (
     <NotificationContext.Provider value={{ 
       settings, 
       updateSettings, 
       showNotification, 
-      playNotificationSound: playNotificationSoundHandler 
+      playNotificationSound: playNotificationSoundHandler,
+      notifications,
+      clearNotifications
     }}>
       {children}
     </NotificationContext.Provider>
