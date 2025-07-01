@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -30,7 +29,7 @@ export const AnalysisBar: React.FC<AnalysisBarProps> = ({ onSearch }) => {
     try {
       console.log('Sending analysis request to webhook:', searchTerm);
 
-      const response = await fetch('https://develms.app.n8n.cloud/webhook/unmet_needs', {
+      const response = await fetch('https://develms.app.n8n.cloud/webhook/starter', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
