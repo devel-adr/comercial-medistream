@@ -46,6 +46,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const medicationsCountRef = useRef(0);
   const unmetNeedsCountRef = useRef(0);
   const isInitializedRef = useRef(false);
+  const lastNotificationRef = useRef<{ type: string; timestamp: number } | null>(null);
 
   // Listen for data updates from both hooks
   useEffect(() => {
@@ -53,6 +54,17 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       console.log('Data update detected in context:', event.detail);
       
       const { type, count, newRecords } = event.detail;
+      const now = Date.now();
+      
+      // Prevent duplicate notifications within 1 second
+      if (lastNotificationRef.current && 
+          lastNotificationRef.current.type === type && 
+          now - lastNotificationRef.current.timestamp < 1000) {
+        console.log('Skipping duplicate notification for', type);
+        return;
+      }
+      
+      lastNotificationRef.current = { type, timestamp: now };
       
       const newNotification: NotificationItem = {
         id: Date.now().toString(),
