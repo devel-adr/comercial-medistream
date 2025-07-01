@@ -17,6 +17,10 @@ const Index = () => {
   
   const { data: medications, loading, error, refresh } = useSupabaseData();
 
+  const handleSearch = (term: string) => {
+    setSearchTerm(term);
+  };
+
   return (
     <ThemeProvider>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
@@ -25,7 +29,7 @@ const Index = () => {
         <Header onToggleFilters={() => setIsFiltersOpen(!isFiltersOpen)} />
         
         <div className="container mx-auto px-4 py-6 space-y-6">
-          <AnalysisBar />
+          <AnalysisBar onSearch={handleSearch} />
           
           <StatsCards medications={medications} loading={loading} />
           
