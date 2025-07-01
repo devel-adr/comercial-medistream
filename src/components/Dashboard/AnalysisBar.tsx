@@ -25,7 +25,7 @@ export const AnalysisBar: React.FC = () => {
     console.log("Iniciando análisis:", analysisText);
 
     try {
-      const response = await fetch('https://develms.app.n8n.cloud/webhook-test/starter', {
+      const response = await fetch('https://develms.app.n8n.cloud/webhook/starter', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
