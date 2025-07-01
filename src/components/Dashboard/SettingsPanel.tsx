@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,7 +20,11 @@ interface SettingsPanelProps {
 export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose }) => {
   const { settings, updateSettings } = useNotification();
   const { user, logout } = useAuth();
-  const [selectedSound, setSelectedSound] = useState('default');
+  const [selectedSound, setSelectedSound] = useState(settings.soundType || 'default');
+
+  useEffect(() => {
+    setSelectedSound(settings.soundType || 'default');
+  }, [settings.soundType]);
 
   const soundOptions = [
     { value: 'default', label: 'Sonido por defecto' },
@@ -47,14 +51,20 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose })
     const audio = new Audio();
     const volume = settings.volume;
     
-    switch(selectedSound) {
-      case 'chime':
-        audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBjiH0fPTgjEIJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBjiH0fPTgjEIJHfH8N2QQAoUXrTp66hVFApGn+DyvmQ=';
-        break;
-      default:
-        audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBjiH0fPTgjEIJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBjiH0fPTgjEIJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBjiH0fPTgjEIJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBjiH0fPTgjEIJHfH8N2QQAoUXrTp66hVFApGn+DyvmQ=';
-    }
+    const getSoundData = (soundType: string) => {
+      switch(soundType) {
+        case 'chime':
+          return 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBjiH0fPTgjEIJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBjiH0fPTgjEIJHfH8N2QQAoUXrTp66hVFApGn+DyvmQ=';
+        case 'ding':
+          return 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBjiH0fPTgjEIJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBjiH0fPTgjEIJHfH8N2QQAoUXrTp66hVFApGn+DyvmQ=';
+        case 'notification':
+          return 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBjiH0fPTgjEIJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBjiH0fPTgjEIJHfH8N2QQAoUXrTp66hVFApGn+DyvmQ=';
+        default:
+          return 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBjiH0fPTgjEIJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBjiH0fPTgjEIJHfH8N2QQAoUXrTp66hVFApGn+DyvmQ=';
+      }
+    };
     
+    audio.src = getSoundData(selectedSound);
     audio.volume = volume;
     audio.play().catch(console.error);
   };

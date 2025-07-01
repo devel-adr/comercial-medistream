@@ -22,11 +22,16 @@ export const useUnmetNeedsData = (refreshInterval = 30000) => {
 
       console.log('Unmet Needs data fetched successfully:', unmetNeeds?.length, 'records');
       
-      // Check if data has changed and trigger notification
-      if (data.length > 0 && unmetNeeds && unmetNeeds.length !== data.length) {
+      // Check if we have new data (more records than before)
+      if (data.length > 0 && unmetNeeds && unmetNeeds.length > data.length) {
+        console.log('New UnmetNeeds data detected:', unmetNeeds.length - data.length, 'new records');
         // Dispatch custom event for data update
         window.dispatchEvent(new CustomEvent('dataUpdated', { 
-          detail: { type: 'unmetNeeds', count: unmetNeeds.length } 
+          detail: { 
+            type: 'unmetNeeds', 
+            count: unmetNeeds.length,
+            newRecords: unmetNeeds.length - data.length
+          } 
         }));
       }
       
