@@ -10,9 +10,9 @@ export const useSupabaseData = (refreshInterval = 30000) => {
 
   const fetchData = async () => {
     try {
-      console.log('Fetching data from Supabase...');
+      console.log('Fetching data from DrugDealer_table...');
       const { data: medications, error } = await supabase
-        .from('test')
+        .from('DrugDealer_table')
         .select('*')
         .order('ID_NUM', { ascending: false });
 

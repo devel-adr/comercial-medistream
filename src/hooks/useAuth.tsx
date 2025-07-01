@@ -1,5 +1,6 @@
 
 import { useState, useEffect, createContext, useContext } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface User {
   email: string;
@@ -14,13 +15,6 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// Mock users data until Users_logIn table is created in Supabase
-const MOCK_USERS = [
-  { id: 1, email: 'admin@drugdealer.com', pwd: 'admin123' },
-  { id: 2, email: 'user@drugdealer.com', pwd: 'user123' },
-  { id: 3, email: 'demo@drugdealer.com', pwd: 'demo123' }
-];
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -37,15 +31,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      // Mock authentication - replace this when Users_logIn table is available
-      const foundUser = MOCK_USERS.find(u => u.email === email && u.pwd === password);
+      console.log('Attempting login with:', email);
       
-      if (!foundUser) {
+      const { data, error } = await supabase
+        .from('Users_logIn')
+        .select('*')
+        .eq('email', email)
+        .eq('pwd', password)
+        .single();
+
+      if (error) {
+        console.error('Supabase login error:', error);
+        return false;
+      }
+
+      if (!data) {
         console.log('Login failed: Invalid credentials');
         return false;
       }
 
-      const userData = { email: foundUser.email, id: foundUser.id };
+      const userData = { email: data.email, id: data.ID };
       setUser(userData);
       localStorage.setItem('drugdealer_user', JSON.stringify(userData));
       console.log('Login successful:', userData);
