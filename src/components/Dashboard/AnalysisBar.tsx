@@ -35,7 +35,7 @@ export const AnalysisBar: React.FC<AnalysisBarProps> = ({ onSearch }) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          query: searchTerm,
+          text: searchTerm,
           type: 'analysis_request'
         }),
       });
