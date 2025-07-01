@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { toast } from "@/components/ui/use-toast";
 
 interface AnalysisBarProps {
   onSearch?: (searchTerm: string) => void;
@@ -10,11 +11,61 @@ interface AnalysisBarProps {
 
 export const AnalysisBar: React.FC<AnalysisBarProps> = ({ onSearch }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (onSearch) {
-      onSearch(searchTerm);
+    
+    if (!searchTerm.trim()) {
+      toast({
+        title: "Error",
+        description: "Por favor introduce información para analizar.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsAnalyzing(true);
+    
+    try {
+      console.log('Sending analysis request to webhook:', searchTerm);
+
+      const response = await fetch('https://develms.app.n8n.cloud/webhook/unmet_needs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: searchTerm,
+          type: 'analysis_request'
+        }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Análisis iniciado",
+          description: "Se ha enviado la información para análisis.",
+        });
+        
+        // También llamar al callback local si existe
+        if (onSearch) {
+          onSearch(searchTerm);
+        }
+        
+        // Limpiar el campo después del envío exitoso
+        setSearchTerm('');
+      } else {
+        throw new Error('Error en la respuesta del servidor');
+      }
+    } catch (error) {
+      console.error('Error sending analysis request:', error);
+      toast({
+        title: "Error",
+        description: "Hubo un problema al enviar el análisis. Inténtalo de nuevo.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
@@ -36,13 +87,22 @@ export const AnalysisBar: React.FC<AnalysisBarProps> = ({ onSearch }) => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/70 focus:bg-white/30"
+              disabled={isAnalyzing}
             />
           </div>
           <Button 
             type="submit"
             className="bg-white text-blue-600 hover:bg-blue-50"
+            disabled={isAnalyzing}
           >
-            Analizar
+            {isAnalyzing ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                Analizando...
+              </>
+            ) : (
+              'Analizar'
+            )}
           </Button>
         </form>
       </div>
