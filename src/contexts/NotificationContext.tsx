@@ -46,7 +46,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const medicationsCountRef = useRef(0);
   const unmetNeedsCountRef = useRef(0);
   const isInitializedRef = useRef(false);
-  const lastNotificationRef = useRef<{ type: string; timestamp: number } | null>(null);
+  const lastNotificationRef = useRef<{ type: string; timestamp: number; count: number } | null>(null);
 
   // Listen for data updates from both hooks
   useEffect(() => {
@@ -56,18 +56,19 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       const { type, count, newRecords } = event.detail;
       const now = Date.now();
       
-      // Prevent duplicate notifications within 1 second
+      // Prevent duplicate notifications within 5 seconds and same count
       if (lastNotificationRef.current && 
           lastNotificationRef.current.type === type && 
-          now - lastNotificationRef.current.timestamp < 1000) {
-        console.log('Skipping duplicate notification for', type);
+          lastNotificationRef.current.count === count &&
+          now - lastNotificationRef.current.timestamp < 5000) {
+        console.log('Skipping duplicate notification for', type, 'with same count:', count);
         return;
       }
       
-      lastNotificationRef.current = { type, timestamp: now };
+      lastNotificationRef.current = { type, timestamp: now, count };
       
       const newNotification: NotificationItem = {
-        id: Date.now().toString(),
+        id: `${type}_${now}`, // More unique ID
         type: type,
         title: type === 'medications' ? 'Nuevos datos de DrugDealer' : 'Nuevos datos de Unmet Needs',
         message: `Se han añadido ${newRecords} nuevos registros`,
@@ -76,7 +77,21 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         newRecords
       };
 
-      setNotifications(prev => [newNotification, ...prev].slice(0, 20)); // Keep only last 20 notifications
+      setNotifications(prev => {
+        // Avoid adding if a similar notification already exists in the last 5 seconds
+        const recent = prev.find(n => 
+          n.type === type && 
+          n.count === count && 
+          now - n.timestamp.getTime() < 5000
+        );
+        
+        if (recent) {
+          console.log('Similar notification already exists, skipping');
+          return prev;
+        }
+        
+        return [newNotification, ...prev].slice(0, 20);
+      });
       
       let title = 'Nuevos datos disponibles';
       let message = `Se han actualizado los datos de ${type === 'medications' ? 'DrugDealer' : 'Unmet Needs'}`;
