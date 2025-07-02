@@ -74,7 +74,7 @@ export const AnalysisBar: React.FC<AnalysisBarProps> = ({ onSearch }) => {
         <div>
           <h2 className="text-xl font-bold mb-2">Análisis de Laboratorio</h2>
           <p className="text-blue-100 mb-4">
-            Introduce información del laboratorio o medicamento para análisis automático
+            Introduce información del laboratorio o del fármaco para análisis automático
           </p>
         </div>
         <form onSubmit={handleSearch} className="flex gap-2">
