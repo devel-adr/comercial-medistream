@@ -1,22 +1,7 @@
 
 // Simple sound generation for different notification types
-let currentAudio: AudioContext | null = null;
-let isPlaying = false;
-let playStartTime = 0;
-
 export const generateTone = (frequency: number, duration: number, volume: number = 0.5) => {
-  // Stop any currently playing audio
-  if (currentAudio) {
-    try {
-      currentAudio.close();
-    } catch (e) {
-      // Context might already be closed
-    }
-  }
-
   const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-  currentAudio = audioContext;
-  
   const oscillator = audioContext.createOscillator();
   const gainNode = audioContext.createGain();
   
@@ -34,29 +19,11 @@ export const generateTone = (frequency: number, duration: number, volume: number
   oscillator.stop(audioContext.currentTime + duration);
   
   return new Promise(resolve => {
-    oscillator.onended = () => {
-      try {
-        audioContext.close();
-      } catch (e) {
-        // Context might already be closed
-      }
-      currentAudio = null;
-      resolve(undefined);
-    };
+    oscillator.onended = resolve;
   });
 };
 
 export const playNotificationSound = async (soundType: string, volume: number) => {
-  const now = Date.now();
-  
-  // Prevent multiple simultaneous sound playbacks with stricter timing
-  if (isPlaying && (now - playStartTime) < 3000) {
-    console.log('Sound already playing or played recently, skipping...');
-    return;
-  }
-
-  isPlaying = true;
-  playStartTime = now;
   console.log('Playing notification sound:', soundType, 'with volume:', volume);
   
   try {
@@ -89,10 +56,5 @@ export const playNotificationSound = async (soundType: string, volume: number) =
     }
   } catch (error) {
     console.error('Error playing notification sound:', error);
-  } finally {
-    // Reset flag after a longer delay to ensure sounds don't overlap
-    setTimeout(() => {
-      isPlaying = false;
-    }, 1500);
   }
 };
