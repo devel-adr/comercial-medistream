@@ -9,7 +9,7 @@ export const useUnmetNeedsData = (refreshInterval = 30000) => {
   const [lastUpdated, setLastUpdated] = useState(new Date());
   const previousCountRef = useRef(0);
   const isInitialLoadRef = useRef(true);
-  const eventDispatchedRef = useRef(false);
+  const lastEventTimeRef = useRef(0);
 
   const fetchData = async () => {
     try {
@@ -26,31 +26,32 @@ export const useUnmetNeedsData = (refreshInterval = 30000) => {
       const newCount = unmetNeeds?.length || 0;
       console.log('Unmet Needs data fetched successfully:', newCount, 'records');
       
-      // Check if we have new data (only after initial load and prevent multiple dispatches)
+      // Check if we have new data (only after initial load)
       if (!isInitialLoadRef.current && 
           previousCountRef.current > 0 && 
-          newCount > previousCountRef.current &&
-          !eventDispatchedRef.current) {
+          newCount > previousCountRef.current) {
         
-        const newRecords = newCount - previousCountRef.current;
-        console.log('New UnmetNeeds data detected:', newRecords, 'new records');
+        const now = Date.now();
+        const timeSinceLastEvent = now - lastEventTimeRef.current;
         
-        // Set flag to prevent multiple dispatches for the same update
-        eventDispatchedRef.current = true;
-        
-        // Dispatch custom event for data update
-        window.dispatchEvent(new CustomEvent('dataUpdated', { 
-          detail: { 
-            type: 'unmetNeeds', 
-            count: newCount,
-            newRecords: newRecords
-          } 
-        }));
-        
-        // Reset flag after a short delay
-        setTimeout(() => {
-          eventDispatchedRef.current = false;
-        }, 2000);
+        // Solo disparar evento si han pasado al menos 5 segundos desde el último
+        if (timeSinceLastEvent >= 5000) {
+          const newRecords = newCount - previousCountRef.current;
+          console.log('New UnmetNeeds data detected:', newRecords, 'new records');
+          
+          lastEventTimeRef.current = now;
+          
+          // Dispatch custom event for data update
+          window.dispatchEvent(new CustomEvent('dataUpdated', { 
+            detail: { 
+              type: 'unmetNeeds', 
+              count: newCount,
+              newRecords: newRecords
+            } 
+          }));
+        } else {
+          console.log('Skipping event dispatch - too soon since last event');
+        }
       }
       
       // Update refs
