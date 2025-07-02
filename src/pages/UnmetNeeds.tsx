@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -130,24 +131,32 @@ const UnmetNeeds = () => {
     setIsGeneratingTactics(true);
 
     try {
-      // Prepare data for webhook
-      const selectedData = Array.from(selectedRows).map(id => {
+      // Prepare data for webhook with individual variables
+      const selectedItems = Array.from(selectedRows).map(id => {
         const item = unmetNeeds.find(n => n.id_UN_table?.toString() === id);
-        return {
-          laboratorio: item?.lab || '',
-          area_terapeutica: item?.area_terapeutica || '',
-          farmaco: item?.farmaco || '',
-          horizonte: item?.horizonte_temporal || '',
-          unmet_need: item?.unmet_need || '',
-          racional: item?.racional || '',
-          oportunidad_estrategica: item?.oportunidad_estrategica || '',
-          conclusion: item?.conclusion || '',
-          formato: formatSelections[id] || '',
-          impacto: item?.impacto || ''
-        };
+        return item;
       });
 
-      console.log('Sending data to webhook:', selectedData);
+      // Create individual variables for each field
+      const webhookData = {
+        timestamp: new Date().toISOString(),
+        // Arrays of individual variables
+        laboratorios: selectedItems.map(item => item?.lab || ''),
+        areas_terapeuticas: selectedItems.map(item => item?.area_terapeutica || ''),
+        farmacos: selectedItems.map(item => item?.farmaco || ''),
+        moleculas: selectedItems.map(item => item?.molecula || ''),
+        horizontes: selectedItems.map(item => item?.horizonte_temporal || ''),
+        unmet_needs: selectedItems.map(item => item?.unmet_need || ''),
+        racionales: selectedItems.map(item => item?.racional || ''),
+        oportunidades_estrategicas: selectedItems.map(item => item?.oportunidad_estrategica || ''),
+        conclusiones: selectedItems.map(item => item?.conclusion || ''),
+        formatos: Array.from(selectedRows).map(id => formatSelections[id] || ''),
+        impactos: selectedItems.map(item => item?.impacto || ''),
+        // Also include count for easier processing
+        total_items: selectedRows.size
+      };
+
+      console.log('Sending data to webhook:', webhookData);
 
       // Send data to webhook
       const response = await fetch('https://develms.app.n8n.cloud/webhook-test/tactics', {
@@ -156,10 +165,7 @@ const UnmetNeeds = () => {
           'Content-Type': 'application/json',
         },
         mode: 'no-cors',
-        body: JSON.stringify({
-          timestamp: new Date().toISOString(),
-          data: selectedData
-        }),
+        body: JSON.stringify(webhookData),
       });
 
       // Store selected data locally for Tactics page
