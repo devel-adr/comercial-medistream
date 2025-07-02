@@ -37,11 +37,13 @@ const Index = () => {
         <Header onToggleFilters={() => setIsFiltersOpen(!isFiltersOpen)} />
         
         <div className="container mx-auto px-4 py-6 space-y-6">
-          <div className="flex justify-between items-center">
-            <AnalysisBar onSearch={handleSearch} />
+          <div className="flex gap-4 items-start">
+            <div className="flex-1">
+              <AnalysisBar onSearch={handleSearch} />
+            </div>
             <Button 
               onClick={() => setIsAddModalOpen(true)}
-              className="bg-green-600 hover:bg-green-700"
+              className="bg-green-600 hover:bg-green-700 flex-shrink-0"
             >
               <Plus className="w-4 h-4 mr-2" />
               Agregar Medicamento
