@@ -8,59 +8,23 @@ import { BarChart3, FileText, Users, Target, Clock, Lightbulb, Eye } from 'lucid
 
 interface UnmetNeedsCardsProps {
   data: any[];
-  loading?: boolean;
-  onSelectForTactics?: (id: string, selected: boolean) => void;
-  selectedIds?: Set<string>;
-  formatSelections?: Record<string, string>;
-  onFormatChange?: (id: string, format: string) => void;
-  formatOptions?: string[];
+  onSelectForTactics: (id: string, selected: boolean) => void;
+  selectedIds: Set<string>;
+  formatSelections: Record<string, string>;
+  onFormatChange: (id: string, format: string) => void;
+  formatOptions: string[];
   onViewDetails?: (unmetNeed: any) => void;
 }
 
 export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
   data,
-  loading,
   onSelectForTactics,
-  selectedIds = new Set(),
-  formatSelections = {},
+  selectedIds,
+  formatSelections,
   onFormatChange,
-  formatOptions = [],
+  formatOptions,
   onViewDetails
 }) => {
-  if (loading) {
-    return (
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {[...Array(6)].map((_, index) => (
-          <Card key={index} className="relative overflow-hidden transition-all duration-300 border-2 border-gray-200">
-            <CardContent className="p-5 space-y-4 animate-pulse">
-              <div className="flex justify-between items-start">
-                <div className="w-16 h-8 bg-gray-300 rounded"></div>
-                <div className="w-20 h-6 bg-gray-300 rounded"></div>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {[...Array(4)].map((_, i) => (
-                  <div key={i} className="bg-gray-100 p-2 rounded">
-                    <div className="w-full h-4 bg-gray-300 rounded mb-1"></div>
-                    <div className="w-3/4 h-3 bg-gray-300 rounded"></div>
-                  </div>
-                ))}
-              </div>
-              <div className="space-y-3">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="bg-gray-50 p-3 rounded-lg">
-                    <div className="w-24 h-4 bg-gray-300 rounded mb-2"></div>
-                    <div className="w-full h-3 bg-gray-300 rounded mb-1"></div>
-                    <div className="w-5/6 h-3 bg-gray-300 rounded"></div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
-  }
-
   const getImpactColor = (impacto: string) => {
     if (!impacto) return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
     const impactoLower = impacto.toLowerCase();
@@ -194,44 +158,38 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
                 </div>
               </div>
 
-              {/* Format Selection and Action Buttons - only show if callbacks are provided */}
-              {(onSelectForTactics || onFormatChange) && (
-                <div className="flex gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                  {onFormatChange && (
-                    <div className="flex-1">
-                      <Select
-                        value={formatSelections[item.id_UN_table?.toString()] || 'none'}
-                        onValueChange={(value) => 
-                          onFormatChange(item.id_UN_table?.toString(), value === 'none' ? '' : value)
-                        }
-                      >
-                        <SelectTrigger className="h-9 text-xs">
-                          <SelectValue placeholder="Formato" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">Formato</SelectItem>
-                          {formatOptions.map((format) => (
-                            <SelectItem key={format} value={format}>
-                              {format}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-                  {onSelectForTactics && (
-                    <Button
-                      variant={isSelected ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => onSelectForTactics(item.id_UN_table?.toString(), !isSelected)}
-                      className="text-xs uppercase tracking-wider font-medium"
-                    >
-                      <BarChart3 className="w-3 h-3 mr-1" />
-                      {isSelected ? 'Seleccionado' : 'Seleccionar'}
-                    </Button>
-                  )}
+              {/* Format Selection and Action Buttons */}
+              <div className="flex gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex-1">
+                  <Select
+                    value={formatSelections[item.id_UN_table?.toString()] || 'none'}
+                    onValueChange={(value) => 
+                      onFormatChange(item.id_UN_table?.toString(), value === 'none' ? '' : value)
+                    }
+                  >
+                    <SelectTrigger className="h-9 text-xs">
+                      <SelectValue placeholder="Formato" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Formato</SelectItem>
+                      {formatOptions.map((format) => (
+                        <SelectItem key={format} value={format}>
+                          {format}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              )}
+                <Button
+                  variant={isSelected ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => onSelectForTactics(item.id_UN_table?.toString(), !isSelected)}
+                  className="text-xs uppercase tracking-wider font-medium"
+                >
+                  <BarChart3 className="w-3 h-3 mr-1" />
+                  {isSelected ? 'Seleccionado' : 'Seleccionar'}
+                </Button>
+              </div>
             </CardContent>
           </Card>
         );

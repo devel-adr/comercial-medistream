@@ -5,32 +5,9 @@ import { Badge } from '@/components/ui/badge';
 
 interface UnmetNeedsKPIsProps {
   data: any[];
-  loading?: boolean;
 }
 
-export const UnmetNeedsKPIs: React.FC<UnmetNeedsKPIsProps> = ({ data, loading }) => {
-  if (loading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-        {[...Array(5)].map((_, index) => (
-          <Card key={index} className="relative overflow-hidden border-0 shadow-lg">
-            <div className="absolute inset-0 bg-gradient-to-br from-gray-300 to-gray-400 opacity-90 animate-pulse"></div>
-            <CardContent className="relative p-6 text-center">
-              <div className="mb-3">
-                <div className="text-4xl font-bold text-white mb-2">
-                  -
-                </div>
-                <div className="text-sm text-white/80 uppercase tracking-wider font-medium">
-                  Cargando...
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
-  }
-
+export const UnmetNeedsKPIs: React.FC<UnmetNeedsKPIsProps> = ({ data }) => {
   const totalNeeds = data.length;
   const highImpactNeeds = data.filter(item => item.impacto?.toLowerCase().includes('alto')).length;
   const mediumImpactNeeds = data.filter(item => item.impacto?.toLowerCase().includes('medio')).length;

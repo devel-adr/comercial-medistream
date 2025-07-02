@@ -47,6 +47,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const unmetNeedsCountRef = useRef(0);
   const isInitializedRef = useRef(false);
   const lastNotificationRef = useRef<{ type: string; timestamp: number; count: number } | null>(null);
+  const lastSoundPlayedRef = useRef<number>(0);
 
   // Listen for data updates from both hooks
   useEffect(() => {
@@ -56,11 +57,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       const { type, count, newRecords } = event.detail;
       const now = Date.now();
       
-      // Prevent duplicate notifications within 5 seconds and same count
+      // Prevent duplicate notifications within 3 seconds and same count
       if (lastNotificationRef.current && 
           lastNotificationRef.current.type === type && 
           lastNotificationRef.current.count === count &&
-          now - lastNotificationRef.current.timestamp < 5000) {
+          now - lastNotificationRef.current.timestamp < 3000) {
         console.log('Skipping duplicate notification for', type, 'with same count:', count);
         return;
       }
@@ -68,7 +69,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       lastNotificationRef.current = { type, timestamp: now, count };
       
       const newNotification: NotificationItem = {
-        id: `${type}_${now}`, // More unique ID
+        id: `${type}_${now}_${Math.random()}`, // Even more unique ID
         type: type,
         title: type === 'medications' ? 'Nuevos datos de DrugDealer' : 'Nuevos datos de Unmet Needs',
         message: `Se han añadido ${newRecords} nuevos registros`,
@@ -78,11 +79,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       };
 
       setNotifications(prev => {
-        // Avoid adding if a similar notification already exists in the last 5 seconds
+        // Avoid adding if a similar notification already exists in the last 3 seconds
         const recent = prev.find(n => 
           n.type === type && 
           n.count === count && 
-          now - n.timestamp.getTime() < 5000
+          now - n.timestamp.getTime() < 3000
         );
         
         if (recent) {
@@ -158,7 +159,14 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       }
     }
 
-    playNotificationSoundHandler();
+    // Play sound only once per notification with proper timing control
+    const now = Date.now();
+    if (now - lastSoundPlayedRef.current > 2000) { // At least 2 seconds between sounds
+      lastSoundPlayedRef.current = now;
+      playNotificationSoundHandler();
+    } else {
+      console.log('Sound played recently, skipping to prevent overlap');
+    }
   };
 
   const playNotificationSoundHandler = async () => {
@@ -168,7 +176,12 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
     
     console.log('Playing notification sound with settings:', settings);
-    await playNotificationSound(settings.soundType || 'default', settings.volume);
+    
+    try {
+      await playNotificationSound(settings.soundType || 'default', settings.volume);
+    } catch (error) {
+      console.error('Error playing notification sound:', error);
+    }
   };
 
   const clearNotifications = () => {
