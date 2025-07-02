@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
-import { Filter, BarChart3, Search } from 'lucide-react';
+import { Filter, BarChart3, Search, Plus } from 'lucide-react';
 import { Navigation } from '@/components/Navigation';
 import { useUnmetNeedsData } from '@/hooks/useUnmetNeedsData';
 import { ThemeProvider } from '@/components/ThemeProvider';
@@ -15,6 +14,7 @@ import { toast } from "@/hooks/use-toast";
 import { UnmetNeedsKPIs } from '@/components/UnmetNeeds/UnmetNeedsKPIs';
 import { UnmetNeedsCards } from '@/components/UnmetNeeds/UnmetNeedsCards';
 import { UnmetNeedsDetailModal } from '@/components/UnmetNeeds/UnmetNeedsDetailModal';
+import { AddUnmetNeedModal } from '@/components/UnmetNeeds/AddUnmetNeedModal';
 
 const formatOptions = ['Programa', 'Webinar', 'Podcast'];
 
@@ -32,8 +32,9 @@ const UnmetNeeds = () => {
   const [formatSelections, setFormatSelections] = useState<Record<string, string>>({});
   const [selectedUnmetNeed, setSelectedUnmetNeed] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  const { data: unmetNeeds, loading, error } = useUnmetNeedsData();
+  const { data: unmetNeeds, loading, error, refresh } = useUnmetNeedsData();
 
   // Get unique values for filters
   const uniqueOptions = useMemo(() => ({
@@ -146,6 +147,10 @@ const UnmetNeeds = () => {
     window.location.href = '/tactics';
   };
 
+  const handleAddSuccess = () => {
+    refresh(); // Refresh data after successful addition
+  };
+
   if (loading) {
     return (
       <ThemeProvider>
@@ -174,13 +179,22 @@ const UnmetNeeds = () => {
         <Navigation />
         
         <div className="container mx-auto px-4 py-6 space-y-6">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Unmet Needs Dashboard
-            </h1>
-            <p className="text-gray-600 dark:text-gray-300">
-              Análisis completo de necesidades médicas no cubiertas
-            </p>
+          <div className="flex justify-between items-center">
+            <div className="text-center flex-1">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                Unmet Needs Dashboard
+              </h1>
+              <p className="text-gray-600 dark:text-gray-300">
+                Análisis completo de necesidades médicas no cubiertas
+              </p>
+            </div>
+            <Button
+              onClick={() => setIsAddModalOpen(true)}
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Añadir Unmet Need
+            </Button>
           </div>
 
           {/* KPIs */}
@@ -383,6 +397,13 @@ const UnmetNeeds = () => {
               setSelectedUnmetNeed(null);
             }}
             unmetNeed={selectedUnmetNeed}
+          />
+
+          {/* Add Modal */}
+          <AddUnmetNeedModal
+            isOpen={isAddModalOpen}
+            onClose={() => setIsAddModalOpen(false)}
+            onSuccess={handleAddSuccess}
           />
         </div>
       </div>

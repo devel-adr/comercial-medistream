@@ -6,19 +6,27 @@ import { AnalysisBar } from '@/components/Dashboard/AnalysisBar';
 import { StatsCards } from '@/components/Dashboard/StatsCards';
 import { MedicationsTable } from '@/components/Dashboard/MedicationsTable';
 import { FiltersPanel } from '@/components/Dashboard/FiltersPanel';
+import { AddMedicationModal } from '@/components/Dashboard/AddMedicationModal';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { Navigation } from '@/components/Navigation';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 
 const Index = () => {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilters, setActiveFilters] = useState({});
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   
   const { data: medications, loading, error, refresh } = useSupabaseData();
 
   const handleSearch = (term: string) => {
     setSearchTerm(term);
+  };
+
+  const handleAddSuccess = () => {
+    refresh(); // Refresh data after successful addition
   };
 
   return (
@@ -29,7 +37,16 @@ const Index = () => {
         <Header onToggleFilters={() => setIsFiltersOpen(!isFiltersOpen)} />
         
         <div className="container mx-auto px-4 py-6 space-y-6">
-          <AnalysisBar onSearch={handleSearch} />
+          <div className="flex justify-between items-center">
+            <AnalysisBar onSearch={handleSearch} />
+            <Button
+              onClick={() => setIsAddModalOpen(true)}
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Añadir Medicamento
+            </Button>
+          </div>
           
           <StatsCards medications={medications} loading={loading} />
           
@@ -52,6 +69,12 @@ const Index = () => {
             </div>
           </div>
         </div>
+        
+        <AddMedicationModal
+          isOpen={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+          onSuccess={handleAddSuccess}
+        />
         
         <Toaster />
       </div>
