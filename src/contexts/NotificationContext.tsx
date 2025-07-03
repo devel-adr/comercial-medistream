@@ -46,57 +46,92 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const medicationsCountRef = useRef(0);
   const unmetNeedsCountRef = useRef(0);
   const isInitializedRef = useRef(false);
-  const lastNotificationRef = useRef<{ type: string; timestamp: number; count: number } | null>(null);
+  
+  // Sistema de deduplicación mejorado
+  const processedNotificationsRef = useRef<Set<string>>(new Set());
+  const lastNotificationTimeRef = useRef<{ [key: string]: number }>({});
+  const isProcessingRef = useRef(false);
 
   // Listen for data updates from both hooks
   useEffect(() => {
     const handleDataUpdate = (event: any) => {
       console.log('Data update detected in context:', event.detail);
       
-      const { type, count, newRecords } = event.detail;
-      const now = Date.now();
-      
-      // Prevent duplicate notifications within 5 seconds and same count
-      if (lastNotificationRef.current && 
-          lastNotificationRef.current.type === type && 
-          lastNotificationRef.current.count === count &&
-          now - lastNotificationRef.current.timestamp < 5000) {
-        console.log('Skipping duplicate notification for', type, 'with same count:', count);
+      // Prevenir procesamiento múltiple simultáneo
+      if (isProcessingRef.current) {
+        console.log('Already processing notification, skipping');
         return;
       }
       
-      lastNotificationRef.current = { type, timestamp: now, count };
+      isProcessingRef.current = true;
       
-      const newNotification: NotificationItem = {
-        id: `${type}_${now}`, // More unique ID
-        type: type,
-        title: type === 'medications' ? 'Nuevos datos de DrugDealer' : 'Nuevos datos de Unmet Needs',
-        message: `Se han añadido ${newRecords} nuevos registros`,
-        timestamp: new Date(),
-        count,
-        newRecords
-      };
-
-      setNotifications(prev => {
-        // Avoid adding if a similar notification already exists in the last 5 seconds
-        const recent = prev.find(n => 
-          n.type === type && 
-          n.count === count && 
-          now - n.timestamp.getTime() < 5000
-        );
+      try {
+        const { type, count, newRecords } = event.detail;
+        const now = Date.now();
         
-        if (recent) {
-          console.log('Similar notification already exists, skipping');
-          return prev;
+        // Crear un ID único para esta notificación específica
+        const notificationId = `${type}_${count}_${newRecords}`;
+        
+        // Verificar si ya procesamos esta notificación exacta
+        if (processedNotificationsRef.current.has(notificationId)) {
+          console.log('Notification already processed:', notificationId);
+          return;
         }
         
-        return [newNotification, ...prev].slice(0, 20);
-      });
-      
-      let title = 'Nuevos datos disponibles';
-      let message = `Se han actualizado los datos de ${type === 'medications' ? 'DrugDealer' : 'Unmet Needs'}`;
-      
-      showNotification(title, message);
+        // Verificar tiempo desde la última notificación del mismo tipo
+        const lastTime = lastNotificationTimeRef.current[type] || 0;
+        if (now - lastTime < 3000) { // 3 segundos de cooldown por tipo
+          console.log('Notification cooldown active for type:', type);
+          return;
+        }
+        
+        // Marcar como procesada y actualizar tiempo
+        processedNotificationsRef.current.add(notificationId);
+        lastNotificationTimeRef.current[type] = now;
+        
+        // Limpiar notificaciones procesadas antiguas (después de 30 segundos)
+        setTimeout(() => {
+          processedNotificationsRef.current.delete(notificationId);
+        }, 30000);
+        
+        const newNotification: NotificationItem = {
+          id: notificationId,
+          type: type,
+          title: type === 'medications' ? 'Nuevos datos de DrugDealer' : 'Nuevos datos de Unmet Needs',
+          message: `Se han añadido ${newRecords} nuevos registros`,
+          timestamp: new Date(),
+          count,
+          newRecords
+        };
+
+        setNotifications(prev => {
+          // Verificar nuevamente que no existe una notificación similar
+          const exists = prev.some(n => 
+            n.type === type && 
+            n.count === count && 
+            n.newRecords === newRecords &&
+            now - n.timestamp.getTime() < 5000
+          );
+          
+          if (exists) {
+            console.log('Similar notification exists in state, skipping');
+            return prev;
+          }
+          
+          return [newNotification, ...prev].slice(0, 20);
+        });
+        
+        let title = 'Nuevos datos disponibles';
+        let message = `Se han actualizado los datos de ${type === 'medications' ? 'DrugDealer' : 'Unmet Needs'}`;
+        
+        showNotification(title, message);
+        
+      } finally {
+        // Liberar el lock después de un pequeño delay
+        setTimeout(() => {
+          isProcessingRef.current = false;
+        }, 500);
+      }
     };
 
     // Listen for custom events that indicate data updates
@@ -173,6 +208,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const clearNotifications = () => {
     setNotifications([]);
+    // También limpiar el cache de notificaciones procesadas
+    processedNotificationsRef.current.clear();
+    lastNotificationTimeRef.current = {};
   };
 
   return (

@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,6 +34,7 @@ const UnmetNeeds = () => {
   const [selectedUnmetNeed, setSelectedUnmetNeed] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isGeneratingTactics, setIsGeneratingTactics] = useState(false);
 
   const { data: unmetNeeds, loading, error, refresh } = useUnmetNeedsData();
 
@@ -105,7 +107,7 @@ const UnmetNeeds = () => {
     setIsDetailModalOpen(true);
   };
 
-  const handleGenerateTactics = () => {
+  const handleGenerateTactics = async () => {
     if (selectedRows.size === 0) {
       toast({
         title: "Error",
@@ -126,25 +128,79 @@ const UnmetNeeds = () => {
       return;
     }
 
-    // Store selected data and navigate to Tactics
-    const selectedData = Array.from(selectedRows).map(id => {
-      const item = unmetNeeds.find(n => n.id_UN_table?.toString() === id);
-      return {
-        ...item,
-        format: formatSelections[id]
+    setIsGeneratingTactics(true);
+
+    try {
+      // Prepare data for webhook with individual variables
+      const selectedItems = Array.from(selectedRows).map(id => {
+        const item = unmetNeeds.find(n => n.id_UN_table?.toString() === id);
+        return item;
+      });
+
+      // Create individual variables for each selected item
+      const webhookData = {
+        timestamp: new Date().toISOString(),
+        total_items: selectedRows.size
       };
-    });
 
-    // Store in localStorage or context for Tactics page
-    localStorage.setItem('selectedUnmetNeeds', JSON.stringify(selectedData));
-    
-    toast({
-      title: "Éxito",
-      description: `Se han preparado ${selectedRows.size} Unmet Needs para generar tácticas.`,
-    });
+      // Add individual variables for each selected Unmet Need
+      selectedItems.forEach((item, index) => {
+        const itemId = item?.id_UN_table?.toString();
+        webhookData[`laboratorio_${index + 1}`] = item?.lab || '';
+        webhookData[`area_terapeutica_${index + 1}`] = item?.area_terapeutica || '';
+        webhookData[`farmaco_${index + 1}`] = item?.farmaco || '';
+        webhookData[`molecula_${index + 1}`] = item?.molecula || '';
+        webhookData[`horizonte_${index + 1}`] = item?.horizonte_temporal || '';
+        webhookData[`unmet_need_${index + 1}`] = item?.unmet_need || '';
+        webhookData[`racional_${index + 1}`] = item?.racional || '';
+        webhookData[`oportunidad_estrategica_${index + 1}`] = item?.oportunidad_estrategica || '';
+        webhookData[`conclusion_${index + 1}`] = item?.conclusion || '';
+        webhookData[`formato_${index + 1}`] = formatSelections[itemId] || '';
+        webhookData[`impacto_${index + 1}`] = item?.impacto || '';
+      });
 
-    // Navigate to tactics (you can use react-router here)
-    window.location.href = '/tactics';
+      console.log('Sending data to webhook:', webhookData);
+
+      // Send data to webhook
+      const response = await fetch('https://develms.app.n8n.cloud/webhook-test/tactics', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(webhookData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Store selected data locally for Tactics page
+      localStorage.setItem('selectedUnmetNeeds', JSON.stringify(Array.from(selectedRows).map(id => {
+        const item = unmetNeeds.find(n => n.id_UN_table?.toString() === id);
+        return {
+          ...item,
+          format: formatSelections[id]
+        };
+      })));
+      
+      toast({
+        title: "Éxito",
+        description: `Se han enviado ${selectedRows.size} Unmet Needs al webhook y se han preparado las tácticas.`,
+      });
+
+      // Navigate to tactics page
+      window.location.href = '/tactics';
+
+    } catch (error) {
+      console.error('Error sending data to webhook:', error);
+      toast({
+        title: "Error",
+        description: "Error al enviar los datos al webhook. Por favor, inténtalo de nuevo.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingTactics(false);
+    }
   };
 
   const handleAddSuccess = () => {
@@ -377,12 +433,12 @@ const UnmetNeeds = () => {
                   </div>
                   <Button
                     onClick={handleGenerateTactics}
-                    disabled={selectedRows.size === 0}
+                    disabled={selectedRows.size === 0 || isGeneratingTactics}
                     size="lg"
                     className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 px-8 py-3"
                   >
                     <BarChart3 className="w-4 h-4 mr-2" />
-                    GENERAR TÁCTICA
+                    {isGeneratingTactics ? 'ENVIANDO...' : 'GENERAR TÁCTICA'}
                   </Button>
                 </div>
               </CardContent>
