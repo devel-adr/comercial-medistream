@@ -137,24 +137,27 @@ const UnmetNeeds = () => {
         return item;
       });
 
-      // Create individual variables for each field
+      // Create individual variables for each selected item
       const webhookData = {
         timestamp: new Date().toISOString(),
-        // Arrays of individual variables
-        laboratorios: selectedItems.map(item => item?.lab || ''),
-        areas_terapeuticas: selectedItems.map(item => item?.area_terapeutica || ''),
-        farmacos: selectedItems.map(item => item?.farmaco || ''),
-        moleculas: selectedItems.map(item => item?.molecula || ''),
-        horizontes: selectedItems.map(item => item?.horizonte_temporal || ''),
-        unmet_needs: selectedItems.map(item => item?.unmet_need || ''),
-        racionales: selectedItems.map(item => item?.racional || ''),
-        oportunidades_estrategicas: selectedItems.map(item => item?.oportunidad_estrategica || ''),
-        conclusiones: selectedItems.map(item => item?.conclusion || ''),
-        formatos: Array.from(selectedRows).map(id => formatSelections[id] || ''),
-        impactos: selectedItems.map(item => item?.impacto || ''),
-        // Also include count for easier processing
         total_items: selectedRows.size
       };
+
+      // Add individual variables for each selected Unmet Need
+      selectedItems.forEach((item, index) => {
+        const itemId = item?.id_UN_table?.toString();
+        webhookData[`laboratorio_${index + 1}`] = item?.lab || '';
+        webhookData[`area_terapeutica_${index + 1}`] = item?.area_terapeutica || '';
+        webhookData[`farmaco_${index + 1}`] = item?.farmaco || '';
+        webhookData[`molecula_${index + 1}`] = item?.molecula || '';
+        webhookData[`horizonte_${index + 1}`] = item?.horizonte_temporal || '';
+        webhookData[`unmet_need_${index + 1}`] = item?.unmet_need || '';
+        webhookData[`racional_${index + 1}`] = item?.racional || '';
+        webhookData[`oportunidad_estrategica_${index + 1}`] = item?.oportunidad_estrategica || '';
+        webhookData[`conclusion_${index + 1}`] = item?.conclusion || '';
+        webhookData[`formato_${index + 1}`] = formatSelections[itemId] || '';
+        webhookData[`impacto_${index + 1}`] = item?.impacto || '';
+      });
 
       console.log('Sending data to webhook:', webhookData);
 
