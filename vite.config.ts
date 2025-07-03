@@ -11,9 +11,9 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
-    mode === 'development' &&
-    componentTagger(),
+    mode === 'development' && componentTagger(),
   ].filter(Boolean),
+  base: '/comercial-medistream/',  // ← AÑADE ESTA LÍNEA AQUÍ
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
