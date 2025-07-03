@@ -31,13 +31,31 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      
+      # --- PASOS NUEVOS ---
+      # Configura Node.js para poder compilar el proyecto
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20 # Puedes usar la versión de Node que prefieras
+          cache: 'npm'
+      
+      # Instala las dependencias y compila el proyecto
+      - name: Install dependencies
+        run: npm install
+      - name: Build
+        run: npm run build # Este comando crea la carpeta /dist
+      # --- FIN DE PASOS NUEVOS ---
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
+      
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
-          path: '.'
+          # Sube el contenido de la carpeta /dist, que es el resultado de la compilación
+          path: './dist' 
+      
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
