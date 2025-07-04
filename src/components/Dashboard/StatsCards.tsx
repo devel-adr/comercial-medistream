@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, FileText, CalendarDays, BarChart, Building, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
+import { TrendingUp, FileText, CalendarDays, BarChart, Building, CheckCircle, Clock, AlertTriangle, Molecule } from 'lucide-react';
 
 interface StatsCardsProps {
   medications: any[];
@@ -43,62 +43,82 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loadin
     med.ensayos_clinicos_relevantes && med.ensayos_clinicos_relevantes.trim() !== ''
   ).length;
 
+  // Nuevo: calcular medicamentos con información de moléculas
+  const medicationsWithMolecules = medications.filter(med => 
+    med.molecula && med.molecula.trim() !== ''
+  ).length;
+
   const stats = [
     {
       title: 'Total Medicamentos',
       value: totalMedications,
       icon: FileText,
       color: 'bg-blue-500',
-      description: 'Medicamentos registrados'
+      description: 'Medicamentos registrados',
+      molecule: medications[0]?.molecula || 'N/A'
     },
     {
       title: 'Laboratorios',
       value: uniqueLabs,
       icon: Building,
       color: 'bg-purple-500',
-      description: 'Laboratorios únicos'
+      description: 'Laboratorios únicos',
+      molecule: medications.find(med => med.nombre_lab)?.molecula || 'N/A'
     },
     {
       title: 'Aprobados',
       value: approvedMeds,
       icon: CheckCircle,
       color: 'bg-green-500',
-      description: 'Medicamentos aprobados'
+      description: 'Medicamentos aprobados',
+      molecule: medications.find(med => med.estado_en_espana?.toLowerCase().includes('aprobado'))?.molecula || 'N/A'
     },
     {
       title: 'En Ensayos',
       value: inTrials,
       icon: BarChart,
       color: 'bg-orange-500',
-      description: 'En fase de ensayos'
+      description: 'En fase de ensayos',
+      molecule: medications.find(med => med.estado_en_espana?.toLowerCase().includes('ensayo'))?.molecula || 'N/A'
     },
     {
       title: 'Pendientes',
       value: pendingMeds,
       icon: Clock,
       color: 'bg-yellow-500',
-      description: 'Pendientes de aprobación'
+      description: 'Pendientes de aprobación',
+      molecule: medications.find(med => med.estado_en_espana?.toLowerCase().includes('pendiente'))?.molecula || 'N/A'
     },
     {
       title: `Aprobados ${currentYear}`,
       value: approvedThisYear,
       icon: CalendarDays,
       color: 'bg-indigo-500',
-      description: 'Aprobados este año'
+      description: 'Aprobados este año',
+      molecule: medications.find(med => {
+        if (!med.fecha_de_aprobacion_espana) return false;
+        try {
+          return new Date(med.fecha_de_aprobacion_espana).getFullYear() === currentYear;
+        } catch {
+          return false;
+        }
+      })?.molecula || 'N/A'
     },
     {
       title: 'Áreas Terapéuticas',
       value: uniqueTherapeuticAreas,
       icon: TrendingUp,
       color: 'bg-teal-500',
-      description: 'Áreas diferentes'
+      description: 'Áreas diferentes',
+      molecule: medications.find(med => med.area_terapeutica)?.molecula || 'N/A'
     },
     {
-      title: 'Con Ensayos Clínicos',
-      value: medicationsWithClinicalTrials,
-      icon: AlertTriangle,
-      color: 'bg-red-500',
-      description: 'Con información de ensayos'
+      title: 'Con Moléculas',
+      value: medicationsWithMolecules,
+      icon: Molecule,
+      color: 'bg-pink-500',
+      description: 'Con información de moléculas',
+      molecule: medications.find(med => med.molecula && med.molecula.trim() !== '')?.molecula || 'N/A'
     }
   ];
 
@@ -139,6 +159,18 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loadin
               <p className="text-xs text-gray-500 mb-2">
                 {stat.description}
               </p>
+              
+              {/* Nuevo: Sección de molécula */}
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-md p-2 mb-2">
+                <div className="flex items-center gap-1 mb-1">
+                  <Molecule className="w-3 h-3 text-gray-600 dark:text-gray-400" />
+                  <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Molécula:</span>
+                </div>
+                <p className="text-xs text-gray-800 dark:text-gray-200 truncate" title={stat.molecule}>
+                  {stat.molecule}
+                </p>
+              </div>
+              
               {index > 1 && totalMedications > 0 && (
                 <div className="flex items-center space-x-2">
                   <Badge variant="secondary" className="text-blue-600 bg-blue-100">

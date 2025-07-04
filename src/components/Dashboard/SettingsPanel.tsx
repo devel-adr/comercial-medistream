@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNotification } from '@/contexts/NotificationContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Volume2, Mail, LogOut, User, Play, Palette, Bell } from 'lucide-react';
+import { Volume2, VolumeX, Mail, LogOut, User, Play, Palette, Bell } from 'lucide-react';
 import { playNotificationSound } from '@/utils/notificationSounds';
 
 interface SettingsPanelProps {
@@ -35,11 +34,26 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose })
   ];
 
   const handleVolumeChange = (value: number[]) => {
-    updateSettings({ volume: value[0] });
+    const newVolume = value[0];
+    updateSettings({ volume: newVolume });
+    
+    // Si el volumen es 0, también deshabilitar las notificaciones
+    if (newVolume === 0 && settings.enabled) {
+      updateSettings({ enabled: false });
+    }
+    // Si el volumen es mayor que 0 y las notificaciones están deshabilitadas, habilitarlas
+    else if (newVolume > 0 && !settings.enabled) {
+      updateSettings({ enabled: true });
+    }
   };
 
   const handleNotificationsToggle = (enabled: boolean) => {
     updateSettings({ enabled });
+    
+    // Si se habilitan las notificaciones y el volumen está en 0, ponerlo a un valor audible
+    if (enabled && settings.volume === 0) {
+      updateSettings({ volume: 0.5 });
+    }
   };
 
   const handleSoundChange = (sound: string) => {
@@ -50,7 +64,17 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose })
 
   const testNotificationSound = async () => {
     console.log('Testing notification sound:', selectedSound, 'with volume:', settings.volume);
-    await playNotificationSound(selectedSound, settings.volume);
+    await playNotificationSound(selectedSound, settings.enabled ? settings.volume : 0);
+  };
+
+  const handleMuteToggle = () => {
+    if (settings.volume > 0) {
+      // Silenciar: guardar el volumen actual y ponerlo a 0
+      updateSettings({ volume: 0, enabled: false });
+    } else {
+      // Reactivar: restaurar a un volumen audible
+      updateSettings({ volume: 0.5, enabled: true });
+    }
   };
 
   const handleContactDeveloper = () => {
@@ -61,6 +85,8 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose })
     logout();
     onClose();
   };
+
+  const isMuted = !settings.enabled || settings.volume === 0;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -119,10 +145,21 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose })
 
               <div className="space-y-4">
                 <div className="space-y-3">
-                  <Label className="font-medium flex items-center gap-2">
-                    <Volume2 className="w-4 h-4" />
-                    Volumen de notificaciones
-                  </Label>
+                  <div className="flex items-center justify-between">
+                    <Label className="font-medium flex items-center gap-2">
+                      {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                      Volumen de notificaciones
+                    </Label>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleMuteToggle}
+                      className="flex items-center gap-1"
+                    >
+                      {isMuted ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
+                      {isMuted ? 'Activar' : 'Silenciar'}
+                    </Button>
+                  </div>
                   <div className="px-2">
                     <Slider
                       value={[settings.volume]}
