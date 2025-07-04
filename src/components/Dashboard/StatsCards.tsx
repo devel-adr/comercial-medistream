@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -42,7 +43,7 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loadin
     med.ensayos_clinicos_relevantes && med.ensayos_clinicos_relevantes.trim() !== ''
   ).length;
 
-  // Nuevo: calcular medicamentos con información de moléculas
+  // Medicamentos con información de moléculas
   const medicationsWithMolecules = medications.filter(med => 
     med.molecula && med.molecula.trim() !== ''
   ).length;
@@ -54,7 +55,7 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loadin
       icon: FileText,
       color: 'bg-blue-500',
       description: 'Medicamentos registrados',
-      molecule: medications[0]?.molecula || 'N/A'
+      molecule: medications.find(med => med.molecula && med.molecula.trim() !== '')?.molecula || 'Sin información'
     },
     {
       title: 'Laboratorios',
@@ -62,7 +63,7 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loadin
       icon: Building,
       color: 'bg-purple-500',
       description: 'Laboratorios únicos',
-      molecule: medications.find(med => med.nombre_lab)?.molecula || 'N/A'
+      molecule: medications.find(med => med.nombre_lab && med.molecula && med.molecula.trim() !== '')?.molecula || 'Sin información'
     },
     {
       title: 'Aprobados',
@@ -70,7 +71,7 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loadin
       icon: CheckCircle,
       color: 'bg-green-500',
       description: 'Medicamentos aprobados',
-      molecule: medications.find(med => med.estado_en_espana?.toLowerCase().includes('aprobado'))?.molecula || 'N/A'
+      molecule: medications.find(med => med.estado_en_espana?.toLowerCase().includes('aprobado') && med.molecula && med.molecula.trim() !== '')?.molecula || 'Sin información'
     },
     {
       title: 'En Ensayos',
@@ -78,7 +79,7 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loadin
       icon: BarChart,
       color: 'bg-orange-500',
       description: 'En fase de ensayos',
-      molecule: medications.find(med => med.estado_en_espana?.toLowerCase().includes('ensayo'))?.molecula || 'N/A'
+      molecule: medications.find(med => med.estado_en_espana?.toLowerCase().includes('ensayo') && med.molecula && med.molecula.trim() !== '')?.molecula || 'Sin información'
     },
     {
       title: 'Pendientes',
@@ -86,7 +87,7 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loadin
       icon: Clock,
       color: 'bg-yellow-500',
       description: 'Pendientes de aprobación',
-      molecule: medications.find(med => med.estado_en_espana?.toLowerCase().includes('pendiente'))?.molecula || 'N/A'
+      molecule: medications.find(med => med.estado_en_espana?.toLowerCase().includes('pendiente') && med.molecula && med.molecula.trim() !== '')?.molecula || 'Sin información'
     },
     {
       title: `Aprobados ${currentYear}`,
@@ -95,13 +96,13 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loadin
       color: 'bg-indigo-500',
       description: 'Aprobados este año',
       molecule: medications.find(med => {
-        if (!med.fecha_de_aprobacion_espana) return false;
+        if (!med.fecha_de_aprobacion_espana || !med.molecula || med.molecula.trim() === '') return false;
         try {
           return new Date(med.fecha_de_aprobacion_espana).getFullYear() === currentYear;
         } catch {
           return false;
         }
-      })?.molecula || 'N/A'
+      })?.molecula || 'Sin información'
     },
     {
       title: 'Áreas Terapéuticas',
@@ -109,7 +110,7 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loadin
       icon: TrendingUp,
       color: 'bg-teal-500',
       description: 'Áreas diferentes',
-      molecule: medications.find(med => med.area_terapeutica)?.molecula || 'N/A'
+      molecule: medications.find(med => med.area_terapeutica && med.molecula && med.molecula.trim() !== '')?.molecula || 'Sin información'
     },
     {
       title: 'Con Moléculas',
@@ -117,7 +118,7 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loadin
       icon: Atom,
       color: 'bg-pink-500',
       description: 'Con información de moléculas',
-      molecule: medications.find(med => med.molecula && med.molecula.trim() !== '')?.molecula || 'N/A'
+      molecule: medications.find(med => med.molecula && med.molecula.trim() !== '')?.molecula || 'Sin información'
     }
   ];
 
@@ -159,7 +160,7 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loadin
                 {stat.description}
               </p>
               
-              {/* Nuevo: Sección de molécula */}
+              {/* Sección de molécula */}
               <div className="bg-gray-50 dark:bg-gray-800 rounded-md p-2 mb-2">
                 <div className="flex items-center gap-1 mb-1">
                   <Atom className="w-3 h-3 text-gray-600 dark:text-gray-400" />

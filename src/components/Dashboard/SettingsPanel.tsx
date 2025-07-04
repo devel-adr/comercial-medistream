@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -65,16 +66,6 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose })
   const testNotificationSound = async () => {
     console.log('Testing notification sound:', selectedSound, 'with volume:', settings.volume);
     await playNotificationSound(selectedSound, settings.enabled ? settings.volume : 0);
-  };
-
-  const handleMuteToggle = () => {
-    if (settings.volume > 0) {
-      // Silenciar: guardar el volumen actual y ponerlo a 0
-      updateSettings({ volume: 0, enabled: false });
-    } else {
-      // Reactivar: restaurar a un volumen audible
-      updateSettings({ volume: 0.5, enabled: true });
-    }
   };
 
   const handleContactDeveloper = () => {
@@ -150,15 +141,6 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose })
                       {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
                       Volumen de notificaciones
                     </Label>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleMuteToggle}
-                      className="flex items-center gap-1"
-                    >
-                      {isMuted ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
-                      {isMuted ? 'Activar' : 'Silenciar'}
-                    </Button>
                   </div>
                   <div className="px-2">
                     <Slider
