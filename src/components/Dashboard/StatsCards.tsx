@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, FileText, CalendarDays, BarChart, Building, CheckCircle, Clock, AlertTriangle, Molecule } from 'lucide-react';
+import { TrendingUp, FileText, CalendarDays, BarChart, Building, CheckCircle, Clock, AlertTriangle, Atom } from 'lucide-react';
 
 interface StatsCardsProps {
   medications: any[];
@@ -115,7 +114,7 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loadin
     {
       title: 'Con Moléculas',
       value: medicationsWithMolecules,
-      icon: Molecule,
+      icon: Atom,
       color: 'bg-pink-500',
       description: 'Con información de moléculas',
       molecule: medications.find(med => med.molecula && med.molecula.trim() !== '')?.molecula || 'N/A'
@@ -163,7 +162,7 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loadin
               {/* Nuevo: Sección de molécula */}
               <div className="bg-gray-50 dark:bg-gray-800 rounded-md p-2 mb-2">
                 <div className="flex items-center gap-1 mb-1">
-                  <Molecule className="w-3 h-3 text-gray-600 dark:text-gray-400" />
+                  <Atom className="w-3 h-3 text-gray-600 dark:text-gray-400" />
                   <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Molécula:</span>
                 </div>
                 <p className="text-xs text-gray-800 dark:text-gray-200 truncate" title={stat.molecule}>
