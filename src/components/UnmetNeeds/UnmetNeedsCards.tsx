@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BarChart3, FileText, Users, Target, Clock, Lightbulb, Eye } from 'lucide-react';
+import { BarChart3, FileText, Users, Target, Clock, Lightbulb, Eye, Atom } from 'lucide-react';
 
 interface UnmetNeedsCardsProps {
   data: any[];
@@ -108,6 +108,19 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
                   <div className="text-gray-900 dark:text-gray-100 truncate">{item.lab || 'N/A'}</div>
                 </div>
               </div>
+
+              {/* Molécula Section */}
+              {item.molecula && item.molecula.trim() !== '' && (
+                <div className="bg-pink-50 dark:bg-pink-900/20 p-3 rounded-lg border border-pink-200 dark:border-pink-800">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Atom className="w-4 h-4 text-pink-600 dark:text-pink-400" />
+                    <span className="text-sm font-semibold text-pink-700 dark:text-pink-300">Molécula</span>
+                  </div>
+                  <p className="text-sm text-gray-800 dark:text-gray-200 font-medium">
+                    {item.molecula}
+                  </p>
+                </div>
+              )}
 
               {/* Detailed Information */}
               <div className="space-y-3">

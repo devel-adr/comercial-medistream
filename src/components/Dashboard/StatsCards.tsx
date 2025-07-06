@@ -54,71 +54,56 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loadin
       value: totalMedications,
       icon: FileText,
       color: 'bg-blue-500',
-      description: 'Medicamentos registrados',
-      molecule: medications.find(med => med.molecula && med.molecula.trim() !== '')?.molecula || 'Sin información'
+      description: 'Medicamentos registrados'
     },
     {
       title: 'Laboratorios',
       value: uniqueLabs,
       icon: Building,
       color: 'bg-purple-500',
-      description: 'Laboratorios únicos',
-      molecule: medications.find(med => med.nombre_lab && med.molecula && med.molecula.trim() !== '')?.molecula || 'Sin información'
+      description: 'Laboratorios únicos'
     },
     {
       title: 'Aprobados',
       value: approvedMeds,
       icon: CheckCircle,
       color: 'bg-green-500',
-      description: 'Medicamentos aprobados',
-      molecule: medications.find(med => med.estado_en_espana?.toLowerCase().includes('aprobado') && med.molecula && med.molecula.trim() !== '')?.molecula || 'Sin información'
+      description: 'Medicamentos aprobados'
     },
     {
       title: 'En Ensayos',
       value: inTrials,
       icon: BarChart,
       color: 'bg-orange-500',
-      description: 'En fase de ensayos',
-      molecule: medications.find(med => med.estado_en_espana?.toLowerCase().includes('ensayo') && med.molecula && med.molecula.trim() !== '')?.molecula || 'Sin información'
+      description: 'En fase de ensayos'
     },
     {
       title: 'Pendientes',
       value: pendingMeds,
       icon: Clock,
       color: 'bg-yellow-500',
-      description: 'Pendientes de aprobación',
-      molecule: medications.find(med => med.estado_en_espana?.toLowerCase().includes('pendiente') && med.molecula && med.molecula.trim() !== '')?.molecula || 'Sin información'
+      description: 'Pendientes de aprobación'
     },
     {
       title: `Aprobados ${currentYear}`,
       value: approvedThisYear,
       icon: CalendarDays,
       color: 'bg-indigo-500',
-      description: 'Aprobados este año',
-      molecule: medications.find(med => {
-        if (!med.fecha_de_aprobacion_espana || !med.molecula || med.molecula.trim() === '') return false;
-        try {
-          return new Date(med.fecha_de_aprobacion_espana).getFullYear() === currentYear;
-        } catch {
-          return false;
-        }
-      })?.molecula || 'Sin información'
+      description: 'Aprobados este año'
     },
     {
       title: 'Áreas Terapéuticas',
       value: uniqueTherapeuticAreas,
       icon: TrendingUp,
       color: 'bg-teal-500',
-      description: 'Áreas diferentes',
-      molecule: medications.find(med => med.area_terapeutica && med.molecula && med.molecula.trim() !== '')?.molecula || 'Sin información'
+      description: 'Áreas diferentes'
     },
     {
       title: 'Con Moléculas',
       value: medicationsWithMolecules,
       icon: Atom,
       color: 'bg-pink-500',
-      description: 'Con información de moléculas',
-      molecule: medications.find(med => med.molecula && med.molecula.trim() !== '')?.molecula || 'Sin información'
+      description: 'Con información de moléculas'
     }
   ];
 
@@ -159,17 +144,6 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loadin
               <p className="text-xs text-gray-500 mb-2">
                 {stat.description}
               </p>
-              
-              {/* Sección de molécula */}
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-md p-2 mb-2">
-                <div className="flex items-center gap-1 mb-1">
-                  <Atom className="w-3 h-3 text-gray-600 dark:text-gray-400" />
-                  <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Molécula:</span>
-                </div>
-                <p className="text-xs text-gray-800 dark:text-gray-200 truncate" title={stat.molecule}>
-                  {stat.molecule}
-                </p>
-              </div>
               
               {index > 1 && totalMedications > 0 && (
                 <div className="flex items-center space-x-2">
