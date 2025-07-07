@@ -140,7 +140,6 @@ export const AddMedicationModal: React.FC<AddMedicationModalProps> = ({
                 id="area_terapeutica"
                 value={formData.area_terapeutica}
                 onChange={(e) => handleInputChange('area_terapeutica', e.target.value)}
-                required
               />
             </div>
 
@@ -150,7 +149,6 @@ export const AddMedicationModal: React.FC<AddMedicationModalProps> = ({
                 id="sub_area_de_tratamiento"
                 value={formData.sub_area_de_tratamiento}
                 onChange={(e) => handleInputChange('sub_area_de_tratamiento', e.target.value)}
-                required
               />
             </div>
 
@@ -160,7 +158,6 @@ export const AddMedicationModal: React.FC<AddMedicationModalProps> = ({
                 id="linea_de_tratamiento"
                 value={formData.linea_de_tratamiento}
                 onChange={(e) => handleInputChange('linea_de_tratamiento', e.target.value)}
-                required
               />
             </div>
 
@@ -200,7 +197,6 @@ export const AddMedicationModal: React.FC<AddMedicationModalProps> = ({
               value={formData.mecanismo_de_accion}
               onChange={(e) => handleInputChange('mecanismo_de_accion', e.target.value)}
               rows={3}
-              required
             />
           </div>
 
@@ -211,7 +207,6 @@ export const AddMedicationModal: React.FC<AddMedicationModalProps> = ({
               value={formData.alteracion_genetica_dirigida}
               onChange={(e) => handleInputChange('alteracion_genetica_dirigida', e.target.value)}
               rows={2}
-              required
             />
           </div>
 
@@ -222,7 +217,6 @@ export const AddMedicationModal: React.FC<AddMedicationModalProps> = ({
               value={formData.ensayos_clinicos_relevantes}
               onChange={(e) => handleInputChange('ensayos_clinicos_relevantes', e.target.value)}
               rows={3}
-              required
             />
           </div>
 
@@ -234,7 +228,6 @@ export const AddMedicationModal: React.FC<AddMedicationModalProps> = ({
               value={formData.fuente_url}
               onChange={(e) => handleInputChange('fuente_url', e.target.value)}
               placeholder="https://..."
-              required
             />
           </div>
 
