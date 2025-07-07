@@ -134,12 +134,11 @@ export const AddUnmetNeedModal: React.FC<AddUnmetNeedModalProps> = ({
             </div>
 
             <div>
-              <Label htmlFor="area_terapeutica">Área Terapéutica *</Label>
+              <Label htmlFor="area_terapeutica">Área Terapéutica</Label>
               <Input
                 id="area_terapeutica"
                 value={formData.area_terapeutica}
                 onChange={(e) => handleInputChange('area_terapeutica', e.target.value)}
-                required
               />
             </div>
 
@@ -164,7 +163,7 @@ export const AddUnmetNeedModal: React.FC<AddUnmetNeedModalProps> = ({
             </div>
 
             <div>
-              <Label htmlFor="impacto">Impacto *</Label>
+              <Label htmlFor="impacto">Impacto</Label>
               <Select
                 value={formData.impacto}
                 onValueChange={(value) => handleInputChange('impacto', value)}
@@ -182,7 +181,7 @@ export const AddUnmetNeedModal: React.FC<AddUnmetNeedModalProps> = ({
             </div>
 
             <div>
-              <Label htmlFor="horizonte_temporal">Horizonte Temporal *</Label>
+              <Label htmlFor="horizonte_temporal">Horizonte Temporal</Label>
               <Select
                 value={formData.horizonte_temporal}
                 onValueChange={(value) => handleInputChange('horizonte_temporal', value)}
@@ -199,7 +198,7 @@ export const AddUnmetNeedModal: React.FC<AddUnmetNeedModalProps> = ({
             </div>
 
             <div>
-              <Label htmlFor="id_NUM_DD">ID Número DrugDealer</Label>
+              <Label htmlFor="id_NUM_DD">ID Número DrugDealer *</Label>
               <Input
                 id="id_NUM_DD"
                 type="number"
@@ -211,24 +210,22 @@ export const AddUnmetNeedModal: React.FC<AddUnmetNeedModalProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="racional">Racional *</Label>
+            <Label htmlFor="racional">Racional</Label>
             <Textarea
               id="racional"
               value={formData.racional}
               onChange={(e) => handleInputChange('racional', e.target.value)}
               rows={4}
-              required
             />
           </div>
 
           <div>
-            <Label htmlFor="conclusion">Conclusión *</Label>
+            <Label htmlFor="conclusion">Conclusión</Label>
             <Textarea
               id="conclusion"
               value={formData.conclusion}
               onChange={(e) => handleInputChange('conclusion', e.target.value)}
               rows={4}
-              required
             />
           </div>
 
