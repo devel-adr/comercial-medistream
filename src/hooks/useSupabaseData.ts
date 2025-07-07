@@ -14,11 +14,23 @@ export const useSupabaseData = (refreshInterval = 30000) => {
   const fetchData = async () => {
     try {
       console.log('Fetching data from Supabase...');
+      
+      // Primero obtenemos el conteo total de registros
+      const { count, error: countError } = await supabase
+        .from('DrugDealer_table')
+        .select('*', { count: 'exact', head: true });
+      
+      if (countError) {
+        console.error('Error getting count:', countError);
+      } else {
+        console.log('Total records in database:', count);
+      }
+
+      // Ahora obtenemos todos los datos sin límite explícito
       const { data: medications, error } = await supabase
         .from('DrugDealer_table')
         .select('*')
-        .order('ID_NUM', { ascending: false })
-        .limit(50000); // Aumentar el límite significativamente
+        .order('ID_NUM', { ascending: false });
 
       if (error) {
         throw error;
@@ -26,6 +38,15 @@ export const useSupabaseData = (refreshInterval = 30000) => {
 
       const newCount = medications?.length || 0;
       console.log('Data fetched successfully:', newCount, 'records');
+      console.log('Expected count:', count, 'Actual fetched:', newCount);
+      
+      if (count && newCount < count) {
+        console.warn('WARNING: Not all records were fetched!', {
+          expected: count,
+          fetched: newCount,
+          missing: count - newCount
+        });
+      }
       
       // Check if we have new data (only after initial load)
       if (!isInitialLoadRef.current && 
