@@ -17,7 +17,8 @@ export const useSupabaseData = (refreshInterval = 30000) => {
       const { data: medications, error } = await supabase
         .from('DrugDealer_table')
         .select('*')
-        .order('ID_NUM', { ascending: false });
+        .order('ID_NUM', { ascending: false })
+        .limit(50000); // Aumentar el límite significativamente
 
       if (error) {
         throw error;
