@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -108,99 +107,8 @@ const UnmetNeeds = () => {
   };
 
   const handleGenerateTactics = async () => {
-    if (selectedRows.size === 0) {
-      toast({
-        title: "Error",
-        description: "Por favor selecciona al menos una Unmet Need para generar tácticas.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Check if all selected rows have a format assigned
-    const missingFormats = Array.from(selectedRows).filter(id => !formatSelections[id]);
-    if (missingFormats.length > 0) {
-      toast({
-        title: "Error",
-        description: "Por favor asigna un formato a todas las Unmet Needs seleccionadas.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsGeneratingTactics(true);
-
-    try {
-      // Prepare data for webhook with individual variables
-      const selectedItems = Array.from(selectedRows).map(id => {
-        const item = unmetNeeds.find(n => n.id_UN_table?.toString() === id);
-        return item;
-      });
-
-      // Create individual variables for each selected item
-      const webhookData = {
-        timestamp: new Date().toISOString(),
-        total_items: selectedRows.size
-      };
-
-      // Add individual variables for each selected Unmet Need
-      selectedItems.forEach((item, index) => {
-        const itemId = item?.id_UN_table?.toString();
-        webhookData[`laboratorio_${index + 1}`] = item?.lab || '';
-        webhookData[`area_terapeutica_${index + 1}`] = item?.area_terapeutica || '';
-        webhookData[`farmaco_${index + 1}`] = item?.farmaco || '';
-        webhookData[`molecula_${index + 1}`] = item?.molecula || '';
-        webhookData[`horizonte_${index + 1}`] = item?.horizonte_temporal || '';
-        webhookData[`unmet_need_${index + 1}`] = item?.unmet_need || '';
-        webhookData[`racional_${index + 1}`] = item?.racional || '';
-        webhookData[`oportunidad_estrategica_${index + 1}`] = item?.oportunidad_estrategica || '';
-        webhookData[`conclusion_${index + 1}`] = item?.conclusion || '';
-        webhookData[`formato_${index + 1}`] = formatSelections[itemId] || '';
-        webhookData[`impacto_${index + 1}`] = item?.impacto || '';
-      });
-
-      console.log('Sending data to webhook:', webhookData);
-
-      // Send data to webhook
-      const response = await fetch('https://develms.app.n8n.cloud/webhook-test/tactics', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(webhookData),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      // Store selected data locally for Tactics page
-      localStorage.setItem('selectedUnmetNeeds', JSON.stringify(Array.from(selectedRows).map(id => {
-        const item = unmetNeeds.find(n => n.id_UN_table?.toString() === id);
-        return {
-          ...item,
-          format: formatSelections[id]
-        };
-      })));
-      
-      toast({
-        title: "Éxito",
-        description: `Se han enviado ${selectedRows.size} Unmet Needs al webhook y se han preparado las tácticas.`,
-      });
-
-      // Navigate to tactics page
-      window.location.href = '/tactics';
-
-    } catch (error) {
-      console.error('Error sending data to webhook:', error);
-      toast({
-        title: "Error",
-        description: "Error al enviar los datos al webhook. Por favor, inténtalo de nuevo.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsGeneratingTactics(false);
-    }
+    // Función deshabilitada - próximamente
+    return;
   };
 
   const handleAddSuccess = () => {
@@ -412,7 +320,7 @@ const UnmetNeeds = () => {
             </CardContent>
           </Card>
 
-          {/* Generate Tactics Button */}
+          {/* Generate Tactics Button - Disabled */}
           <div className="flex justify-center">
             <Card className="shadow-lg">
               <CardContent className="p-6">
@@ -423,7 +331,7 @@ const UnmetNeeds = () => {
                       Generar Tácticas
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-300">
-                      Selecciona las Unmet Needs y asigna un formato para generar tácticas personalizadas.
+                      Funcionalidad próximamente disponible.
                     </p>
                     {selectedRows.size > 0 && (
                       <p className="text-sm text-blue-600 dark:text-blue-400 mt-2">
@@ -432,13 +340,12 @@ const UnmetNeeds = () => {
                     )}
                   </div>
                   <Button
-                    onClick={handleGenerateTactics}
-                    disabled={selectedRows.size === 0 || isGeneratingTactics}
+                    disabled={true}
                     size="lg"
-                    className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 px-8 py-3"
+                    className="bg-gray-400 hover:bg-gray-400 cursor-not-allowed px-8 py-3"
                   >
                     <BarChart3 className="w-4 h-4 mr-2" />
-                    {isGeneratingTactics ? 'ENVIANDO...' : 'GENERAR TÁCTICA'}
+                    PRÓXIMAMENTE...
                   </Button>
                 </div>
               </CardContent>

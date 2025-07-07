@@ -9,8 +9,7 @@ export const Navigation: React.FC = () => {
   
   const navItems = [
     { path: '/', label: 'DrugDealer' },
-    { path: '/unmet-needs', label: 'Unmet Needs' },
-    { path: '/tactics', label: 'Tactics' }
+    { path: '/unmet-needs', label: 'Unmet Needs' }
   ];
 
   return (
