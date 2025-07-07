@@ -135,7 +135,7 @@ export const AddMedicationModal: React.FC<AddMedicationModalProps> = ({
             </div>
 
             <div>
-              <Label htmlFor="area_terapeutica">Área Terapéutica *</Label>
+              <Label htmlFor="area_terapeutica">Área Terapéutica</Label>
               <Input
                 id="area_terapeutica"
                 value={formData.area_terapeutica}
@@ -145,7 +145,7 @@ export const AddMedicationModal: React.FC<AddMedicationModalProps> = ({
             </div>
 
             <div>
-              <Label htmlFor="sub_area_de_tratamiento">Sub-área de Tratamiento *</Label>
+              <Label htmlFor="sub_area_de_tratamiento">Sub-área de Tratamiento</Label>
               <Input
                 id="sub_area_de_tratamiento"
                 value={formData.sub_area_de_tratamiento}
@@ -155,7 +155,7 @@ export const AddMedicationModal: React.FC<AddMedicationModalProps> = ({
             </div>
 
             <div>
-              <Label htmlFor="linea_de_tratamiento">Línea de Tratamiento *</Label>
+              <Label htmlFor="linea_de_tratamiento">Línea de Tratamiento</Label>
               <Input
                 id="linea_de_tratamiento"
                 value={formData.linea_de_tratamiento}
@@ -165,7 +165,7 @@ export const AddMedicationModal: React.FC<AddMedicationModalProps> = ({
             </div>
 
             <div>
-              <Label htmlFor="estado_en_espana">Estado en España *</Label>
+              <Label htmlFor="estado_en_espana">Estado en España</Label>
               <Select
                 value={formData.estado_en_espana}
                 onValueChange={(value) => handleInputChange('estado_en_espana', value)}
@@ -194,7 +194,7 @@ export const AddMedicationModal: React.FC<AddMedicationModalProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="mecanismo_de_accion">Mecanismo de Acción *</Label>
+            <Label htmlFor="mecanismo_de_accion">Mecanismo de Acción</Label>
             <Textarea
               id="mecanismo_de_accion"
               value={formData.mecanismo_de_accion}
@@ -205,7 +205,7 @@ export const AddMedicationModal: React.FC<AddMedicationModalProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="alteracion_genetica_dirigida">Alteración Genética Dirigida *</Label>
+            <Label htmlFor="alteracion_genetica_dirigida">Alteración Genética Dirigida</Label>
             <Textarea
               id="alteracion_genetica_dirigida"
               value={formData.alteracion_genetica_dirigida}
@@ -216,7 +216,7 @@ export const AddMedicationModal: React.FC<AddMedicationModalProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="ensayos_clinicos_relevantes">Ensayos Clínicos Relevantes *</Label>
+            <Label htmlFor="ensayos_clinicos_relevantes">Ensayos Clínicos Relevantes</Label>
             <Textarea
               id="ensayos_clinicos_relevantes"
               value={formData.ensayos_clinicos_relevantes}
@@ -227,7 +227,7 @@ export const AddMedicationModal: React.FC<AddMedicationModalProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="fuente_url">Fuente URL *</Label>
+            <Label htmlFor="fuente_url">Fuente URL</Label>
             <Input
               id="fuente_url"
               type="url"
