@@ -143,9 +143,10 @@ const UnmetNeeds = () => {
         total_items: selectedRows.size
       };
 
-      // Add individual variables for each selected Unmet Need
+      // Add individual variables for each selected Unmet Need including ID
       selectedItems.forEach((item, index) => {
         const itemId = item?.id_UN_table?.toString();
+        webhookData[`id_unmet_need_${index + 1}`] = item?.id_UN_table || '';
         webhookData[`laboratorio_${index + 1}`] = item?.lab || '';
         webhookData[`area_terapeutica_${index + 1}`] = item?.area_terapeutica || '';
         webhookData[`farmaco_${index + 1}`] = item?.farmaco || '';
