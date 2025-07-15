@@ -46,7 +46,7 @@ const Index = () => {
                 className="bg-green-600 hover:bg-green-700 text-white whitespace-nowrap"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Añadir Medicamento
+                Añadir Indicación
               </Button>
             </div>
           </div>
