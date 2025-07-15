@@ -17,6 +17,7 @@ const Index = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilters, setActiveFilters] = useState({});
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   
   const { data: medications, loading, error, refresh } = useSupabaseData();
 
@@ -28,12 +29,16 @@ const Index = () => {
     refresh(); // Refresh data after successful addition
   };
 
+  const handleToggleFilters = () => {
+    setShowFilters(!showFilters);
+  };
+
   return (
     <ThemeProvider>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
         <Navigation />
         
-        <Header />
+        <Header onToggleFilters={handleToggleFilters} />
         
         <div className="container mx-auto px-4 py-6 space-y-6">
           <div className="flex gap-4 items-center">
@@ -53,10 +58,12 @@ const Index = () => {
           
           <StatsCards medications={medications} loading={loading} />
           
-          <SimpleFiltersPanel 
-            onFiltersChange={setActiveFilters}
-            medications={medications}
-          />
+          {showFilters && (
+            <SimpleFiltersPanel 
+              onFiltersChange={setActiveFilters}
+              medications={medications}
+            />
+          )}
           
           <MedicationsTable 
             medications={medications}

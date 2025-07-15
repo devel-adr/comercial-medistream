@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -73,7 +72,7 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
       const { error } = await supabase
         .from('UnmetNeeds_table')
         .delete()
-        .eq('id_UN_table', id);
+        .eq('id_UN_table', parseInt(id));
 
       if (error) {
         throw error;
