@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -36,10 +35,48 @@ const UnmetNeeds = () => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isGeneratingTactics, setIsGeneratingTactics] = useState(false);
+  const [localFavorites, setLocalFavorites] = useState<Set<string>>(new Set());
 
   const { data: unmetNeeds, loading, error, refresh, toggleFavorite, deleteUnmetNeed } = useUnmetNeedsData();
 
-  // Get unique values for filters
+  // Load favorites from localStorage on component mount
+  useEffect(() => {
+    const savedFavorites = localStorage.getItem('unmetNeedsFavorites');
+    if (savedFavorites) {
+      try {
+        const favoritesArray = JSON.parse(savedFavorites);
+        setLocalFavorites(new Set(favoritesArray));
+      } catch (error) {
+        console.error('Error loading favorites from localStorage:', error);
+      }
+    }
+  }, []);
+
+  // Save favorites to localStorage whenever localFavorites changes
+  useEffect(() => {
+    localStorage.setItem('unmetNeedsFavorites', JSON.stringify(Array.from(localFavorites)));
+  }, [localFavorites]);
+
+  const handleToggleLocalFavorite = (id: string) => {
+    setLocalFavorites(prev => {
+      const newFavorites = new Set(prev);
+      if (newFavorites.has(id)) {
+        newFavorites.delete(id);
+        toast({
+          title: "Favorito removido",
+          description: "La Unmet Need ha sido removida de favoritos.",
+        });
+      } else {
+        newFavorites.add(id);
+        toast({
+          title: "Favorito añadido",
+          description: "La Unmet Need ha sido añadida a favoritos.",
+        });
+      }
+      return newFavorites;
+    });
+  };
+
   const uniqueOptions = useMemo(() => ({
     labs: [...new Set(unmetNeeds.map(item => item.lab).filter(Boolean))].sort(),
     areasTerapeuticas: [...new Set(unmetNeeds.map(item => item.area_terapeutica).filter(Boolean))].sort(),
@@ -80,15 +117,16 @@ const UnmetNeeds = () => {
       if (filters.impacto && item.impacto !== filters.impacto) return false;
       if (filters.horizonte_temporal && item.horizonte_temporal !== filters.horizonte_temporal) return false;
       
-      // Favoritos filter
-      if (filters.favoritos === 'si' && !item.favorito) return false;
-      if (filters.favoritos === 'no' && item.favorito) return false;
+      // Favoritos filter using local favorites
+      const itemId = item.id_UN_table?.toString();
+      if (filters.favoritos === 'si' && !localFavorites.has(itemId)) return false;
+      if (filters.favoritos === 'no' && localFavorites.has(itemId)) return false;
       
       return true;
     });
 
     return filtered;
-  }, [unmetNeeds, filters, searchTerm]);
+  }, [unmetNeeds, filters, searchTerm, localFavorites]);
 
   const handleSelectRow = (id: string, checked: boolean) => {
     const newSelected = new Set(selectedRows);
@@ -471,6 +509,8 @@ const UnmetNeeds = () => {
                 formatOptions={formatOptions}
                 onToggleFavorite={handleToggleFavorite}
                 onDelete={handleDelete}
+                localFavorites={localFavorites}
+                onToggleLocalFavorite={handleToggleLocalFavorite}
               />
             </CardContent>
           </Card>

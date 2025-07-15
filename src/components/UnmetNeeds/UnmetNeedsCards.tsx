@@ -15,6 +15,8 @@ interface UnmetNeedsCardsProps {
   formatOptions: string[];
   onToggleFavorite?: (unmetNeed: any) => void;
   onDelete?: (unmetNeed: any) => void;
+  localFavorites?: Set<string>;
+  onToggleLocalFavorite?: (id: string) => void;
 }
 
 export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
@@ -25,7 +27,9 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
   onFormatChange,
   formatOptions,
   onToggleFavorite,
-  onDelete
+  onDelete,
+  localFavorites = new Set(),
+  onToggleLocalFavorite
 }) => {
   const getImpactColor = (impacto: string) => {
     if (!impacto) return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
@@ -47,8 +51,9 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
 
   const handleToggleFavorite = (item: any) => {
     console.log('Star button clicked for item:', item);
-    if (onToggleFavorite) {
-      onToggleFavorite(item);
+    const itemId = item.id_UN_table?.toString();
+    if (onToggleLocalFavorite && itemId) {
+      onToggleLocalFavorite(itemId);
     }
   };
 
@@ -63,7 +68,9 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
       {data.map((item, index) => {
         const isSelected = selectedIds.has(item.id_UN_table?.toString());
-        const isFavorite = item.favorito === true || item.favorito === 'true';
+        const itemId = item.id_UN_table?.toString();
+        const isFavorite = localFavorites.has(itemId);
+        
         return (
           <Card 
             key={item.id_UN_table || index}
@@ -75,7 +82,7 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
             
             <CardContent className="p-5 space-y-4">
               {/* Header */}
-              <div className="flex justify-between items-start">
+              <div className="flex justify-between items-start relative z-10">
                 <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                   #{item.id_UN_table || index + 1}
                 </div>
@@ -91,7 +98,7 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
                       e.stopPropagation();
                       handleToggleFavorite(item);
                     }}
-                    className="h-8 w-8 p-0 hover:bg-yellow-100 dark:hover:bg-yellow-900/20"
+                    className="h-8 w-8 p-0 hover:bg-yellow-100 dark:hover:bg-yellow-900/20 relative z-20"
                     type="button"
                   >
                     <Star 
@@ -110,7 +117,7 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
                       e.stopPropagation();
                       handleDelete(item);
                     }}
-                    className="h-8 w-8 p-0 hover:bg-red-100 dark:hover:bg-red-900/20"
+                    className="h-8 w-8 p-0 hover:bg-red-100 dark:hover:bg-red-900/20 relative z-20"
                     type="button"
                   >
                     <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
