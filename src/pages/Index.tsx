@@ -3,9 +3,9 @@ import { useState, useEffect } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Header } from '@/components/Dashboard/Header';
 import { AnalysisBar } from '@/components/Dashboard/AnalysisBar';
-import { SimplifiedStatsCards } from '@/components/Dashboard/SimplifiedStatsCards';
-import { EnhancedMedicationsTable } from '@/components/Dashboard/EnhancedMedicationsTable';
-import { SimpleFiltersPanel } from '@/components/Dashboard/SimpleFiltersPanel';
+import { StatsCards } from '@/components/Dashboard/StatsCards';
+import { MedicationsTable } from '@/components/Dashboard/MedicationsTable';
+import { FiltersPanel } from '@/components/Dashboard/FiltersPanel';
 import { AddMedicationModal } from '@/components/Dashboard/AddMedicationModal';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
 import { ThemeProvider } from '@/components/ThemeProvider';
@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 
 const Index = () => {
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilters, setActiveFilters] = useState({});
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -25,7 +26,7 @@ const Index = () => {
   };
 
   const handleAddSuccess = () => {
-    refresh();
+    refresh(); // Refresh data after successful addition
   };
 
   return (
@@ -33,16 +34,9 @@ const Index = () => {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
         <Navigation />
         
+        <Header onToggleFilters={() => setIsFiltersOpen(!isFiltersOpen)} />
+        
         <div className="container mx-auto px-4 py-6 space-y-6">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Drug Dealer Dashboard
-            </h1>
-            <p className="text-gray-600 dark:text-gray-300">
-              Gestión y análisis de medicamentos
-            </p>
-          </div>
-
           <div className="flex gap-4 items-center">
             <div className="flex-1">
               <AnalysisBar onSearch={handleSearch} />
@@ -58,21 +52,26 @@ const Index = () => {
             </div>
           </div>
           
-          <SimplifiedStatsCards medications={medications} loading={loading} />
+          <StatsCards medications={medications} loading={loading} />
           
-          <SimpleFiltersPanel 
-            onFiltersChange={setActiveFilters}
-            medications={medications}
-          />
-          
-          <EnhancedMedicationsTable 
-            medications={medications}
-            loading={loading}
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            activeFilters={activeFilters}
-            onRefresh={refresh}
-          />
+          <div className="flex gap-6">
+            <FiltersPanel 
+              isOpen={isFiltersOpen}
+              onClose={() => setIsFiltersOpen(false)}
+              onFiltersChange={setActiveFilters}
+              medications={medications}
+            />
+            
+            <div className="flex-1">
+              <MedicationsTable 
+                medications={medications}
+                loading={loading}
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                activeFilters={activeFilters}
+              />
+            </div>
+          </div>
         </div>
         
         <AddMedicationModal
