@@ -14,17 +14,13 @@ export const usePharmaTacticsData = (refreshInterval = 30000) => {
   const fetchData = async () => {
     try {
       console.log('Fetching PharmaTactics data from Supabase...');
-      
-      // Using type assertion to work around TypeScript limitations
-      // Note: This assumes the PharmaTactics_table exists in your Supabase database
-      const { data: tactics, error } = await (supabase as any)
+      const { data: tactics, error } = await supabase
         .from('PharmaTactics_table')
         .select('*')
         .order('id', { ascending: false });
 
       if (error) {
-        console.error('Supabase error:', error);
-        throw new Error(`Failed to fetch data: ${error.message}`);
+        throw error;
       }
 
       const newCount = tactics?.length || 0;
@@ -38,7 +34,7 @@ export const usePharmaTacticsData = (refreshInterval = 30000) => {
         const now = Date.now();
         const timeSinceLastEvent = now - lastEventTimeRef.current;
         
-        // Only dispatch event if at least 5 seconds have passed since the last one
+        // Solo disparar evento si han pasado al menos 5 segundos desde el último
         if (timeSinceLastEvent >= 5000) {
           const newRecords = newCount - previousCountRef.current;
           console.log('New PharmaTactics data detected:', newRecords, 'new records');
@@ -69,7 +65,7 @@ export const usePharmaTacticsData = (refreshInterval = 30000) => {
       setError(null);
     } catch (err) {
       console.error('Error fetching PharmaTactics data:', err);
-      setError(err instanceof Error ? err.message : 'Unknown error occurred');
+      setError(err.message);
     } finally {
       setLoading(false);
     }
