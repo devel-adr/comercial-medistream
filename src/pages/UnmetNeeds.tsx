@@ -7,7 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
-import { Filter, BarChart3, Search, Plus } from 'lucide-react';
+import { Filter, BarChart3, Search, Plus, Star } from 'lucide-react';
 import { Navigation } from '@/components/Navigation';
 import { useUnmetNeedsData } from '@/hooks/useUnmetNeedsData';
 import { ThemeProvider } from '@/components/ThemeProvider';
@@ -26,7 +26,8 @@ const UnmetNeeds = () => {
     farmaco: '',
     molecula: '',
     impacto: '',
-    horizonte_temporal: ''
+    horizonte_temporal: '',
+    favoritos: ''
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
@@ -36,7 +37,7 @@ const UnmetNeeds = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isGeneratingTactics, setIsGeneratingTactics] = useState(false);
 
-  const { data: unmetNeeds, loading, error, refresh } = useUnmetNeedsData();
+  const { data: unmetNeeds, loading, error, refresh, toggleFavorite, deleteUnmetNeed } = useUnmetNeedsData();
 
   // Get unique values for filters
   const uniqueOptions = useMemo(() => ({
@@ -79,6 +80,10 @@ const UnmetNeeds = () => {
       if (filters.impacto && item.impacto !== filters.impacto) return false;
       if (filters.horizonte_temporal && item.horizonte_temporal !== filters.horizonte_temporal) return false;
       
+      // Favoritos filter
+      if (filters.favoritos === 'si' && !item.favorito) return false;
+      if (filters.favoritos === 'no' && item.favorito) return false;
+      
       return true;
     });
 
@@ -105,6 +110,40 @@ const UnmetNeeds = () => {
   const handleViewDetails = (unmetNeed: any) => {
     setSelectedUnmetNeed(unmetNeed);
     setIsDetailModalOpen(true);
+  };
+
+  const handleToggleFavorite = async (unmetNeed: any) => {
+    try {
+      await toggleFavorite(unmetNeed);
+      toast({
+        title: "Éxito",
+        description: `Unmet Need ${unmetNeed.favorito ? 'removida de' : 'añadida a'} favoritos.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Error al actualizar el estado de favorito.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDelete = async (unmetNeed: any) => {
+    if (window.confirm('¿Estás seguro de que deseas eliminar esta Unmet Need? Esta acción no se puede deshacer.')) {
+      try {
+        await deleteUnmetNeed(unmetNeed);
+        toast({
+          title: "Éxito",
+          description: "Unmet Need eliminada correctamente.",
+        });
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Error al eliminar la Unmet Need.",
+          variant: "destructive",
+        });
+      }
+    }
   };
 
   const handleGenerateTactics = async () => {
@@ -281,7 +320,7 @@ const UnmetNeeds = () => {
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
                   <label className="text-sm font-medium mb-2 block">Laboratorio</label>
                   <Select
@@ -332,6 +371,28 @@ const UnmetNeeds = () => {
                       {uniqueOptions.farmacos.map((farmaco) => (
                         <SelectItem key={farmaco} value={farmaco}>{farmaco}</SelectItem>
                       ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Favoritos</label>
+                  <Select
+                    value={filters.favoritos}
+                    onValueChange={(value) => setFilters(prev => ({ ...prev, favoritos: value === 'all' ? '' : value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="si">
+                        <div className="flex items-center gap-2">
+                          <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                          Solo Favoritos
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="no">Sin Favoritos</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -408,7 +469,8 @@ const UnmetNeeds = () => {
                 formatSelections={formatSelections}
                 onFormatChange={handleFormatChange}
                 formatOptions={formatOptions}
-                onViewDetails={handleViewDetails}
+                onToggleFavorite={handleToggleFavorite}
+                onDelete={handleDelete}
               />
             </CardContent>
           </Card>

@@ -71,6 +71,61 @@ export const useUnmetNeedsData = (refreshInterval = 30000) => {
     }
   };
 
+  const toggleFavorite = async (unmetNeed: any) => {
+    try {
+      const newFavoritoValue = !unmetNeed.favorito;
+      console.log('Toggling favorite for:', unmetNeed.id_UN_table, 'to:', newFavoritoValue);
+      
+      const { error } = await supabase
+        .from('UnmetNeeds_table')
+        .update({ favorito: newFavoritoValue })
+        .eq('id_UN_table', unmetNeed.id_UN_table);
+
+      if (error) {
+        throw error;
+      }
+
+      // Update local state
+      setData(prevData => 
+        prevData.map(item => 
+          item.id_UN_table === unmetNeed.id_UN_table 
+            ? { ...item, favorito: newFavoritoValue }
+            : item
+        )
+      );
+
+      console.log('Favorite status updated successfully');
+    } catch (err) {
+      console.error('Error updating favorite status:', err);
+      throw err;
+    }
+  };
+
+  const deleteUnmetNeed = async (unmetNeed: any) => {
+    try {
+      console.log('Deleting Unmet Need:', unmetNeed.id_UN_table);
+      
+      const { error } = await supabase
+        .from('UnmetNeeds_table')
+        .delete()
+        .eq('id_UN_table', unmetNeed.id_UN_table);
+
+      if (error) {
+        throw error;
+      }
+
+      // Update local state
+      setData(prevData => 
+        prevData.filter(item => item.id_UN_table !== unmetNeed.id_UN_table)
+      );
+
+      console.log('Unmet Need deleted successfully');
+    } catch (err) {
+      console.error('Error deleting Unmet Need:', err);
+      throw err;
+    }
+  };
+
   useEffect(() => {
     fetchData();
     
@@ -84,6 +139,8 @@ export const useUnmetNeedsData = (refreshInterval = 30000) => {
     loading,
     error,
     lastUpdated,
-    refresh: fetchData
+    refresh: fetchData,
+    toggleFavorite,
+    deleteUnmetNeed
   };
 };
