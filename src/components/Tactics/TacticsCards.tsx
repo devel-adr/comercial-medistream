@@ -106,7 +106,7 @@ export const TacticsCards: React.FC<TacticsCardsProps> = ({
                 <div className="flex-1 pr-2">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
-                      ID UNMET NEED: {tactic.id_unmetNeed}
+                      ID Unmet Need: {tactic.id_unmetNeed}
                     </span>
                     <Badge className={getFormatColor(tactic.formato)}>
                       {tactic.formato}
