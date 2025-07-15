@@ -59,7 +59,7 @@ export const AddMedicationModal: React.FC<AddMedicationModalProps> = ({
 
       toast({
         title: "Éxito",
-        description: "Medicamento añadido correctamente",
+        description: "Indicación añadida correctamente",
       });
 
       // Reset form
@@ -84,7 +84,7 @@ export const AddMedicationModal: React.FC<AddMedicationModalProps> = ({
       console.error('Error adding medication:', error);
       toast({
         title: "Error",
-        description: error.message || "Error al añadir el medicamento",
+        description: error.message || "Error al añadir la indicación",
         variant: "destructive",
       });
     } finally {
@@ -98,7 +98,7 @@ export const AddMedicationModal: React.FC<AddMedicationModalProps> = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Plus className="w-5 h-5" />
-            Añadir Nuevo Medicamento
+            Añadir Nueva Indicación
           </DialogTitle>
         </DialogHeader>
 

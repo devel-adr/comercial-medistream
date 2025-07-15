@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, FileText, CalendarDays, BarChart, Building, CheckCircle, Clock, AlertTriangle, Atom } from 'lucide-react';
+import { FileText, Building, CalendarDays, TrendingUp } from 'lucide-react';
 
 interface StatsCardsProps {
   medications: any[];
@@ -11,18 +11,6 @@ interface StatsCardsProps {
 
 export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loading }) => {
   const totalMedications = medications.length;
-  
-  const approvedMeds = medications.filter(med => 
-    med.estado_en_espana && med.estado_en_espana.toLowerCase().includes('aprobado')
-  ).length;
-  
-  const inTrials = medications.filter(med => 
-    med.estado_en_espana && med.estado_en_espana.toLowerCase().includes('ensayo')
-  ).length;
-  
-  const pendingMeds = medications.filter(med => 
-    med.estado_en_espana && med.estado_en_espana.toLowerCase().includes('pendiente')
-  ).length;
   
   const uniqueLabs = new Set(medications.map(med => med.nombre_lab).filter(Boolean)).size;
   
@@ -38,23 +26,14 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loadin
   }).length;
 
   const uniqueTherapeuticAreas = new Set(medications.map(med => med.area_terapeutica).filter(Boolean)).size;
-  
-  const medicationsWithClinicalTrials = medications.filter(med => 
-    med.ensayos_clinicos_relevantes && med.ensayos_clinicos_relevantes.trim() !== ''
-  ).length;
-
-  // Medicamentos con información de moléculas
-  const medicationsWithMolecules = medications.filter(med => 
-    med.molecula && med.molecula.trim() !== ''
-  ).length;
 
   const stats = [
     {
-      title: 'Total Medicamentos',
+      title: 'Total Indicaciones',
       value: totalMedications,
       icon: FileText,
       color: 'bg-blue-500',
-      description: 'Medicamentos registrados'
+      description: 'Indicaciones registrados'
     },
     {
       title: 'Laboratorios',
@@ -62,27 +41,6 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loadin
       icon: Building,
       color: 'bg-purple-500',
       description: 'Laboratorios únicos'
-    },
-    {
-      title: 'Aprobados',
-      value: approvedMeds,
-      icon: CheckCircle,
-      color: 'bg-green-500',
-      description: 'Medicamentos aprobados'
-    },
-    {
-      title: 'En Ensayos',
-      value: inTrials,
-      icon: BarChart,
-      color: 'bg-orange-500',
-      description: 'En fase de ensayos'
-    },
-    {
-      title: 'Pendientes',
-      value: pendingMeds,
-      icon: Clock,
-      color: 'bg-yellow-500',
-      description: 'Pendientes de aprobación'
     },
     {
       title: `Aprobados ${currentYear}`,
@@ -97,20 +55,13 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loadin
       icon: TrendingUp,
       color: 'bg-teal-500',
       description: 'Áreas diferentes'
-    },
-    {
-      title: 'Con Moléculas',
-      value: medicationsWithMolecules,
-      icon: Atom,
-      color: 'bg-pink-500',
-      description: 'Con información de moléculas'
     }
   ];
 
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+        {[1, 2, 3, 4].map((i) => (
           <Card key={i} className="animate-pulse">
             <CardContent className="p-4">
               <div className="h-16 bg-gray-200 rounded"></div>
