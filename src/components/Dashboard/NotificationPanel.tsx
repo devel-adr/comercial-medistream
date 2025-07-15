@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Bell, Database, Users, X } from 'lucide-react';
+import { Bell, Database, Users, X, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,7 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface NotificationItem {
   id: string;
-  type: 'medications' | 'unmetNeeds';
+  type: 'medications' | 'unmetNeeds' | 'pharmaTactics';
   title: string;
   message: string;
   timestamp: Date;
@@ -32,15 +32,42 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({
   if (!isOpen) return null;
 
   const getIcon = (type: string) => {
-    return type === 'medications' ? <Database className="w-4 h-4" /> : <Users className="w-4 h-4" />;
+    switch (type) {
+      case 'medications':
+        return <Database className="w-4 h-4" />;
+      case 'unmetNeeds':
+        return <Users className="w-4 h-4" />;
+      case 'pharmaTactics':
+        return <Target className="w-4 h-4" />;
+      default:
+        return <Database className="w-4 h-4" />;
+    }
   };
 
   const getTypeLabel = (type: string) => {
-    return type === 'medications' ? 'DrugDealer' : 'Unmet Needs';
+    switch (type) {
+      case 'medications':
+        return 'DrugDealer';
+      case 'unmetNeeds':
+        return 'Unmet Needs';
+      case 'pharmaTactics':
+        return 'Tactics';
+      default:
+        return 'Datos';
+    }
   };
 
   const getTypeColor = (type: string) => {
-    return type === 'medications' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800';
+    switch (type) {
+      case 'medications':
+        return 'bg-blue-100 text-blue-800';
+      case 'unmetNeeds':
+        return 'bg-green-100 text-green-800';
+      case 'pharmaTactics':
+        return 'bg-purple-100 text-purple-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
   };
 
   const formatTime = (date: Date) => {

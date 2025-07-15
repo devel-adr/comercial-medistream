@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useRef, useEffect } from 'r
 import { playNotificationSound } from '@/utils/notificationSounds';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
 import { useUnmetNeedsData } from '@/hooks/useUnmetNeedsData';
+import { usePharmaTacticsData } from '@/hooks/usePharmaTacticsData';
 
 interface NotificationSettings {
   volume: number;
@@ -12,7 +13,7 @@ interface NotificationSettings {
 
 interface NotificationItem {
   id: string;
-  type: 'medications' | 'unmetNeeds';
+  type: 'medications' | 'unmetNeeds' | 'pharmaTactics';
   title: string;
   message: string;
   timestamp: Date;
@@ -42,9 +43,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   // Initialize data hooks to track changes globally
   const { data: medicationsData } = useSupabaseData();
   const { data: unmetNeedsData } = useUnmetNeedsData();
+  const { data: pharmaTacticsData } = usePharmaTacticsData();
 
   const medicationsCountRef = useRef(0);
   const unmetNeedsCountRef = useRef(0);
+  const pharmaTacticsCountRef = useRef(0);
   const isInitializedRef = useRef(false);
   
   // Sistema de deduplicación mejorado
@@ -52,7 +55,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const lastNotificationTimeRef = useRef<{ [key: string]: number }>({});
   const isProcessingRef = useRef(false);
 
-  // Listen for data updates from both hooks
+  // Listen for data updates from all hooks
   useEffect(() => {
     const handleDataUpdate = (event: any) => {
       console.log('Data update detected in context:', event.detail);
@@ -94,11 +97,31 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
           processedNotificationsRef.current.delete(notificationId);
         }, 30000);
         
+        let title = 'Nuevos datos disponibles';
+        let message = '';
+        
+        switch (type) {
+          case 'medications':
+            title = 'Nuevos datos de DrugDealer';
+            message = `Se han añadido ${newRecords} nuevos registros de medicamentos`;
+            break;
+          case 'unmetNeeds':
+            title = 'Nuevos datos de Unmet Needs';
+            message = `Se han añadido ${newRecords} nuevos registros de unmet needs`;
+            break;
+          case 'pharmaTactics':
+            title = 'Nuevas Tactics disponibles';
+            message = `Se han añadido ${newRecords} nuevas tactics`;
+            break;
+          default:
+            message = `Se han añadido ${newRecords} nuevos registros`;
+        }
+        
         const newNotification: NotificationItem = {
           id: notificationId,
           type: type,
-          title: type === 'medications' ? 'Nuevos datos de DrugDealer' : 'Nuevos datos de Unmet Needs',
-          message: `Se han añadido ${newRecords} nuevos registros`,
+          title,
+          message,
           timestamp: new Date(),
           count,
           newRecords
@@ -120,9 +143,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
           
           return [newNotification, ...prev].slice(0, 20);
         });
-        
-        let title = 'Nuevos datos disponibles';
-        let message = `Se han actualizado los datos de ${type === 'medications' ? 'DrugDealer' : 'Unmet Needs'}`;
         
         showNotification(title, message);
         
@@ -155,10 +175,18 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (unmetNeedsData.length > 0) {
       if (!isInitializedRef.current) {
         unmetNeedsCountRef.current = unmetNeedsData.length;
-        isInitializedRef.current = true;
       }
     }
   }, [unmetNeedsData]);
+
+  useEffect(() => {
+    if (pharmaTacticsData.length > 0) {
+      if (!isInitializedRef.current) {
+        pharmaTacticsCountRef.current = pharmaTacticsData.length;
+        isInitializedRef.current = true;
+      }
+    }
+  }, [pharmaTacticsData]);
 
   const updateSettings = (newSettings: Partial<NotificationSettings>) => {
     const updated = { ...settings, ...newSettings };
