@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -152,10 +151,13 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
     setDeletingIds(prev => new Set([...prev, medicationId]));
 
     try {
+      // Convert string ID back to number for database query
+      const numericId = parseInt(medicationId, 10);
+      
       const { error } = await supabase
         .from('DrugDealer_table')
         .delete()
-        .eq('ID_NUM', medicationId);
+        .eq('ID_NUM', numericId);
 
       if (error) {
         throw error;
