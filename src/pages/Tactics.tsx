@@ -17,10 +17,18 @@ const Tactics = () => {
   const [selectedArea, setSelectedArea] = useState('');
   const [selectedFormat, setSelectedFormat] = useState('');
 
-  // Get unique values for filters
-  const uniqueLabs = [...new Set(data.map(item => item.laboratorio))].filter(Boolean).sort();
-  const uniqueAreas = [...new Set(data.map(item => item.area_terapeutica))].filter(Boolean).sort();
-  const uniqueFormats = [...new Set(data.map(item => item.formato))].filter(Boolean).sort();
+  // Get unique values for filters and filter out empty/null values
+  const uniqueLabs = [...new Set(data.map(item => item.laboratorio))]
+    .filter(lab => lab && lab.trim() !== '')
+    .sort();
+  
+  const uniqueAreas = [...new Set(data.map(item => item.area_terapeutica))]
+    .filter(area => area && area.trim() !== '')
+    .sort();
+  
+  const uniqueFormats = [...new Set(data.map(item => item.formato))]
+    .filter(format => format && format.trim() !== '')
+    .sort();
 
   const clearFilters = () => {
     setSearchTerm('');
@@ -98,7 +106,7 @@ const Tactics = () => {
                     <SelectValue placeholder="Seleccionar laboratorio" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos los laboratorios</SelectItem>
+                    <SelectItem value="all">Todos los laboratorios</SelectItem>
                     {uniqueLabs.map((lab) => (
                       <SelectItem key={lab} value={lab}>
                         {lab}
@@ -112,7 +120,7 @@ const Tactics = () => {
                     <SelectValue placeholder="Seleccionar área" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todas las áreas</SelectItem>
+                    <SelectItem value="all">Todas las áreas</SelectItem>
                     {uniqueAreas.map((area) => (
                       <SelectItem key={area} value={area}>
                         {area}
@@ -126,7 +134,7 @@ const Tactics = () => {
                     <SelectValue placeholder="Seleccionar formato" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos los formatos</SelectItem>
+                    <SelectItem value="all">Todos los formatos</SelectItem>
                     {uniqueFormats.map((format) => (
                       <SelectItem key={format} value={format}>
                         {format}
@@ -143,9 +151,9 @@ const Tactics = () => {
             data={data}
             loading={loading}
             searchTerm={searchTerm}
-            selectedLab={selectedLab}
-            selectedArea={selectedArea}
-            selectedFormat={selectedFormat}
+            selectedLab={selectedLab === 'all' ? '' : selectedLab}
+            selectedArea={selectedArea === 'all' ? '' : selectedArea}
+            selectedFormat={selectedFormat === 'all' ? '' : selectedFormat}
           />
         </div>
       </div>
