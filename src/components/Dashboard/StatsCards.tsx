@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Building, CalendarDays, BarChart, Atom, Target, TrendingUp, Activity } from 'lucide-react';
+import { FileText, Building, CalendarDays, TrendingUp } from 'lucide-react';
 
 interface StatsCardsProps {
   medications: any[];
@@ -26,22 +26,6 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loadin
   }).length;
 
   const uniqueTherapeuticAreas = new Set(medications.map(med => med.area_terapeutica).filter(Boolean)).size;
-  
-  const medicationsWithMolecules = medications.filter(med => 
-    med.nombre_de_la_molecula && med.nombre_de_la_molecula.trim() !== ''
-  ).length;
-
-  const medicationsWithMechanism = medications.filter(med => 
-    med.mecanismo_de_accion && med.mecanismo_de_accion.trim() !== ''
-  ).length;
-
-  const medicationsWithClinicalTrials = medications.filter(med => 
-    med.ensayos_clinicos_relevantes && med.ensayos_clinicos_relevantes.trim() !== ''
-  ).length;
-
-  const medicationsWithGeneticTarget = medications.filter(med => 
-    med.alteracion_genetica_dirigida && med.alteracion_genetica_dirigida.trim() !== ''
-  ).length;
 
   const stats = [
     {
@@ -71,41 +55,13 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loadin
       icon: TrendingUp,
       color: 'bg-teal-500',
       description: 'Áreas diferentes'
-    },
-    {
-      title: 'Con Moléculas',
-      value: medicationsWithMolecules,
-      icon: Atom,
-      color: 'bg-pink-500',
-      description: 'Con información de moléculas'
-    },
-    {
-      title: 'Con Mecanismo',
-      value: medicationsWithMechanism,
-      icon: Activity,
-      color: 'bg-orange-500',
-      description: 'Con mecanismo de acción'
-    },
-    {
-      title: 'Con Ensayos',
-      value: medicationsWithClinicalTrials,
-      icon: BarChart,
-      color: 'bg-green-500',
-      description: 'Con ensayos clínicos'
-    },
-    {
-      title: 'Con Target Genético',
-      value: medicationsWithGeneticTarget,
-      icon: Target,
-      color: 'bg-red-500',
-      description: 'Con alteración genética'
     }
   ];
 
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+        {[1, 2, 3, 4].map((i) => (
           <Card key={i} className="animate-pulse">
             <CardContent className="p-4">
               <div className="h-16 bg-gray-200 rounded"></div>

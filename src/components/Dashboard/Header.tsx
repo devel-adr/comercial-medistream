@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Filter, Bell, Settings, Search } from 'lucide-react';
+import { Bell, Settings, Search } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { useNotification } from '@/contexts/NotificationContext';
 import { SettingsPanel } from './SettingsPanel';
@@ -55,16 +55,6 @@ export const Header: React.FC<HeaderProps> = ({ onToggleFilters }) => {
             </div>
 
             <div className="flex items-center space-x-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onToggleFilters}
-                className="flex items-center space-x-2"
-              >
-                <Filter className="w-4 h-4" />
-                <span>Filtros</span>
-              </Button>
-
               <div className="relative">
                 <Button 
                   variant="ghost" 

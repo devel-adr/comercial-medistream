@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Filter, X } from 'lucide-react';
+import { Filter, X, Star } from 'lucide-react';
 
 interface SimpleFiltersPanelProps {
   onFiltersChange: (filters: any) => void;
@@ -20,7 +20,8 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
     areaTerapeutica: '',
     farmaco: '',
     molecula: '',
-    estado: ''
+    estado: '',
+    favoritos: ''
   });
 
   // Opciones únicas para cada filtro
@@ -44,7 +45,8 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
       areaTerapeutica: '',
       farmaco: '',
       molecula: '',
-      estado: ''
+      estado: '',
+      favoritos: ''
     };
     setFilters(emptyFilters);
     onFiltersChange(emptyFilters);
@@ -63,7 +65,7 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
           )}
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 xl:grid-cols-7 gap-4">
           <div>
             <label className="text-sm font-medium mb-1 block">Laboratorio</label>
             <Select
@@ -145,6 +147,27 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
                 {uniqueOptions.estados.map((estado) => (
                   <SelectItem key={estado} value={estado}>{estado}</SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium mb-1 block">Favoritos</label>
+            <Select
+              value={filters.favoritos}
+              onValueChange={(value) => handleFilterChange('favoritos', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Todos" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="si">
+                  <div className="flex items-center gap-2">
+                    <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                    Solo Favoritos
+                  </div>
+                </SelectItem>
+                <SelectItem value="no">Sin Favoritos</SelectItem>
               </SelectContent>
             </Select>
           </div>

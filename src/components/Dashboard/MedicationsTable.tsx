@@ -48,14 +48,6 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
     return 'bg-gray-100 text-gray-800';
   };
 
-  const getSubAreaSummary = (subArea: string) => {
-    if (!subArea) return 'N/A';
-    // Crear un resumen breve pero completo
-    const words = subArea.split(' ');
-    if (words.length <= 4) return subArea;
-    return words.slice(0, 4).join(' ') + '...';
-  };
-
   const filteredAndSortedData = useMemo(() => {
     let filtered = medications.filter(med => {
       // Búsqueda global
@@ -101,6 +93,18 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
         return false;
       }
 
+      // Filtro por favoritos
+      if (activeFilters.favoritos) {
+        const medicationId = String(med.ID_NUM);
+        const isFavorite = favorites.has(medicationId);
+        if (activeFilters.favoritos === 'si' && !isFavorite) {
+          return false;
+        }
+        if (activeFilters.favoritos === 'no' && isFavorite) {
+          return false;
+        }
+      }
+
       return true;
     });
 
@@ -121,7 +125,7 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
     }
 
     return filtered;
-  }, [medications, searchTerm, activeFilters, sortConfig]);
+  }, [medications, searchTerm, activeFilters, sortConfig, favorites]);
 
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -325,7 +329,7 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
           <div className="w-full">
             <ScrollArea className="w-full">
               <div className="w-full overflow-x-auto">
-                <div className="min-w-[1400px]">
+                <div className="min-w-[1600px]">
                   <Table className="w-full">
                     <TableHeader className="sticky top-0 z-10 bg-gray-50 dark:bg-gray-800">
                       <TableRow className="border-b">
@@ -357,6 +361,15 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                           </div>
                         </TableHead>
                         <TableHead 
+                          className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[200px]"
+                          onClick={() => handleSort('sub_area_de_tratamiento')}
+                        >
+                          <div className="flex items-center space-x-2">
+                            <span className="font-semibold">Subárea</span>
+                            <SortIcon column="sub_area_de_tratamiento" />
+                          </div>
+                        </TableHead>
+                        <TableHead 
                           className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[150px]"
                           onClick={() => handleSort('nombre_del_farmaco')}
                         >
@@ -372,15 +385,6 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                           <div className="flex items-center space-x-2">
                             <span className="font-semibold">Molécula</span>
                             <SortIcon column="nombre_de_la_molecula" />
-                          </div>
-                        </TableHead>
-                        <TableHead 
-                          className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[150px]"
-                          onClick={() => handleSort('sub_area_de_tratamiento')}
-                        >
-                          <div className="flex items-center space-x-2">
-                            <span className="font-semibold">Subárea</span>
-                            <SortIcon column="sub_area_de_tratamiento" />
                           </div>
                         </TableHead>
                         <TableHead 
@@ -461,6 +465,11 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                               </div>
                             </TableCell>
                             <TableCell>
+                              <div className="w-[180px] text-sm leading-tight py-1" title={medication.sub_area_de_tratamiento}>
+                                {medication.sub_area_de_tratamiento || 'N/A'}
+                              </div>
+                            </TableCell>
+                            <TableCell>
                               <div className="w-[130px] truncate" title={medication.nombre_del_farmaco}>
                                 {medication.nombre_del_farmaco || 'N/A'}
                               </div>
@@ -468,11 +477,6 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                             <TableCell>
                               <div className="w-[110px] truncate" title={medication.nombre_de_la_molecula}>
                                 {medication.nombre_de_la_molecula || 'N/A'}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="w-[130px]" title={medication.sub_area_de_tratamiento}>
-                                {getSubAreaSummary(medication.sub_area_de_tratamiento)}
                               </div>
                             </TableCell>
                             <TableCell>
