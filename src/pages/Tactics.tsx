@@ -3,12 +3,14 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 import { Navigation } from '@/components/Navigation';
 import { ThemeProvider } from '@/components/ThemeProvider';
-import { Search, Filter, BarChart3 } from 'lucide-react';
+import { Search, Filter, BarChart3, Star, StarOff } from 'lucide-react';
 import { usePharmaTacticsData } from '@/hooks/usePharmaTacticsData';
 import { TacticsKPIs } from '@/components/Tactics/TacticsKPIs';
 import { TacticsCards } from '@/components/Tactics/TacticsCards';
+import { toast } from "@/hooks/use-toast";
 
 const Tactics = () => {
   const { data, loading, error } = usePharmaTacticsData();
@@ -16,8 +18,8 @@ const Tactics = () => {
   const [selectedLab, setSelectedLab] = useState('');
   const [selectedArea, setSelectedArea] = useState('');
   const [selectedFormat, setSelectedFormat] = useState('');
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
-  // Get unique values for filters and filter out empty/null values
   const uniqueLabs = [...new Set(data.map(item => item.laboratorio))]
     .filter(lab => lab && lab.trim() !== '')
     .sort();
@@ -29,6 +31,26 @@ const Tactics = () => {
   const uniqueFormats = [...new Set(data.map(item => item.formato))]
     .filter(format => format && format.trim() !== '')
     .sort();
+
+  const handleToggleFavorite = (id: string) => {
+    const newFavorites = new Set(favorites);
+    const item = data.find(tactic => tactic.id?.toString() === id);
+    
+    if (newFavorites.has(id)) {
+      newFavorites.delete(id);
+      toast({
+        title: "Favorito eliminado",
+        description: `${item?.tactica || 'Táctica'} eliminado de favoritos`,
+      });
+    } else {
+      newFavorites.add(id);
+      toast({
+        title: "Favorito añadido",
+        description: `${item?.tactica || 'Táctica'} añadido a favoritos`,
+      });
+    }
+    setFavorites(newFavorites);
+  };
 
   const clearFilters = () => {
     setSearchTerm('');
@@ -73,7 +95,6 @@ const Tactics = () => {
 
           <TacticsKPIs data={data} loading={loading} />
 
-          {/* Filters Section */}
           <Card className="shadow-lg">
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -146,15 +167,100 @@ const Tactics = () => {
             </CardContent>
           </Card>
 
-          {/* Tactics Cards */}
-          <TacticsCards
-            data={data}
-            loading={loading}
-            searchTerm={searchTerm}
-            selectedLab={selectedLab === 'all' ? '' : selectedLab}
-            selectedArea={selectedArea === 'all' ? '' : selectedArea}
-            selectedFormat={selectedFormat === 'all' ? '' : selectedFormat}
-          />
+          <Card className="shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-xl font-semibold">
+                Tactics ({data.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {data
+                  .filter(item => {
+                    if (searchTerm) {
+                      const searchLower = searchTerm.toLowerCase();
+                      const searchFields = [
+                        item.tactica,
+                        item.laboratorio,
+                        item.area_terapeutica,
+                        item.formato,
+                        item.descripcion
+                      ];
+                      if (!searchFields.some(field => 
+                        field && field.toString().toLowerCase().includes(searchLower)
+                      )) {
+                        return false;
+                      }
+                    }
+                    
+                    if (selectedLab && selectedLab !== 'all' && item.laboratorio !== selectedLab) return false;
+                    if (selectedArea && selectedArea !== 'all' && item.area_terapeutica !== selectedArea) return false;
+                    if (selectedFormat && selectedFormat !== 'all' && item.formato !== selectedFormat) return false;
+                    
+                    return true;
+                  })
+                  .map((item) => {
+                    const id = item.id?.toString();
+                    const isFavorite = favorites.has(id);
+                    
+                    return (
+                      <Card key={id} className={`relative transition-all duration-200 ${
+                        isFavorite ? 'ring-2 ring-yellow-400 bg-yellow-50 dark:bg-yellow-900/20' : ''
+                      }`}>
+                        <CardHeader className="pb-3">
+                          <div className="flex items-start justify-between gap-2">
+                            <h3 className="font-semibold text-sm line-clamp-2 flex-1" title={item.tactica}>
+                              {item.tactica || 'N/A'}
+                            </h3>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleToggleFavorite(id)}
+                              className="h-8 w-8 p-0 flex-shrink-0"
+                            >
+                              {isFavorite ? (
+                                <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                              ) : (
+                                <StarOff className="w-4 h-4 text-gray-400" />
+                              )}
+                            </Button>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="pt-0">
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-gray-600 dark:text-gray-300">Lab:</span>
+                              <span className="font-medium truncate ml-2" title={item.laboratorio}>
+                                {item.laboratorio || 'N/A'}
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600 dark:text-gray-300">Área:</span>
+                              <span className="font-medium truncate ml-2" title={item.area_terapeutica}>
+                                {item.area_terapeutica || 'N/A'}
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600 dark:text-gray-300">Formato:</span>
+                              <span className="font-medium truncate ml-2" title={item.formato}>
+                                {item.formato || 'N/A'}
+                              </span>
+                            </div>
+                            {item.descripcion && (
+                              <div className="mt-3 pt-3 border-t">
+                                <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-3" title={item.descripcion}>
+                                  {item.descripcion}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </ThemeProvider>

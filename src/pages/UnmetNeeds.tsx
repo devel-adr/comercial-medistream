@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,11 +6,12 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
-import { Filter, BarChart3, Search, Plus } from 'lucide-react';
+import { Filter, BarChart3, Search, Plus, Star, StarOff, Trash2 } from 'lucide-react';
 import { Navigation } from '@/components/Navigation';
 import { useUnmetNeedsData } from '@/hooks/useUnmetNeedsData';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { toast } from "@/hooks/use-toast";
+import { supabase } from '@/integrations/supabase/client';
 import { UnmetNeedsKPIs } from '@/components/UnmetNeeds/UnmetNeedsKPIs';
 import { UnmetNeedsCards } from '@/components/UnmetNeeds/UnmetNeedsCards';
 import { UnmetNeedsDetailModal } from '@/components/UnmetNeeds/UnmetNeedsDetailModal';
@@ -35,6 +35,8 @@ const UnmetNeeds = () => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isGeneratingTactics, setIsGeneratingTactics] = useState(false);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
 
   const { data: unmetNeeds, loading, error, refresh } = useUnmetNeedsData();
 
@@ -85,6 +87,82 @@ const UnmetNeeds = () => {
     return filtered;
   }, [unmetNeeds, filters, searchTerm]);
 
+  const handleToggleFavorite = (id: string) => {
+    const newFavorites = new Set(favorites);
+    const item = unmetNeeds.find(n => n.id_UN_table?.toString() === id);
+    
+    if (newFavorites.has(id)) {
+      newFavorites.delete(id);
+      toast({
+        title: "Favorito eliminado",
+        description: `${item?.unmet_need || 'Unmet Need'} eliminado de favoritos`,
+      });
+    } else {
+      newFavorites.add(id);
+      toast({
+        title: "Favorito añadido",
+        description: `${item?.unmet_need || 'Unmet Need'} añadido a favoritos`,
+      });
+    }
+    setFavorites(newFavorites);
+  };
+
+  const handleDelete = async (id: string) => {
+    const item = unmetNeeds.find(n => n.id_UN_table?.toString() === id);
+    if (!item) return;
+
+    setDeletingIds(prev => new Set([...prev, id]));
+
+    try {
+      const { error } = await supabase
+        .from('UnmetNeeds_table')
+        .delete()
+        .eq('id_UN_table', item.id_UN_table);
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Unmet Need eliminado",
+        description: `${item.unmet_need || 'Unmet Need'} ha sido eliminado correctamente.`,
+      });
+
+      refresh();
+      
+      // Clean up related state
+      setSelectedRows(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
+      
+      setFavorites(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
+
+      const newFormatSelections = { ...formatSelections };
+      delete newFormatSelections[id];
+      setFormatSelections(newFormatSelections);
+
+    } catch (error) {
+      console.error('Error deleting unmet need:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar la Unmet Need. Inténtalo de nuevo.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
+    }
+  };
+
   const handleSelectRow = (id: string, checked: boolean) => {
     const newSelected = new Set(selectedRows);
     if (checked) {
@@ -117,7 +195,6 @@ const UnmetNeeds = () => {
       return;
     }
 
-    // Check if all selected rows have a format assigned
     const missingFormats = Array.from(selectedRows).filter(id => !formatSelections[id]);
     if (missingFormats.length > 0) {
       toast({
@@ -131,19 +208,16 @@ const UnmetNeeds = () => {
     setIsGeneratingTactics(true);
 
     try {
-      // Prepare data for webhook with individual variables
       const selectedItems = Array.from(selectedRows).map(id => {
         const item = unmetNeeds.find(n => n.id_UN_table?.toString() === id);
         return item;
       });
 
-      // Create individual variables for each selected item
       const webhookData = {
         timestamp: new Date().toISOString(),
         total_items: selectedRows.size
       };
 
-      // Add individual variables for each selected Unmet Need including ID
       selectedItems.forEach((item, index) => {
         const itemId = item?.id_UN_table?.toString();
         webhookData[`id_unmet_need_${index + 1}`] = item?.id_UN_table || '';
@@ -162,7 +236,6 @@ const UnmetNeeds = () => {
 
       console.log('Sending data to webhook:', webhookData);
 
-      // Send data to webhook
       const response = await fetch('https://develms.app.n8n.cloud/webhook-test/tactics', {
         method: 'POST',
         headers: {
@@ -175,7 +248,6 @@ const UnmetNeeds = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      // Store selected data locally for Tactics page
       localStorage.setItem('selectedUnmetNeeds', JSON.stringify(Array.from(selectedRows).map(id => {
         const item = unmetNeeds.find(n => n.id_UN_table?.toString() === id);
         return {
@@ -189,7 +261,6 @@ const UnmetNeeds = () => {
         description: `Se han enviado ${selectedRows.size} Unmet Needs al webhook y se han preparado las tácticas.`,
       });
 
-      // Navigate to tactics page
       window.location.href = '/tactics';
 
     } catch (error) {
@@ -205,7 +276,7 @@ const UnmetNeeds = () => {
   };
 
   const handleAddSuccess = () => {
-    refresh(); // Refresh data after successful addition
+    refresh();
   };
 
   if (loading) {
@@ -254,10 +325,8 @@ const UnmetNeeds = () => {
             </Button>
           </div>
 
-          {/* KPIs */}
           <UnmetNeedsKPIs data={filteredAndSortedData} />
 
-          {/* Enhanced Filters Panel */}
           <Card className="shadow-lg">
             <CardHeader>
               <div className="flex items-center space-x-2">
@@ -393,7 +462,6 @@ const UnmetNeeds = () => {
             </CardContent>
           </Card>
 
-          {/* Cards View */}
           <Card className="shadow-lg">
             <CardHeader>
               <CardTitle className="text-xl font-semibold">
@@ -401,19 +469,135 @@ const UnmetNeeds = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <UnmetNeedsCards
-                data={filteredAndSortedData}
-                onSelectForTactics={handleSelectRow}
-                selectedIds={selectedRows}
-                formatSelections={formatSelections}
-                onFormatChange={handleFormatChange}
-                formatOptions={formatOptions}
-                onViewDetails={handleViewDetails}
-              />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredAndSortedData.map((item) => {
+                  const id = item.id_UN_table?.toString();
+                  const isFavorite = favorites.has(id);
+                  const isDeleting = deletingIds.has(id);
+                  const isSelected = selectedRows.has(id);
+                  
+                  return (
+                    <Card key={id} className={`relative transition-all duration-200 ${
+                      isFavorite ? 'ring-2 ring-yellow-400 bg-yellow-50 dark:bg-yellow-900/20' : ''
+                    } ${isSelected ? 'ring-2 ring-blue-400 bg-blue-50 dark:bg-blue-900/20' : ''} ${
+                      isDeleting ? 'opacity-50' : ''
+                    }`}>
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <Checkbox
+                              checked={isSelected}
+                              onCheckedChange={(checked) => handleSelectRow(id, checked === true)}
+                              disabled={isDeleting}
+                            />
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleToggleFavorite(id)}
+                              disabled={isDeleting}
+                              className="h-8 w-8 p-0"
+                            >
+                              {isFavorite ? (
+                                <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                              ) : (
+                                <StarOff className="w-4 h-4 text-gray-400" />
+                              )}
+                            </Button>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleViewDetails(item)}
+                              disabled={isDeleting}
+                              className="h-8 w-8 p-0"
+                            >
+                              👁️
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDelete(id)}
+                              disabled={isDeleting}
+                              className="h-8 w-8 p-0 text-red-600 hover:text-red-800"
+                            >
+                              {isDeleting ? (
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                              ) : (
+                                <Trash2 className="w-4 h-4" />
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-sm line-clamp-2" title={item.unmet_need}>
+                            {item.unmet_need || 'N/A'}
+                          </h3>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-600 dark:text-gray-300">Lab:</span>
+                            <span className="font-medium truncate ml-2" title={item.lab}>
+                              {item.lab || 'N/A'}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600 dark:text-gray-300">Área:</span>
+                            <span className="font-medium truncate ml-2" title={item.area_terapeutica}>
+                              {item.area_terapeutica || 'N/A'}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600 dark:text-gray-300">Fármaco:</span>
+                            <span className="font-medium truncate ml-2" title={item.farmaco}>
+                              {item.farmaco || 'N/A'}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600 dark:text-gray-300">Impacto:</span>
+                            <Badge variant={item.impacto?.toLowerCase().includes('alto') ? 'destructive' : 'secondary'}>
+                              {item.impacto || 'N/A'}
+                            </Badge>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600 dark:text-gray-300">Horizonte:</span>
+                            <span className="font-medium text-xs truncate ml-2" title={item.horizonte_temporal}>
+                              {item.horizonte_temporal || 'N/A'}
+                            </span>
+                          </div>
+                          
+                          {selectedRows.has(id) && (
+                            <div className="mt-3 pt-3 border-t">
+                              <label className="text-xs font-medium mb-1 block">Formato:</label>
+                              <Select
+                                value={formatSelections[id] || ''}
+                                onValueChange={(value) => handleFormatChange(id, value)}
+                                disabled={isDeleting}
+                              >
+                                <SelectTrigger className="h-8 text-xs">
+                                  <SelectValue placeholder="Seleccionar formato" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {formatOptions.map((format) => (
+                                    <SelectItem key={format} value={format} className="text-xs">
+                                      {format}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
             </CardContent>
           </Card>
 
-          {/* Generate Tactics Button */}
           <div className="flex justify-center">
             <Card className="shadow-lg">
               <CardContent className="p-6">
@@ -446,7 +630,6 @@ const UnmetNeeds = () => {
             </Card>
           </div>
 
-          {/* Detail Modal */}
           <UnmetNeedsDetailModal
             isOpen={isDetailModalOpen}
             onClose={() => {
@@ -456,7 +639,6 @@ const UnmetNeeds = () => {
             unmetNeed={selectedUnmetNeed}
           />
 
-          {/* Add Modal */}
           <AddUnmetNeedModal
             isOpen={isAddModalOpen}
             onClose={() => setIsAddModalOpen(false)}
