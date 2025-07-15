@@ -409,6 +409,7 @@ const UnmetNeeds = () => {
                 onFormatChange={handleFormatChange}
                 formatOptions={formatOptions}
                 onViewDetails={handleViewDetails}
+                onRefresh={refresh}
               />
             </CardContent>
           </Card>

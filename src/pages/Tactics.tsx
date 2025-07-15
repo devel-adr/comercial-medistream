@@ -11,7 +11,7 @@ import { TacticsKPIs } from '@/components/Tactics/TacticsKPIs';
 import { TacticsCards } from '@/components/Tactics/TacticsCards';
 
 const Tactics = () => {
-  const { data, loading, error } = usePharmaTacticsData();
+  const { data, loading, error, refresh } = usePharmaTacticsData();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLab, setSelectedLab] = useState('');
   const [selectedArea, setSelectedArea] = useState('');
@@ -154,6 +154,7 @@ const Tactics = () => {
             selectedLab={selectedLab === 'all' ? '' : selectedLab}
             selectedArea={selectedArea === 'all' ? '' : selectedArea}
             selectedFormat={selectedFormat === 'all' ? '' : selectedFormat}
+            onRefresh={refresh}
           />
         </div>
       </div>

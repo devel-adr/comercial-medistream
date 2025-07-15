@@ -1,10 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BarChart3, FileText, Users, Target, Clock, Lightbulb, Eye, Atom } from 'lucide-react';
+import { BarChart3, FileText, Users, Target, Clock, Lightbulb, Star, Atom, Trash2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from "@/hooks/use-toast";
 
 interface UnmetNeedsCardsProps {
   data: any[];
@@ -14,6 +16,7 @@ interface UnmetNeedsCardsProps {
   onFormatChange: (id: string, format: string) => void;
   formatOptions: string[];
   onViewDetails?: (unmetNeed: any) => void;
+  onRefresh?: () => void;
 }
 
 export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
@@ -23,8 +26,12 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
   formatSelections,
   onFormatChange,
   formatOptions,
-  onViewDetails
+  onViewDetails,
+  onRefresh
 }) => {
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
+
   const getImpactColor = (impacto: string) => {
     if (!impacto) return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
     const impactoLower = impacto.toLowerCase();
@@ -43,8 +50,61 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
     return 'border-gray-200';
   };
 
+  const toggleFavorite = (id: string) => {
+    setFavorites(prev => {
+      const newFavorites = new Set(prev);
+      if (newFavorites.has(id)) {
+        newFavorites.delete(id);
+      } else {
+        newFavorites.add(id);
+      }
+      return newFavorites;
+    });
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('¿Estás seguro de que quieres eliminar esta Unmet Need?')) {
+      return;
+    }
+
+    setDeletingIds(prev => new Set(prev).add(id));
+
+    try {
+      const { error } = await supabase
+        .from('UnmetNeeds_table')
+        .delete()
+        .eq('id_UN_table', id);
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Éxito",
+        description: "Unmet Need eliminada correctamente",
+      });
+
+      if (onRefresh) {
+        onRefresh();
+      }
+    } catch (error) {
+      console.error('Error deleting unmet need:', error);
+      toast({
+        title: "Error",
+        description: "Error al eliminar la Unmet Need",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
+    }
+  };
+
   const handleViewDetails = (item: any) => {
-    console.log('Eye button clicked for item:', item);
+    console.log('Star button clicked for item:', item);
     if (onViewDetails) {
       onViewDetails(item);
     }
@@ -54,6 +114,7 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
       {data.map((item, index) => {
         const isSelected = selectedIds.has(item.id_UN_table?.toString());
+        const itemId = item.id_UN_table?.toString();
         return (
           <Card 
             key={item.id_UN_table || index}
@@ -79,12 +140,32 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      handleViewDetails(item);
+                      toggleFavorite(itemId);
                     }}
-                    className="h-8 w-8 p-0 hover:bg-blue-100 dark:hover:bg-blue-900/20"
+                    className="h-8 w-8 p-0 hover:bg-yellow-100 dark:hover:bg-yellow-900/20"
                     type="button"
                   >
-                    <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    <Star 
+                      className={`w-4 h-4 ${
+                        favorites.has(itemId) 
+                          ? 'fill-yellow-400 text-yellow-400' 
+                          : 'text-gray-400'
+                      }`} 
+                    />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleDelete(itemId);
+                    }}
+                    disabled={deletingIds.has(itemId)}
+                    className="h-8 w-8 p-0 hover:bg-red-100 dark:hover:bg-red-900/20"
+                    type="button"
+                  >
+                    <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
                   </Button>
                 </div>
               </div>
