@@ -3,19 +3,23 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Navigation } from '@/components/Navigation';
 import { ThemeProvider } from '@/components/ThemeProvider';
-import { Search, Filter, BarChart3 } from 'lucide-react';
+import { Search, Filter, BarChart3, Heart } from 'lucide-react';
 import { usePharmaTacticsData } from '@/hooks/usePharmaTacticsData';
+import { useTacticsFavorites } from '@/hooks/useTacticsFavorites';
 import { TacticsKPIs } from '@/components/Tactics/TacticsKPIs';
 import { TacticsCards } from '@/components/Tactics/TacticsCards';
 
 const Tactics = () => {
   const { data, loading, error } = usePharmaTacticsData();
+  const { favorites, toggleFavorite, isFavorite } = useTacticsFavorites();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLab, setSelectedLab] = useState('');
   const [selectedArea, setSelectedArea] = useState('');
   const [selectedFormat, setSelectedFormat] = useState('');
+  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
 
   // Get unique values for filters and filter out empty/null values
   const uniqueLabs = [...new Set(data.map(item => item.laboratorio))]
@@ -35,6 +39,7 @@ const Tactics = () => {
     setSelectedLab('');
     setSelectedArea('');
     setSelectedFormat('');
+    setShowOnlyFavorites(false);
   };
 
   if (error) {
@@ -143,6 +148,21 @@ const Tactics = () => {
                   </SelectContent>
                 </Select>
               </div>
+              
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="favorites"
+                  checked={showOnlyFavorites}
+                  onCheckedChange={setShowOnlyFavorites}
+                />
+                <label
+                  htmlFor="favorites"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2"
+                >
+                  <Heart className="w-4 h-4" />
+                  Mostrar solo favoritos
+                </label>
+              </div>
             </CardContent>
           </Card>
 
@@ -154,6 +174,10 @@ const Tactics = () => {
             selectedLab={selectedLab === 'all' ? '' : selectedLab}
             selectedArea={selectedArea === 'all' ? '' : selectedArea}
             selectedFormat={selectedFormat === 'all' ? '' : selectedFormat}
+            showOnlyFavorites={showOnlyFavorites}
+            favorites={favorites}
+            toggleFavorite={toggleFavorite}
+            isFavorite={isFavorite}
           />
         </div>
       </div>

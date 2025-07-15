@@ -3,8 +3,9 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { FileText, ExternalLink, Presentation, Eye } from 'lucide-react';
+import { FileText, ExternalLink, Presentation, Eye, Heart, Trash2 } from 'lucide-react';
 import { TacticsDetailModal } from './TacticsDetailModal';
+import { useToast } from '@/hooks/use-toast';
 
 interface TacticsCardsProps {
   data: any[];
@@ -13,6 +14,10 @@ interface TacticsCardsProps {
   selectedLab: string;
   selectedArea: string;
   selectedFormat: string;
+  showOnlyFavorites: boolean;
+  favorites: Set<string>;
+  toggleFavorite: (id: string) => void;
+  isFavorite: (id: string) => boolean;
 }
 
 export const TacticsCards: React.FC<TacticsCardsProps> = ({
@@ -21,10 +26,15 @@ export const TacticsCards: React.FC<TacticsCardsProps> = ({
   searchTerm,
   selectedLab,
   selectedArea,
-  selectedFormat
+  selectedFormat,
+  showOnlyFavorites,
+  favorites,
+  toggleFavorite,
+  isFavorite
 }) => {
   const [selectedTactic, setSelectedTactic] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const { toast } = useToast();
 
   const filteredData = data.filter(item => {
     const matchesSearch = !searchTerm || 
@@ -36,8 +46,9 @@ export const TacticsCards: React.FC<TacticsCardsProps> = ({
     const matchesLab = !selectedLab || item.laboratorio === selectedLab;
     const matchesArea = !selectedArea || item.area_terapeutica === selectedArea;
     const matchesFormat = !selectedFormat || item.formato === selectedFormat;
+    const matchesFavorites = !showOnlyFavorites || isFavorite(item.id?.toString());
     
-    return matchesSearch && matchesLab && matchesArea && matchesFormat;
+    return matchesSearch && matchesLab && matchesArea && matchesFormat && matchesFavorites;
   });
 
   const getFormatColor = (format: string) => {
@@ -64,6 +75,24 @@ export const TacticsCards: React.FC<TacticsCardsProps> = ({
     if (url) {
       window.open(url, '_blank', 'noopener,noreferrer');
     }
+  };
+
+  const handleToggleFavorite = (tactic: any) => {
+    toggleFavorite(tactic.id?.toString());
+    toast({
+      title: isFavorite(tactic.id?.toString()) ? "Removido de favoritos" : "Añadido a favoritos",
+      description: `"${tactic.unmet_need}" ${isFavorite(tactic.id?.toString()) ? "removido de" : "añadido a"} favoritos.`,
+    });
+  };
+
+  const handleDelete = (tactic: any) => {
+    // Aquí implementarías la lógica de eliminación real
+    // Por ahora solo mostramos un toast de confirmación
+    toast({
+      title: "Tactic eliminada",
+      description: `"${tactic.unmet_need}" ha sido eliminada.`,
+      variant: "destructive",
+    });
   };
 
   if (loading) {
@@ -115,6 +144,30 @@ export const TacticsCards: React.FC<TacticsCardsProps> = ({
                   <CardTitle className="text-lg font-semibold leading-relaxed">
                     {tactic.unmet_need}
                   </CardTitle>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleToggleFavorite(tactic)}
+                    className="p-1 h-8 w-8"
+                  >
+                    <Heart 
+                      className={`w-4 h-4 ${
+                        isFavorite(tactic.id?.toString()) 
+                          ? 'fill-red-500 text-red-500' 
+                          : 'text-gray-400'
+                      }`} 
+                    />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDelete(tactic)}
+                    className="p-1 h-8 w-8 hover:text-red-500"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                 </div>
               </div>
             </CardHeader>
