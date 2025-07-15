@@ -20,7 +20,7 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
     areaTerapeutica: '',
     farmaco: '',
     molecula: '',
-    estado: []
+    estado: ''
   });
 
   const uniqueOptions = useMemo(() => ({
@@ -43,7 +43,7 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
       areaTerapeutica: '',
       farmaco: '',
       molecula: '',
-      estado: []
+      estado: ''
     };
     setFilters(clearedFilters);
     onFiltersChange(clearedFilters);
