@@ -102,13 +102,20 @@ export const TacticsCards: React.FC<TacticsCardsProps> = ({
         {filteredData.map((tactic) => (
           <Card key={tactic.id} className="shadow-sm hover:shadow-md transition-shadow">
             <CardHeader>
-              <div className="flex items-start justify-between">
-                <CardTitle className="text-lg font-semibold line-clamp-2">
-                  {tactic.unmet_need}
-                </CardTitle>
-                <Badge className={getFormatColor(tactic.formato)}>
-                  {tactic.formato}
-                </Badge>
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex-1 pr-2">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                      ID: {tactic.id_unmetNeed}
+                    </span>
+                    <Badge className={getFormatColor(tactic.formato)}>
+                      {tactic.formato}
+                    </Badge>
+                  </div>
+                  <CardTitle className="text-lg font-semibold leading-relaxed">
+                    {tactic.unmet_need}
+                  </CardTitle>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
