@@ -59,7 +59,7 @@ export const AddMedicationModal: React.FC<AddMedicationModalProps> = ({
 
       toast({
         title: "Éxito",
-        description: "Indicación añadido correctamente",
+        description: "Indicación añadida correctamente",
       });
 
       // Reset form
