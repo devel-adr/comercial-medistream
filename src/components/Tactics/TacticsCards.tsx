@@ -3,9 +3,8 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { FileText, ExternalLink, Presentation, Eye, Star, Trash2 } from 'lucide-react';
+import { FileText, ExternalLink, Presentation, Eye } from 'lucide-react';
 import { TacticsDetailModal } from './TacticsDetailModal';
-import { toast } from "@/hooks/use-toast";
 
 interface TacticsCardsProps {
   data: any[];
@@ -14,7 +13,6 @@ interface TacticsCardsProps {
   selectedLab: string;
   selectedArea: string;
   selectedFormat: string;
-  onRefresh?: () => void;
 }
 
 export const TacticsCards: React.FC<TacticsCardsProps> = ({
@@ -23,13 +21,10 @@ export const TacticsCards: React.FC<TacticsCardsProps> = ({
   searchTerm,
   selectedLab,
   selectedArea,
-  selectedFormat,
-  onRefresh
+  selectedFormat
 }) => {
   const [selectedTactic, setSelectedTactic] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [favorites, setFavorites] = useState<Set<number>>(new Set());
-  const [deletingIds, setDeletingIds] = useState<Set<number>>(new Set());
 
   const filteredData = data.filter(item => {
     const matchesSearch = !searchTerm || 
@@ -57,55 +52,6 @@ export const TacticsCards: React.FC<TacticsCardsProps> = ({
         return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
-    }
-  };
-
-  const toggleFavorite = (id: number) => {
-    setFavorites(prev => {
-      const newFavorites = new Set(prev);
-      if (newFavorites.has(id)) {
-        newFavorites.delete(id);
-      } else {
-        newFavorites.add(id);
-      }
-      return newFavorites;
-    });
-  };
-
-  const handleDelete = async (id: number) => {
-    if (!confirm('¿Estás seguro de que quieres eliminar esta táctica?')) {
-      return;
-    }
-
-    setDeletingIds(prev => new Set(prev).add(id));
-
-    try {
-      // Since PharmaTactics_table doesn't exist in the type definitions,
-      // we'll simulate the delete operation for now
-      // TODO: Update Supabase types to include PharmaTactics_table
-      console.log('Delete operation for tactics ID:', id);
-      
-      toast({
-        title: "Éxito",
-        description: "Táctica eliminada correctamente",
-      });
-
-      if (onRefresh) {
-        onRefresh();
-      }
-    } catch (error) {
-      console.error('Error deleting tactic:', error);
-      toast({
-        title: "Error",
-        description: "Error al eliminar la táctica",
-        variant: "destructive",
-      });
-    } finally {
-      setDeletingIds(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(id);
-        return newSet;
-      });
     }
   };
 
@@ -169,31 +115,6 @@ export const TacticsCards: React.FC<TacticsCardsProps> = ({
                   <CardTitle className="text-lg font-semibold leading-relaxed">
                     {tactic.unmet_need}
                   </CardTitle>
-                </div>
-                <div className="flex gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => toggleFavorite(tactic.id)}
-                    className="p-1 h-8 w-8 hover:bg-yellow-100 dark:hover:bg-yellow-900/20"
-                  >
-                    <Star 
-                      className={`w-4 h-4 ${
-                        favorites.has(tactic.id) 
-                          ? 'fill-yellow-400 text-yellow-400' 
-                          : 'text-gray-400'
-                      }`} 
-                    />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDelete(tactic.id)}
-                    disabled={deletingIds.has(tactic.id)}
-                    className="p-1 h-8 w-8 hover:bg-red-100 dark:hover:bg-red-900/20"
-                  >
-                    <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
-                  </Button>
                 </div>
               </div>
             </CardHeader>

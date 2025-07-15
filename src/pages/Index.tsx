@@ -5,7 +5,7 @@ import { Header } from '@/components/Dashboard/Header';
 import { AnalysisBar } from '@/components/Dashboard/AnalysisBar';
 import { StatsCards } from '@/components/Dashboard/StatsCards';
 import { MedicationsTable } from '@/components/Dashboard/MedicationsTable';
-import { SimpleFiltersPanel } from '@/components/Dashboard/SimpleFiltersPanel';
+import { FiltersPanel } from '@/components/Dashboard/FiltersPanel';
 import { AddMedicationModal } from '@/components/Dashboard/AddMedicationModal';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
 import { ThemeProvider } from '@/components/ThemeProvider';
@@ -14,10 +14,10 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 
 const Index = () => {
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilters, setActiveFilters] = useState({});
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
   
   const { data: medications, loading, error, refresh } = useSupabaseData();
 
@@ -29,16 +29,12 @@ const Index = () => {
     refresh(); // Refresh data after successful addition
   };
 
-  const handleToggleFilters = () => {
-    setShowFilters(!showFilters);
-  };
-
   return (
     <ThemeProvider>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
         <Navigation />
         
-        <Header onToggleFilters={handleToggleFilters} />
+        <Header onToggleFilters={() => setIsFiltersOpen(!isFiltersOpen)} />
         
         <div className="container mx-auto px-4 py-6 space-y-6">
           <div className="flex gap-4 items-center">
@@ -58,21 +54,24 @@ const Index = () => {
           
           <StatsCards medications={medications} loading={loading} />
           
-          {showFilters && (
-            <SimpleFiltersPanel 
+          <div className="flex gap-6">
+            <FiltersPanel 
+              isOpen={isFiltersOpen}
+              onClose={() => setIsFiltersOpen(false)}
               onFiltersChange={setActiveFilters}
               medications={medications}
             />
-          )}
-          
-          <MedicationsTable 
-            medications={medications}
-            loading={loading}
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            activeFilters={activeFilters}
-            onRefresh={refresh}
-          />
+            
+            <div className="flex-1">
+              <MedicationsTable 
+                medications={medications}
+                loading={loading}
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                activeFilters={activeFilters}
+              />
+            </div>
+          </div>
         </div>
         
         <AddMedicationModal
