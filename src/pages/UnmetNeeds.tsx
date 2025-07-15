@@ -15,8 +15,9 @@ import { UnmetNeedsKPIs } from '@/components/UnmetNeeds/UnmetNeedsKPIs';
 import { UnmetNeedsCards } from '@/components/UnmetNeeds/UnmetNeedsCards';
 import { UnmetNeedsDetailModal } from '@/components/UnmetNeeds/UnmetNeedsDetailModal';
 import { AddUnmetNeedModal } from '@/components/UnmetNeeds/AddUnmetNeedModal';
+import { CustomFieldsForm } from '@/components/UnmetNeeds/CustomFieldsForm';
 
-const formatOptions = ['Programa', 'Webinar', 'Podcast'];
+const formatOptions = ['Programa', 'Webinar', 'Podcast', 'Personalizado (DOCS only)'];
 
 const UnmetNeeds = () => {
   const [filters, setFilters] = useState({
@@ -36,6 +37,13 @@ const UnmetNeeds = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isGeneratingTactics, setIsGeneratingTactics] = useState(false);
   const [localFavorites, setLocalFavorites] = useState<Set<string>>(new Set());
+  const [customFields, setCustomFields] = useState<Record<string, {
+    capitulos: string;
+    modulos: string;
+    subtemas: string;
+    numeroExperto: string;
+    formato: string;
+  }>>({});
 
   const { data: unmetNeeds, loading, error, refresh, toggleFavorite, deleteUnmetNeed } = useUnmetNeedsData();
 
@@ -134,6 +142,14 @@ const UnmetNeeds = () => {
       newSelected.add(id);
     } else {
       newSelected.delete(id);
+      // Clear custom fields when deselecting
+      if (customFields[id]) {
+        setCustomFields(prev => {
+          const newFields = { ...prev };
+          delete newFields[id];
+          return newFields;
+        });
+      }
     }
     setSelectedRows(newSelected);
   };
@@ -142,6 +158,28 @@ const UnmetNeeds = () => {
     setFormatSelections(prev => ({
       ...prev,
       [id]: format
+    }));
+
+    // Clear custom fields if switching away from Personalizado format
+    if (format !== 'Personalizado (DOCS only)' && customFields[id]) {
+      setCustomFields(prev => {
+        const newFields = { ...prev };
+        delete newFields[id];
+        return newFields;
+      });
+    }
+  };
+
+  const handleCustomFieldsChange = (id: string, fields: {
+    capitulos: string;
+    modulos: string;
+    subtemas: string;
+    numeroExperto: string;
+    formato: string;
+  }) => {
+    setCustomFields(prev => ({
+      ...prev,
+      [id]: fields
     }));
   };
 
@@ -184,6 +222,26 @@ const UnmetNeeds = () => {
     }
   };
 
+  const hasCustomFormat = Array.from(selectedRows).some(id => 
+    formatSelections[id] === 'Personalizado (DOCS only)'
+  );
+
+  const areCustomFieldsComplete = () => {
+    const customFormatItems = Array.from(selectedRows).filter(id => 
+      formatSelections[id] === 'Personalizado (DOCS only)'
+    );
+    
+    return customFormatItems.every(id => {
+      const fields = customFields[id];
+      return fields && 
+        fields.capitulos.trim() !== '' &&
+        fields.modulos.trim() !== '' &&
+        fields.subtemas.trim() !== '' &&
+        fields.numeroExperto.trim() !== '' &&
+        fields.formato.trim() !== '';
+    });
+  };
+
   const handleGenerateTactics = async () => {
     if (selectedRows.size === 0) {
       toast({
@@ -205,6 +263,16 @@ const UnmetNeeds = () => {
       return;
     }
 
+    // Check custom fields completion for Personalizado format
+    if (hasCustomFormat && !areCustomFieldsComplete()) {
+      toast({
+        title: "Error",
+        description: "Por favor completa todos los campos personalizados para el formato 'Personalizado (DOCS only)'.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsGeneratingTactics(true);
 
     try {
@@ -214,7 +282,7 @@ const UnmetNeeds = () => {
         return item;
       });
 
-      // Create individual variables for each selected item
+      // Create individual variables for each selected Unmet Need including ID
       const webhookData = {
         timestamp: new Date().toISOString(),
         total_items: selectedRows.size
@@ -235,6 +303,16 @@ const UnmetNeeds = () => {
         webhookData[`conclusion_${index + 1}`] = item?.conclusion || '';
         webhookData[`formato_${index + 1}`] = formatSelections[itemId] || '';
         webhookData[`impacto_${index + 1}`] = item?.impacto || '';
+
+        // Add custom fields if format is Personalizado (DOCS only)
+        if (formatSelections[itemId] === 'Personalizado (DOCS only)' && customFields[itemId]) {
+          const customFieldsData = customFields[itemId];
+          webhookData[`capitulos_${index + 1}`] = customFieldsData.capitulos;
+          webhookData[`modulos_${index + 1}`] = customFieldsData.modulos;
+          webhookData[`subtemas_${index + 1}`] = customFieldsData.subtemas;
+          webhookData[`numero_experto_${index + 1}`] = customFieldsData.numeroExperto;
+          webhookData[`formato_personalizado_${index + 1}`] = customFieldsData.formato;
+        }
       });
 
       console.log('Sending data to webhook:', webhookData);
@@ -255,10 +333,17 @@ const UnmetNeeds = () => {
       // Store selected data locally for Tactics page
       localStorage.setItem('selectedUnmetNeeds', JSON.stringify(Array.from(selectedRows).map(id => {
         const item = unmetNeeds.find(n => n.id_UN_table?.toString() === id);
-        return {
+        const result = {
           ...item,
           format: formatSelections[id]
         };
+
+        // Add custom fields if applicable
+        if (formatSelections[id] === 'Personalizado (DOCS only)' && customFields[id]) {
+          result.customFields = customFields[id];
+        }
+
+        return result;
       })));
       
       toast({
@@ -515,6 +600,17 @@ const UnmetNeeds = () => {
             </CardContent>
           </Card>
 
+          {/* Custom Fields Form */}
+          {hasCustomFormat && (
+            <CustomFieldsForm
+              selectedRows={selectedRows}
+              formatSelections={formatSelections}
+              customFields={customFields}
+              onCustomFieldsChange={handleCustomFieldsChange}
+              unmetNeeds={unmetNeeds}
+            />
+          )}
+
           {/* Generate Tactics Button */}
           <div className="flex justify-center">
             <Card className="shadow-lg">
@@ -533,10 +629,15 @@ const UnmetNeeds = () => {
                         {selectedRows.size} Unmet Need{selectedRows.size > 1 ? 's' : ''} seleccionada{selectedRows.size > 1 ? 's' : ''}
                       </p>
                     )}
+                    {hasCustomFormat && !areCustomFieldsComplete() && (
+                      <p className="text-sm text-orange-600 dark:text-orange-400 mt-2">
+                        Completa los campos personalizados para continuar
+                      </p>
+                    )}
                   </div>
                   <Button
                     onClick={handleGenerateTactics}
-                    disabled={selectedRows.size === 0 || isGeneratingTactics}
+                    disabled={selectedRows.size === 0 || isGeneratingTactics || (hasCustomFormat && !areCustomFieldsComplete())}
                     size="lg"
                     className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 px-8 py-3"
                   >
