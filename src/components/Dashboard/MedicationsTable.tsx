@@ -574,7 +574,7 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                 Análisis de Unmet Needs
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-300">
-                Selecciona medicamentos de la tabla anterior y presiona este botón para procesar y analizar 
+                Selecciona indicaciones de la tabla anterior y presiona este botón para procesar y analizar 
                 las necesidades médicas no cubiertas (Unmet Needs) de los fármacos seleccionados.
               </p>
               {selectedMedicationIds.size > 0 && (
