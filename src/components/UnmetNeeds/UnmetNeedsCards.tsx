@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BarChart3, FileText, Users, Target, Clock, Lightbulb, Star, Atom, Trash2 } from 'lucide-react';
+import { BarChart3, FileText, Users, Target, Clock, Lightbulb, Eye, Atom } from 'lucide-react';
 
 interface UnmetNeedsCardsProps {
   data: any[];
@@ -13,10 +13,7 @@ interface UnmetNeedsCardsProps {
   formatSelections: Record<string, string>;
   onFormatChange: (id: string, format: string) => void;
   formatOptions: string[];
-  onToggleFavorite?: (unmetNeed: any) => void;
-  onDelete?: (unmetNeed: any) => void;
-  localFavorites?: Set<string>;
-  onToggleLocalFavorite?: (id: string) => void;
+  onViewDetails?: (unmetNeed: any) => void;
 }
 
 export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
@@ -26,10 +23,7 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
   formatSelections,
   onFormatChange,
   formatOptions,
-  onToggleFavorite,
-  onDelete,
-  localFavorites = new Set(),
-  onToggleLocalFavorite
+  onViewDetails
 }) => {
   const getImpactColor = (impacto: string) => {
     if (!impacto) return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
@@ -49,18 +43,10 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
     return 'border-gray-200';
   };
 
-  const handleToggleFavorite = (item: any) => {
-    console.log('Star button clicked for item:', item);
-    const itemId = item.id_UN_table?.toString();
-    if (onToggleLocalFavorite && itemId) {
-      onToggleLocalFavorite(itemId);
-    }
-  };
-
-  const handleDelete = (item: any) => {
-    console.log('Delete button clicked for item:', item);
-    if (onDelete) {
-      onDelete(item);
+  const handleViewDetails = (item: any) => {
+    console.log('Eye button clicked for item:', item);
+    if (onViewDetails) {
+      onViewDetails(item);
     }
   };
 
@@ -68,9 +54,6 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
       {data.map((item, index) => {
         const isSelected = selectedIds.has(item.id_UN_table?.toString());
-        const itemId = item.id_UN_table?.toString();
-        const isFavorite = localFavorites.has(itemId);
-        
         return (
           <Card 
             key={item.id_UN_table || index}
@@ -82,7 +65,7 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
             
             <CardContent className="p-5 space-y-4">
               {/* Header */}
-              <div className="flex justify-between items-start relative z-10">
+              <div className="flex justify-between items-start">
                 <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                   #{item.id_UN_table || index + 1}
                 </div>
@@ -96,31 +79,12 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      handleToggleFavorite(item);
+                      handleViewDetails(item);
                     }}
-                    className="h-8 w-8 p-0 hover:bg-yellow-100 dark:hover:bg-yellow-900/20 relative z-20"
+                    className="h-8 w-8 p-0 hover:bg-blue-100 dark:hover:bg-blue-900/20"
                     type="button"
                   >
-                    <Star 
-                      className={`w-4 h-4 ${
-                        isFavorite 
-                          ? 'text-yellow-500 fill-yellow-500' 
-                          : 'text-gray-400 hover:text-yellow-500'
-                      }`} 
-                    />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleDelete(item);
-                    }}
-                    className="h-8 w-8 p-0 hover:bg-red-100 dark:hover:bg-red-900/20 relative z-20"
-                    type="button"
-                  >
-                    <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
+                    <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                   </Button>
                 </div>
               </div>

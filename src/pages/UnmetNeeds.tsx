@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
-import { Filter, BarChart3, Search, Plus, Star } from 'lucide-react';
+import { Filter, BarChart3, Search, Plus } from 'lucide-react';
 import { Navigation } from '@/components/Navigation';
 import { useUnmetNeedsData } from '@/hooks/useUnmetNeedsData';
 import { ThemeProvider } from '@/components/ThemeProvider';
@@ -15,9 +16,8 @@ import { UnmetNeedsKPIs } from '@/components/UnmetNeeds/UnmetNeedsKPIs';
 import { UnmetNeedsCards } from '@/components/UnmetNeeds/UnmetNeedsCards';
 import { UnmetNeedsDetailModal } from '@/components/UnmetNeeds/UnmetNeedsDetailModal';
 import { AddUnmetNeedModal } from '@/components/UnmetNeeds/AddUnmetNeedModal';
-import { CustomFieldsForm } from '@/components/UnmetNeeds/CustomFieldsForm';
 
-const formatOptions = ['Programa', 'Webinar', 'Podcast', 'Personalizado (DOCS only)'];
+const formatOptions = ['Programa', 'Webinar', 'Podcast'];
 
 const UnmetNeeds = () => {
   const [filters, setFilters] = useState({
@@ -26,8 +26,7 @@ const UnmetNeeds = () => {
     farmaco: '',
     molecula: '',
     impacto: '',
-    horizonte_temporal: '',
-    favoritos: ''
+    horizonte_temporal: ''
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
@@ -36,55 +35,10 @@ const UnmetNeeds = () => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isGeneratingTactics, setIsGeneratingTactics] = useState(false);
-  const [localFavorites, setLocalFavorites] = useState<Set<string>>(new Set());
-  const [customFields, setCustomFields] = useState<Record<string, {
-    capitulos: string;
-    modulos: string;
-    subtemas: string;
-    numeroExperto: string;
-    formato: string;
-  }>>({});
 
-  const { data: unmetNeeds, loading, error, refresh, toggleFavorite, deleteUnmetNeed } = useUnmetNeedsData();
+  const { data: unmetNeeds, loading, error, refresh } = useUnmetNeedsData();
 
-  // Load favorites from localStorage on component mount
-  useEffect(() => {
-    const savedFavorites = localStorage.getItem('unmetNeedsFavorites');
-    if (savedFavorites) {
-      try {
-        const favoritesArray = JSON.parse(savedFavorites);
-        setLocalFavorites(new Set(favoritesArray));
-      } catch (error) {
-        console.error('Error loading favorites from localStorage:', error);
-      }
-    }
-  }, []);
-
-  // Save favorites to localStorage whenever localFavorites changes
-  useEffect(() => {
-    localStorage.setItem('unmetNeedsFavorites', JSON.stringify(Array.from(localFavorites)));
-  }, [localFavorites]);
-
-  const handleToggleLocalFavorite = (id: string) => {
-    setLocalFavorites(prev => {
-      const newFavorites = new Set(prev);
-      if (newFavorites.has(id)) {
-        newFavorites.delete(id);
-        toast({
-          title: "Favorito removido",
-          description: "La Unmet Need ha sido removida de favoritos.",
-        });
-      } else {
-        newFavorites.add(id);
-        toast({
-          title: "Favorito añadido",
-          description: "La Unmet Need ha sido añadida a favoritos.",
-        });
-      }
-      return newFavorites;
-    });
-  };
-
+  // Get unique values for filters
   const uniqueOptions = useMemo(() => ({
     labs: [...new Set(unmetNeeds.map(item => item.lab).filter(Boolean))].sort(),
     areasTerapeuticas: [...new Set(unmetNeeds.map(item => item.area_terapeutica).filter(Boolean))].sort(),
@@ -125,16 +79,11 @@ const UnmetNeeds = () => {
       if (filters.impacto && item.impacto !== filters.impacto) return false;
       if (filters.horizonte_temporal && item.horizonte_temporal !== filters.horizonte_temporal) return false;
       
-      // Favoritos filter using local favorites
-      const itemId = item.id_UN_table?.toString();
-      if (filters.favoritos === 'si' && !localFavorites.has(itemId)) return false;
-      if (filters.favoritos === 'no' && localFavorites.has(itemId)) return false;
-      
       return true;
     });
 
     return filtered;
-  }, [unmetNeeds, filters, searchTerm, localFavorites]);
+  }, [unmetNeeds, filters, searchTerm]);
 
   const handleSelectRow = (id: string, checked: boolean) => {
     const newSelected = new Set(selectedRows);
@@ -142,14 +91,6 @@ const UnmetNeeds = () => {
       newSelected.add(id);
     } else {
       newSelected.delete(id);
-      // Clear custom fields when deselecting
-      if (customFields[id]) {
-        setCustomFields(prev => {
-          const newFields = { ...prev };
-          delete newFields[id];
-          return newFields;
-        });
-      }
     }
     setSelectedRows(newSelected);
   };
@@ -159,87 +100,11 @@ const UnmetNeeds = () => {
       ...prev,
       [id]: format
     }));
-
-    // Clear custom fields if switching away from Personalizado format
-    if (format !== 'Personalizado (DOCS only)' && customFields[id]) {
-      setCustomFields(prev => {
-        const newFields = { ...prev };
-        delete newFields[id];
-        return newFields;
-      });
-    }
-  };
-
-  const handleCustomFieldsChange = (id: string, fields: {
-    capitulos: string;
-    modulos: string;
-    subtemas: string;
-    numeroExperto: string;
-    formato: string;
-  }) => {
-    setCustomFields(prev => ({
-      ...prev,
-      [id]: fields
-    }));
   };
 
   const handleViewDetails = (unmetNeed: any) => {
     setSelectedUnmetNeed(unmetNeed);
     setIsDetailModalOpen(true);
-  };
-
-  const handleToggleFavorite = async (unmetNeed: any) => {
-    try {
-      await toggleFavorite(unmetNeed);
-      toast({
-        title: "Éxito",
-        description: `Unmet Need ${unmetNeed.favorito ? 'removida de' : 'añadida a'} favoritos.`,
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Error al actualizar el estado de favorito.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleDelete = async (unmetNeed: any) => {
-    if (window.confirm('¿Estás seguro de que deseas eliminar esta Unmet Need? Esta acción no se puede deshacer.')) {
-      try {
-        await deleteUnmetNeed(unmetNeed);
-        toast({
-          title: "Éxito",
-          description: "Unmet Need eliminada correctamente.",
-        });
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Error al eliminar la Unmet Need.",
-          variant: "destructive",
-        });
-      }
-    }
-  };
-
-  const hasCustomFormat = Array.from(selectedRows).some(id => 
-    formatSelections[id] === 'Personalizado (DOCS only)'
-  );
-
-  const areCustomFieldsComplete = () => {
-    const customFormatItems = Array.from(selectedRows).filter(id => 
-      formatSelections[id] === 'Personalizado (DOCS only)'
-    );
-    
-    return customFormatItems.every(id => {
-      const fields = customFields[id];
-      return fields && 
-        fields.capitulos.trim() !== '' &&
-        fields.modulos.trim() !== '' &&
-        fields.subtemas.trim() !== '' &&
-        fields.numeroExperto.trim() !== '' &&
-        fields.formato.trim() !== '';
-    });
   };
 
   const handleGenerateTactics = async () => {
@@ -263,16 +128,6 @@ const UnmetNeeds = () => {
       return;
     }
 
-    // Check custom fields completion for Personalizado format
-    if (hasCustomFormat && !areCustomFieldsComplete()) {
-      toast({
-        title: "Error",
-        description: "Por favor completa todos los campos personalizados para el formato 'Personalizado (DOCS only)'.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsGeneratingTactics(true);
 
     try {
@@ -282,7 +137,7 @@ const UnmetNeeds = () => {
         return item;
       });
 
-      // Create individual variables for each selected Unmet Need including ID
+      // Create individual variables for each selected item
       const webhookData = {
         timestamp: new Date().toISOString(),
         total_items: selectedRows.size
@@ -303,16 +158,6 @@ const UnmetNeeds = () => {
         webhookData[`conclusion_${index + 1}`] = item?.conclusion || '';
         webhookData[`formato_${index + 1}`] = formatSelections[itemId] || '';
         webhookData[`impacto_${index + 1}`] = item?.impacto || '';
-
-        // Add custom fields if format is Personalizado (DOCS only)
-        if (formatSelections[itemId] === 'Personalizado (DOCS only)' && customFields[itemId]) {
-          const customFieldsData = customFields[itemId];
-          webhookData[`capitulos_${index + 1}`] = customFieldsData.capitulos;
-          webhookData[`modulos_${index + 1}`] = customFieldsData.modulos;
-          webhookData[`subtemas_${index + 1}`] = customFieldsData.subtemas;
-          webhookData[`numero_experto_${index + 1}`] = customFieldsData.numeroExperto;
-          webhookData[`formato_personalizado_${index + 1}`] = customFieldsData.formato;
-        }
       });
 
       console.log('Sending data to webhook:', webhookData);
@@ -333,20 +178,10 @@ const UnmetNeeds = () => {
       // Store selected data locally for Tactics page
       localStorage.setItem('selectedUnmetNeeds', JSON.stringify(Array.from(selectedRows).map(id => {
         const item = unmetNeeds.find(n => n.id_UN_table?.toString() === id);
-        const itemId = item?.id_UN_table?.toString();
-        
-        // Create a properly typed result object
-        const result: any = {
+        return {
           ...item,
           format: formatSelections[id]
         };
-
-        // Add custom fields if applicable
-        if (formatSelections[id] === 'Personalizado (DOCS only)' && customFields[id]) {
-          result.customFields = customFields[id];
-        }
-
-        return result;
       })));
       
       toast({
@@ -446,7 +281,7 @@ const UnmetNeeds = () => {
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="text-sm font-medium mb-2 block">Laboratorio</label>
                   <Select
@@ -497,28 +332,6 @@ const UnmetNeeds = () => {
                       {uniqueOptions.farmacos.map((farmaco) => (
                         <SelectItem key={farmaco} value={farmaco}>{farmaco}</SelectItem>
                       ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Favoritos</label>
-                  <Select
-                    value={filters.favoritos}
-                    onValueChange={(value) => setFilters(prev => ({ ...prev, favoritos: value === 'all' ? '' : value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Todos" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      <SelectItem value="si">
-                        <div className="flex items-center gap-2">
-                          <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                          Solo Favoritos
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="no">Sin Favoritos</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -595,24 +408,10 @@ const UnmetNeeds = () => {
                 formatSelections={formatSelections}
                 onFormatChange={handleFormatChange}
                 formatOptions={formatOptions}
-                onToggleFavorite={handleToggleFavorite}
-                onDelete={handleDelete}
-                localFavorites={localFavorites}
-                onToggleLocalFavorite={handleToggleLocalFavorite}
+                onViewDetails={handleViewDetails}
               />
             </CardContent>
           </Card>
-
-          {/* Custom Fields Form */}
-          {hasCustomFormat && (
-            <CustomFieldsForm
-              selectedRows={selectedRows}
-              formatSelections={formatSelections}
-              customFields={customFields}
-              onCustomFieldsChange={handleCustomFieldsChange}
-              unmetNeeds={unmetNeeds}
-            />
-          )}
 
           {/* Generate Tactics Button */}
           <div className="flex justify-center">
@@ -632,15 +431,10 @@ const UnmetNeeds = () => {
                         {selectedRows.size} Unmet Need{selectedRows.size > 1 ? 's' : ''} seleccionada{selectedRows.size > 1 ? 's' : ''}
                       </p>
                     )}
-                    {hasCustomFormat && !areCustomFieldsComplete() && (
-                      <p className="text-sm text-orange-600 dark:text-orange-400 mt-2">
-                        Completa los campos personalizados para continuar
-                      </p>
-                    )}
                   </div>
                   <Button
                     onClick={handleGenerateTactics}
-                    disabled={selectedRows.size === 0 || isGeneratingTactics || (hasCustomFormat && !areCustomFieldsComplete())}
+                    disabled={selectedRows.size === 0 || isGeneratingTactics}
                     size="lg"
                     className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 px-8 py-3"
                   >
