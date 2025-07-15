@@ -33,7 +33,7 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loadin
       value: totalMedications,
       icon: FileText,
       color: 'bg-blue-500',
-      description: 'Medicamentos registrados'
+      description: 'Indicaciones registrados'
     },
     {
       title: 'Laboratorios',
