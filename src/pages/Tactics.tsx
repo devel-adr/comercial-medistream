@@ -42,6 +42,10 @@ const Tactics = () => {
     setShowOnlyFavorites(false);
   };
 
+  const handleFavoritesChange = (checked: boolean | "indeterminate") => {
+    setShowOnlyFavorites(checked === true);
+  };
+
   if (error) {
     return (
       <ThemeProvider>
@@ -153,7 +157,7 @@ const Tactics = () => {
                 <Checkbox
                   id="favorites"
                   checked={showOnlyFavorites}
-                  onCheckedChange={setShowOnlyFavorites}
+                  onCheckedChange={handleFavoritesChange}
                 />
                 <label
                   htmlFor="favorites"
