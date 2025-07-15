@@ -215,7 +215,7 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      const allIds = new Set(paginatedData.map(med => med.ID_NUM?.toString()).filter(Boolean));
+      const allIds = new Set(paginatedData.map(med => String(med.ID_NUM)).filter(id => id !== 'undefined'));
       setSelectedMedicationIds(allIds);
     } else {
       setSelectedMedicationIds(new Set());
@@ -237,7 +237,7 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
     try {
       // Prepare detailed medication data
       const selectedMedicationsData = Array.from(selectedMedicationIds).map(idNum => {
-        const medication = medications.find(med => med.ID_NUM?.toString() === idNum);
+        const medication = medications.find(med => String(med.ID_NUM) === idNum);
         return {
           ID_NUM: medication?.ID_NUM,
           laboratorio: medication?.nombre_lab,
@@ -280,9 +280,9 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
   };
 
   const isAllSelected = paginatedData.length > 0 && 
-    paginatedData.every(med => selectedMedicationIds.has(med.ID_NUM?.toString()));
+    paginatedData.every(med => selectedMedicationIds.has(String(med.ID_NUM)));
   
-  const isSomeSelected = paginatedData.some(med => selectedMedicationIds.has(med.ID_NUM?.toString()));
+  const isSomeSelected = paginatedData.some(med => selectedMedicationIds.has(String(med.ID_NUM)));
 
   if (loading) {
     return (
@@ -406,9 +406,10 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                     </TableHeader>
                     <TableBody>
                       {paginatedData.map((medication, index) => {
-                        const isSelected = selectedMedicationIds.has(medication.ID_NUM?.toString());
-                        const isFavorite = favorites.has(medication.ID_NUM?.toString());
-                        const isDeleting = deletingIds.has(medication.ID_NUM?.toString());
+                        const medicationId = String(medication.ID_NUM);
+                        const isSelected = selectedMedicationIds.has(medicationId);
+                        const isFavorite = favorites.has(medicationId);
+                        const isDeleting = deletingIds.has(medicationId);
                         return (
                           <TableRow 
                             key={medication.ID_NUM || index} 
@@ -420,7 +421,7 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                               <Checkbox
                                 checked={isSelected}
                                 onCheckedChange={(checked) => 
-                                  handleSelectMedication(medication.ID_NUM?.toString(), checked === true)
+                                  handleSelectMedication(medicationId, checked === true)
                                 }
                                 disabled={isDeleting}
                               />
@@ -434,7 +435,7 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleToggleFavorite(medication.ID_NUM?.toString())}
+                                onClick={() => handleToggleFavorite(medicationId)}
                                 className="p-0 h-auto"
                                 disabled={isDeleting}
                               >
@@ -496,7 +497,7 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                                 <Button 
                                   variant="ghost" 
                                   size="sm" 
-                                  onClick={() => handleDeleteMedication(medication.ID_NUM?.toString())}
+                                  onClick={() => handleDeleteMedication(medicationId)}
                                   title="Eliminar medicamento"
                                   disabled={isDeleting}
                                   className="text-red-600 hover:text-red-800 hover:bg-red-50"
