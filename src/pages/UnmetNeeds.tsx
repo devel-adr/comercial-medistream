@@ -333,7 +333,10 @@ const UnmetNeeds = () => {
       // Store selected data locally for Tactics page
       localStorage.setItem('selectedUnmetNeeds', JSON.stringify(Array.from(selectedRows).map(id => {
         const item = unmetNeeds.find(n => n.id_UN_table?.toString() === id);
-        const result = {
+        const itemId = item?.id_UN_table?.toString();
+        
+        // Create a properly typed result object
+        const result: any = {
           ...item,
           format: formatSelections[id]
         };
