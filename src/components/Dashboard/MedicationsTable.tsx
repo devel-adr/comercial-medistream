@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -6,9 +7,10 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Search, Eye, Link, ArrowUp, ArrowDown, BarChart3 } from 'lucide-react';
+import { Search, Eye, Link, ArrowUp, ArrowDown, BarChart3, Trash2, Star } from 'lucide-react';
 import { MedicationDetailModal } from './MedicationDetailModal';
 import { toast } from "@/components/ui/use-toast";
+import { supabase } from '@/integrations/supabase/client';
 
 interface MedicationsTableProps {
   medications: any[];
@@ -16,6 +18,7 @@ interface MedicationsTableProps {
   searchTerm: string;
   onSearchChange: (term: string) => void;
   activeFilters: any;
+  onDataChange: () => void;
 }
 
 export const MedicationsTable: React.FC<MedicationsTableProps> = ({
@@ -23,7 +26,8 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
   loading,
   searchTerm,
   onSearchChange,
-  activeFilters
+  activeFilters,
+  onDataChange
 }) => {
   const [sortConfig, setSortConfig] = useState({ key: '', direction: 'asc' });
   const [currentPage, setCurrentPage] = useState(1);
@@ -31,6 +35,8 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMedicationIds, setSelectedMedicationIds] = useState<Set<string>>(new Set());
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   const itemsPerPage = 10;
 
   const getStatusColor = (status: string) => {
@@ -41,6 +47,14 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
     if (statusLower.includes('rechazado')) return 'bg-red-100 text-red-800';
     if (statusLower.includes('pendiente')) return 'bg-yellow-100 text-yellow-800';
     return 'bg-gray-100 text-gray-800';
+  };
+
+  const getSubAreaSummary = (subArea: string) => {
+    if (!subArea) return 'N/A';
+    // Crear un resumen breve pero completo
+    const words = subArea.split(' ');
+    if (words.length <= 4) return subArea;
+    return words.slice(0, 4).join(' ') + '...';
   };
 
   const filteredAndSortedData = useMemo(() => {
@@ -84,36 +98,8 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
         return false;
       }
       
-      if (activeFilters.mecanismoAccion && med.mecanismo_de_accion !== activeFilters.mecanismoAccion) {
+      if (activeFilters.estado && med.estado_en_espana !== activeFilters.estado) {
         return false;
-      }
-      
-      if (activeFilters.subAreaTratamiento && med.sub_area_de_tratamiento !== activeFilters.subAreaTratamiento) {
-        return false;
-      }
-      
-      if (activeFilters.alteracionGenetica && med.alteracion_genetica_dirigida !== activeFilters.alteracionGenetica) {
-        return false;
-      }
-      
-      if (activeFilters.lineaTratamiento && med.linea_de_tratamiento !== activeFilters.lineaTratamiento) {
-        return false;
-      }
-      
-      if (activeFilters.estado && activeFilters.estado.length > 0 && !activeFilters.estado.includes(med.estado_en_espana)) {
-        return false;
-      }
-      
-      if (activeFilters.fechaDesde && med.fecha_de_aprobacion_espana) {
-        if (new Date(med.fecha_de_aprobacion_espana) < new Date(activeFilters.fechaDesde)) {
-          return false;
-        }
-      }
-      
-      if (activeFilters.fechaHasta && med.fecha_de_aprobacion_espana) {
-        if (new Date(med.fecha_de_aprobacion_espana) > new Date(activeFilters.fechaHasta)) {
-          return false;
-        }
       }
 
       return true;
@@ -155,6 +141,57 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
   const handleViewDetails = (medication: any) => {
     setSelectedMedication(medication);
     setIsModalOpen(true);
+  };
+
+  const handleDeleteMedication = async (medicationId: string) => {
+    if (deletingIds.has(medicationId)) return;
+    
+    const confirmDelete = window.confirm('¿Estás seguro de que quieres eliminar este medicamento?');
+    if (!confirmDelete) return;
+
+    setDeletingIds(prev => new Set([...prev, medicationId]));
+
+    try {
+      const { error } = await supabase
+        .from('DrugDealer_table')
+        .delete()
+        .eq('ID_NUM', medicationId);
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Medicamento eliminado",
+        description: "El medicamento ha sido eliminado correctamente.",
+      });
+
+      onDataChange();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Hubo un problema al eliminar el medicamento.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(medicationId);
+        return newSet;
+      });
+    }
+  };
+
+  const handleToggleFavorite = (medicationId: string) => {
+    setFavorites(prev => {
+      const newFavorites = new Set(prev);
+      if (newFavorites.has(medicationId)) {
+        newFavorites.delete(medicationId);
+      } else {
+        newFavorites.add(medicationId);
+      }
+      return newFavorites;
+    });
   };
 
   const SortIcon = ({ column }: { column: string }) => {
@@ -286,7 +323,7 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
           <div className="w-full">
             <ScrollArea className="w-full">
               <div className="w-full overflow-x-auto">
-                <div className="min-w-[1300px]">
+                <div className="min-w-[1400px]">
                   <Table className="w-full">
                     <TableHeader className="sticky top-0 z-10 bg-gray-50 dark:bg-gray-800">
                       <TableRow className="border-b">
@@ -298,6 +335,7 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                           />
                         </TableHead>
                         <TableHead className="w-[50px] text-center font-semibold">UM</TableHead>
+                        <TableHead className="w-[50px] text-center font-semibold">⭐</TableHead>
                         <TableHead 
                           className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[120px]"
                           onClick={() => handleSort('nombre_lab')}
@@ -335,6 +373,15 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                           </div>
                         </TableHead>
                         <TableHead 
+                          className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[150px]"
+                          onClick={() => handleSort('sub_area_de_tratamiento')}
+                        >
+                          <div className="flex items-center space-x-2">
+                            <span className="font-semibold">Subárea</span>
+                            <SortIcon column="sub_area_de_tratamiento" />
+                          </div>
+                        </TableHead>
+                        <TableHead 
                           className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[120px]"
                           onClick={() => handleSort('estado_en_espana')}
                         >
@@ -352,7 +399,7 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                             <SortIcon column="fecha_de_aprobacion_espana" />
                           </div>
                         </TableHead>
-                        <TableHead className="w-[100px]">
+                        <TableHead className="w-[120px]">
                           <span className="font-semibold">Acciones</span>
                         </TableHead>
                       </TableRow>
@@ -360,12 +407,14 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                     <TableBody>
                       {paginatedData.map((medication, index) => {
                         const isSelected = selectedMedicationIds.has(medication.ID_NUM?.toString());
+                        const isFavorite = favorites.has(medication.ID_NUM?.toString());
+                        const isDeleting = deletingIds.has(medication.ID_NUM?.toString());
                         return (
                           <TableRow 
                             key={medication.ID_NUM || index} 
                             className={`hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-b ${
                               isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''
-                            }`}
+                            } ${isDeleting ? 'opacity-50' : ''}`}
                           >
                             <TableCell className="text-center">
                               <Checkbox
@@ -373,12 +422,30 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                                 onCheckedChange={(checked) => 
                                   handleSelectMedication(medication.ID_NUM?.toString(), checked === true)
                                 }
+                                disabled={isDeleting}
                               />
                             </TableCell>
                             <TableCell className="text-center">
                               <div className="w-[30px] text-xs text-gray-500">
                                 {medication.ID_NUM}
                               </div>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleToggleFavorite(medication.ID_NUM?.toString())}
+                                className="p-0 h-auto"
+                                disabled={isDeleting}
+                              >
+                                <Star 
+                                  className={`w-4 h-4 ${
+                                    isFavorite 
+                                      ? 'text-yellow-500 fill-yellow-500' 
+                                      : 'text-gray-300 hover:text-yellow-400'
+                                  }`}
+                                />
+                              </Button>
                             </TableCell>
                             <TableCell className="font-medium">
                               <div className="w-[100px] truncate" title={medication.nombre_lab}>
@@ -401,6 +468,11 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                               </div>
                             </TableCell>
                             <TableCell>
+                              <div className="w-[130px]" title={medication.sub_area_de_tratamiento}>
+                                {getSubAreaSummary(medication.sub_area_de_tratamiento)}
+                              </div>
+                            </TableCell>
+                            <TableCell>
                               <Badge className={getStatusColor(medication.estado_en_espana)}>
                                 {medication.estado_en_espana || 'Sin estado'}
                               </Badge>
@@ -417,8 +489,23 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                                   size="sm" 
                                   onClick={() => handleViewDetails(medication)}
                                   title="Ver detalles completos"
+                                  disabled={isDeleting}
                                 >
                                   <Eye className="w-4 h-4" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => handleDeleteMedication(medication.ID_NUM?.toString())}
+                                  title="Eliminar medicamento"
+                                  disabled={isDeleting}
+                                  className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                                >
+                                  {isDeleting ? (
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                                  ) : (
+                                    <Trash2 className="w-4 h-4" />
+                                  )}
                                 </Button>
                                 {medication.fuente_url && (
                                   <Button variant="ghost" size="sm" asChild>

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, FileText, CalendarDays, BarChart, Building, CheckCircle, Clock, AlertTriangle, Atom } from 'lucide-react';
+import { FileText, Building, CalendarDays, BarChart, Atom, Target, TrendingUp, Activity } from 'lucide-react';
 
 interface StatsCardsProps {
   medications: any[];
@@ -11,18 +11,6 @@ interface StatsCardsProps {
 
 export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loading }) => {
   const totalMedications = medications.length;
-  
-  const approvedMeds = medications.filter(med => 
-    med.estado_en_espana && med.estado_en_espana.toLowerCase().includes('aprobado')
-  ).length;
-  
-  const inTrials = medications.filter(med => 
-    med.estado_en_espana && med.estado_en_espana.toLowerCase().includes('ensayo')
-  ).length;
-  
-  const pendingMeds = medications.filter(med => 
-    med.estado_en_espana && med.estado_en_espana.toLowerCase().includes('pendiente')
-  ).length;
   
   const uniqueLabs = new Set(medications.map(med => med.nombre_lab).filter(Boolean)).size;
   
@@ -39,13 +27,20 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loadin
 
   const uniqueTherapeuticAreas = new Set(medications.map(med => med.area_terapeutica).filter(Boolean)).size;
   
+  const medicationsWithMolecules = medications.filter(med => 
+    med.nombre_de_la_molecula && med.nombre_de_la_molecula.trim() !== ''
+  ).length;
+
+  const medicationsWithMechanism = medications.filter(med => 
+    med.mecanismo_de_accion && med.mecanismo_de_accion.trim() !== ''
+  ).length;
+
   const medicationsWithClinicalTrials = medications.filter(med => 
     med.ensayos_clinicos_relevantes && med.ensayos_clinicos_relevantes.trim() !== ''
   ).length;
 
-  // Medicamentos con información de moléculas
-  const medicationsWithMolecules = medications.filter(med => 
-    med.molecula && med.molecula.trim() !== ''
+  const medicationsWithGeneticTarget = medications.filter(med => 
+    med.alteracion_genetica_dirigida && med.alteracion_genetica_dirigida.trim() !== ''
   ).length;
 
   const stats = [
@@ -62,27 +57,6 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loadin
       icon: Building,
       color: 'bg-purple-500',
       description: 'Laboratorios únicos'
-    },
-    {
-      title: 'Aprobados',
-      value: approvedMeds,
-      icon: CheckCircle,
-      color: 'bg-green-500',
-      description: 'Medicamentos aprobados'
-    },
-    {
-      title: 'En Ensayos',
-      value: inTrials,
-      icon: BarChart,
-      color: 'bg-orange-500',
-      description: 'En fase de ensayos'
-    },
-    {
-      title: 'Pendientes',
-      value: pendingMeds,
-      icon: Clock,
-      color: 'bg-yellow-500',
-      description: 'Pendientes de aprobación'
     },
     {
       title: `Aprobados ${currentYear}`,
@@ -104,6 +78,27 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ medications = [], loadin
       icon: Atom,
       color: 'bg-pink-500',
       description: 'Con información de moléculas'
+    },
+    {
+      title: 'Con Mecanismo',
+      value: medicationsWithMechanism,
+      icon: Activity,
+      color: 'bg-orange-500',
+      description: 'Con mecanismo de acción'
+    },
+    {
+      title: 'Con Ensayos',
+      value: medicationsWithClinicalTrials,
+      icon: BarChart,
+      color: 'bg-green-500',
+      description: 'Con ensayos clínicos'
+    },
+    {
+      title: 'Con Target Genético',
+      value: medicationsWithGeneticTarget,
+      icon: Target,
+      color: 'bg-red-500',
+      description: 'Con alteración genética'
     }
   ];
 
