@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Navigation } from '@/components/Navigation';
 import { ThemeProvider } from '@/components/ThemeProvider';
-import { Search, Filter, BarChart3, Heart } from 'lucide-react';
+import { Search, Filter, BarChart3, Star } from 'lucide-react';
 import { usePharmaTacticsData } from '@/hooks/usePharmaTacticsData';
 import { useTacticsFavorites } from '@/hooks/useTacticsFavorites';
 import { TacticsKPIs } from '@/components/Tactics/TacticsKPIs';
@@ -163,7 +163,7 @@ const Tactics = () => {
                   htmlFor="favorites"
                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2"
                 >
-                  <Heart className="w-4 h-4" />
+                  <Star className="w-4 h-4" />
                   Mostrar solo favoritos
                 </label>
               </div>
