@@ -48,7 +48,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleFilters }) => {
                     MEDISTREAM
                   </h1>
                   <p className="text-sm text-gray-600 dark:text-gray-300">
-                    Derechos reservados a Medistream©
+                    Derechos reservados a Medistream™
                   </p>
                 </div>
               </div>
