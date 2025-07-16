@@ -106,7 +106,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         let message = '';
         let details: any = {};
         
-        // Extraer información adicional del primer registro nuevo
+        // Extraer información adicional del primer registro nuevo usando los nombres de columna correctos
         if (data && data.length > 0) {
           const latestRecord = data[0];
           
@@ -115,8 +115,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
               title = 'Nuevos datos de DrugDealer';
               message = `Se han añadido ${newRecords} nuevos registros de medicamentos`;
               details = {
-                laboratory: latestRecord.LAB || 'No especificado',
-                drug: latestRecord.FARMACO || 'No especificado',
+                laboratory: latestRecord.nombre_lab || 'No especificado',
+                drug: latestRecord.nombre_del_farmaco || 'No especificado',
                 userEmail: latestRecord.user_email || 'Usuario anónimo'
               };
               break;
@@ -133,8 +133,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
               title = 'Nuevas Tactics disponibles';
               message = `Se han añadido ${newRecords} nuevas tactics`;
               details = {
-                laboratory: latestRecord.laboratory || latestRecord.lab || 'No especificado',
-                drug: latestRecord.drug || latestRecord.farmaco || 'No especificado',
+                laboratory: latestRecord.laboratorio || 'No especificado',
+                drug: latestRecord.farmaco || 'No especificado',
                 userEmail: latestRecord.user_email || 'Usuario anónimo'
               };
               break;
