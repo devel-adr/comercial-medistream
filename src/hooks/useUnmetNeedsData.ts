@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -19,6 +18,7 @@ type UnmetNeedWithFavorito = {
   unmet_need?: string;
   favorito?: boolean;
   preguntas?: string;
+  user_email?: string;
 };
 
 export const useUnmetNeedsData = (refreshInterval = 30000) => {
@@ -60,12 +60,13 @@ export const useUnmetNeedsData = (refreshInterval = 30000) => {
           
           lastEventTimeRef.current = now;
           
-          // Dispatch custom event for data update
+          // Dispatch custom event for data update with detailed data
           window.dispatchEvent(new CustomEvent('dataUpdated', { 
             detail: { 
               type: 'unmetNeeds', 
               count: newCount,
-              newRecords: newRecords
+              newRecords: newRecords,
+              data: unmetNeeds || []
             } 
           }));
         } else {

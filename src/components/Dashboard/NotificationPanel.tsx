@@ -1,10 +1,11 @@
 
 import React from 'react';
-import { Bell, Database, Users, X, Target } from 'lucide-react';
+import { Bell, Database, Users, X, Target, Building, Pill, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 
 interface NotificationItem {
   id: string;
@@ -14,6 +15,11 @@ interface NotificationItem {
   timestamp: Date;
   count: number;
   newRecords: number;
+  details?: {
+    laboratory?: string;
+    drug?: string;
+    userEmail?: string;
+  };
 }
 
 interface NotificationPanelProps {
@@ -80,7 +86,7 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({
   return (
     <div className="fixed inset-0 z-50 bg-black/20" onClick={onClose}>
       <div 
-        className="absolute top-16 right-4 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700"
+        className="absolute top-16 right-4 w-96 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700"
         onClick={(e) => e.stopPropagation()}
       >
         <Card className="border-0 shadow-none">
@@ -133,12 +139,45 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({
                           {formatTime(notification.timestamp)}
                         </span>
                       </div>
+                      
                       <h4 className="font-medium text-sm text-gray-900 dark:text-white mb-1">
                         {notification.title}
                       </h4>
-                      <p className="text-xs text-gray-600 dark:text-gray-300 mb-2">
+                      
+                      <p className="text-xs text-gray-600 dark:text-gray-300 mb-3">
                         {notification.message}
                       </p>
+
+                      {notification.details && (
+                        <>
+                          <Separator className="my-2" />
+                          <div className="space-y-1">
+                            {notification.details.laboratory && (
+                              <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
+                                <Building className="w-3 h-3" />
+                                <span className="font-medium">Lab:</span>
+                                <span>{notification.details.laboratory}</span>
+                              </div>
+                            )}
+                            {notification.details.drug && (
+                              <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
+                                <Pill className="w-3 h-3" />
+                                <span className="font-medium">Fármaco:</span>
+                                <span>{notification.details.drug}</span>
+                              </div>
+                            )}
+                            {notification.details.userEmail && (
+                              <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
+                                <Mail className="w-3 h-3" />
+                                <span className="font-medium">Usuario:</span>
+                                <span className="truncate">{notification.details.userEmail}</span>
+                              </div>
+                            )}
+                          </div>
+                          <Separator className="my-2" />
+                        </>
+                      )}
+                      
                       <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
                         <span>+{notification.newRecords} nuevos registros</span>
                         <span>Total: {notification.count}</span>

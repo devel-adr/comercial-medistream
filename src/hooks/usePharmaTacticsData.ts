@@ -45,12 +45,13 @@ export const usePharmaTacticsData = (refreshInterval = 30000) => {
           
           lastEventTimeRef.current = now;
           
-          // Dispatch custom event for data update
+          // Dispatch custom event for data update with detailed data
           window.dispatchEvent(new CustomEvent('dataUpdated', { 
             detail: { 
               type: 'pharmaTactics', 
               count: newCount,
-              newRecords: newRecords
+              newRecords: newRecords,
+              data: tactics || []
             } 
           }));
         } else {

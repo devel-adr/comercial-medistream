@@ -19,6 +19,11 @@ interface NotificationItem {
   timestamp: Date;
   count: number;
   newRecords: number;
+  details?: {
+    laboratory?: string;
+    drug?: string;
+    userEmail?: string;
+  };
 }
 
 interface NotificationContextType {
@@ -69,7 +74,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       isProcessingRef.current = true;
       
       try {
-        const { type, count, newRecords } = event.detail;
+        const { type, count, newRecords, data } = event.detail;
         const now = Date.now();
         
         // Crear un ID único para esta notificación específica
@@ -99,22 +104,61 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         
         let title = 'Nuevos datos disponibles';
         let message = '';
+        let details: any = {};
         
-        switch (type) {
-          case 'medications':
-            title = 'Nuevos datos de DrugDealer';
-            message = `Se han añadido ${newRecords} nuevos registros de medicamentos`;
-            break;
-          case 'unmetNeeds':
-            title = 'Nuevos datos de Unmet Needs';
-            message = `Se han añadido ${newRecords} nuevos registros de unmet needs`;
-            break;
-          case 'pharmaTactics':
-            title = 'Nuevas Tactics disponibles';
-            message = `Se han añadido ${newRecords} nuevas tactics`;
-            break;
-          default:
-            message = `Se han añadido ${newRecords} nuevos registros`;
+        // Extraer información adicional del primer registro nuevo
+        if (data && data.length > 0) {
+          const latestRecord = data[0];
+          
+          switch (type) {
+            case 'medications':
+              title = 'Nuevos datos de DrugDealer';
+              message = `Se han añadido ${newRecords} nuevos registros de medicamentos`;
+              details = {
+                laboratory: latestRecord.LAB || 'No especificado',
+                drug: latestRecord.FARMACO || 'No especificado',
+                userEmail: latestRecord.user_email || 'Usuario anónimo'
+              };
+              break;
+            case 'unmetNeeds':
+              title = 'Nuevos datos de Unmet Needs';
+              message = `Se han añadido ${newRecords} nuevos registros de unmet needs`;
+              details = {
+                laboratory: latestRecord.lab || 'No especificado',
+                drug: latestRecord.farmaco || 'No especificado',
+                userEmail: latestRecord.user_email || 'Usuario anónimo'
+              };
+              break;
+            case 'pharmaTactics':
+              title = 'Nuevas Tactics disponibles';
+              message = `Se han añadido ${newRecords} nuevas tactics`;
+              details = {
+                laboratory: latestRecord.laboratory || latestRecord.lab || 'No especificado',
+                drug: latestRecord.drug || latestRecord.farmaco || 'No especificado',
+                userEmail: latestRecord.user_email || 'Usuario anónimo'
+              };
+              break;
+            default:
+              message = `Se han añadido ${newRecords} nuevos registros`;
+          }
+        } else {
+          // Fallback para cuando no hay data específica
+          switch (type) {
+            case 'medications':
+              title = 'Nuevos datos de DrugDealer';
+              message = `Se han añadido ${newRecords} nuevos registros de medicamentos`;
+              break;
+            case 'unmetNeeds':
+              title = 'Nuevos datos de Unmet Needs';
+              message = `Se han añadido ${newRecords} nuevos registros de unmet needs`;
+              break;
+            case 'pharmaTactics':
+              title = 'Nuevas Tactics disponibles';
+              message = `Se han añadido ${newRecords} nuevas tactics`;
+              break;
+            default:
+              message = `Se han añadido ${newRecords} nuevos registros`;
+          }
         }
         
         const newNotification: NotificationItem = {
@@ -124,7 +168,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
           message,
           timestamp: new Date(),
           count,
-          newRecords
+          newRecords,
+          details
         };
 
         setNotifications(prev => {

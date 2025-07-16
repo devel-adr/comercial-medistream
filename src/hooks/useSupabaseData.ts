@@ -41,12 +41,13 @@ export const useSupabaseData = (refreshInterval = 30000) => {
           
           lastEventTimeRef.current = now;
           
-          // Dispatch custom event for data update
+          // Dispatch custom event for data update with detailed data
           window.dispatchEvent(new CustomEvent('dataUpdated', { 
             detail: { 
               type: 'medications', 
               count: newCount,
-              newRecords: newRecords
+              newRecords: newRecords,
+              data: medications || []
             } 
           }));
         } else {
