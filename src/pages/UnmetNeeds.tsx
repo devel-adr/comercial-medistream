@@ -401,24 +401,24 @@ const UnmetNeeds = () => {
         <Navigation />
         
         <div className="container mx-auto px-4 py-6 space-y-6">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center justify-center flex-1">
-              <div className="text-center">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                  Unmet Needs Dashboard
-                </h1>
-                <p className="text-gray-600 dark:text-gray-300">
-                  Análisis completo de necesidades médicas no cubiertas
-                </p>
-              </div>
+          <div className="relative">
+            <div className="absolute right-0 top-0">
+              <Button
+                onClick={() => setIsAddModalOpen(true)}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Añadir Unmet Need
+              </Button>
             </div>
-            <Button
-              onClick={() => setIsAddModalOpen(true)}
-              className="bg-green-600 hover:bg-green-700 text-white"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Añadir Unmet Need
-            </Button>
+            <div className="text-center">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                Unmet Needs Dashboard
+              </h1>
+              <p className="text-gray-600 dark:text-gray-300">
+                Análisis completo de necesidades médicas no cubiertas
+              </p>
+            </div>
           </div>
 
           {/* KPIs */}
