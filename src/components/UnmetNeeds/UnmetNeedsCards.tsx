@@ -96,15 +96,15 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
         return (
           <Card 
             key={item.id_UN_table || index}
-            className={`relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border-2 ${getHorizonteColor(item.horizonte_temporal)} ${
+            className={`relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border-2 h-[600px] flex flex-col ${getHorizonteColor(item.horizonte_temporal)} ${
               isSelected ? 'ring-2 ring-blue-500 bg-blue-50/50 dark:bg-blue-900/20' : ''
             }`}
           >
             <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-bl-full"></div>
             
-            <CardContent className="p-5 space-y-4">
+            <CardContent className="p-5 flex flex-col h-full">
               {/* Header */}
-              <div className="flex justify-between items-start relative z-10">
+              <div className="flex justify-between items-start relative z-10 mb-4">
                 <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                   #{item.id_UN_table || index + 1}
                 </div>
@@ -148,7 +148,7 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
               </div>
 
               {/* Basic Info Grid - Only show fields that have content */}
-              <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="grid grid-cols-2 gap-2 text-xs mb-4">
                 {item.area_terapeutica && (
                   <div className="bg-blue-50 dark:bg-blue-900/20 p-2 rounded border-l-2 border-blue-400">
                     <div className="text-blue-600 dark:text-blue-400 font-medium mb-1">Área Terapéutica</div>
@@ -177,7 +177,7 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
 
               {/* Molécula Section - Only show if exists */}
               {item.molecula && item.molecula.trim() !== '' && (
-                <div className="bg-pink-50 dark:bg-pink-900/20 p-3 rounded-lg border border-pink-200 dark:border-pink-800">
+                <div className="bg-pink-50 dark:bg-pink-900/20 p-3 rounded-lg border border-pink-200 dark:border-pink-800 mb-3">
                   <div className="flex items-center gap-2 mb-2">
                     <Atom className="w-4 h-4 text-pink-600 dark:text-pink-400" />
                     <span className="text-sm font-semibold text-pink-700 dark:text-pink-300">Molécula</span>
@@ -188,8 +188,8 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
                 </div>
               )}
 
-              {/* Dynamic sections - Only show sections that have content */}
-              <div className="space-y-3">
+              {/* Dynamic sections - Only show sections that have content - Scrollable area */}
+              <div className="flex-1 overflow-y-auto space-y-3 mb-3">
                 {/* Unmet Need - Always show since it's core content */}
                 <div className="bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
@@ -258,8 +258,8 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
                 )}
               </div>
 
-              {/* Format Selection and Action Buttons */}
-              <div className="flex gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+              {/* Format Selection and Action Buttons - Fixed at bottom */}
+              <div className="flex gap-2 pt-2 border-t border-gray-200 dark:border-gray-700 mt-auto">
                 <div className="flex-1">
                   <Select
                     value={formatSelections[item.id_UN_table?.toString()] || 'none'}
