@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -88,7 +87,7 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+    <div className="grid grid-cols-[repeat(auto-fit,_minmax(380px,_1fr))] gap-6">
       {data.map((item, index) => {
         const isSelected = selectedIds.has(item.id_UN_table?.toString());
         const itemId = item.id_UN_table?.toString();
