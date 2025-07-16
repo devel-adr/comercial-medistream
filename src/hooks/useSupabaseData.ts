@@ -17,7 +17,6 @@ export const useSupabaseData = (refreshInterval = 30000) => {
       const { data: medications, error } = await supabase
         .from('DrugDealer_table')
         .select('*')
-        .order('created_at', { ascending: false })
         .order('ID_NUM', { ascending: false });
 
       if (error) {
