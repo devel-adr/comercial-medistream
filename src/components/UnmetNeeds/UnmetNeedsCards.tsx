@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BarChart3, FileText, Users, Target, Clock, Lightbulb, Star, Atom, Trash2 } from 'lucide-react';
+import { BarChart3, FileText, Users, Target, Clock, Lightbulb, Star, Atom, Trash2, HelpCircle } from 'lucide-react';
 
 interface UnmetNeedsCardsProps {
   data: any[];
@@ -205,6 +205,19 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
                     {item.conclusion || 'Sin conclusión disponible'}
                   </p>
                 </div>
+
+                {/* Preguntas de ayuda */}
+                {item.preguntas && item.preguntas.trim() !== '' && (
+                  <div className="bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <HelpCircle className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                      <span className="text-sm font-semibold text-indigo-700 dark:text-indigo-300">Preguntas de ayuda</span>
+                    </div>
+                    <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">
+                      {item.preguntas}
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Format Selection and Action Buttons */}

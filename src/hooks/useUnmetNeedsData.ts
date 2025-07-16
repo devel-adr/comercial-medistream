@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-// Extend the existing type to include favorito field
+// Extend the existing type to include favorito and preguntas fields
 type UnmetNeedWithFavorito = {
   id_UN_table?: number;
   area_terapeutica?: string;
@@ -18,6 +18,7 @@ type UnmetNeedWithFavorito = {
   racional?: string;
   unmet_need?: string;
   favorito?: boolean;
+  preguntas?: string;
 };
 
 export const useUnmetNeedsData = (refreshInterval = 30000) => {
