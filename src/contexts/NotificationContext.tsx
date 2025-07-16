@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
 import { playNotificationSound } from '@/utils/notificationSounds';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
@@ -74,19 +73,13 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       isProcessingRef.current = true;
       
       try {
-        const { type, count, newRecords, data } = event.detail;
+        const { type, count, newRecords, data, latestRecord } = event.detail;
         const now = Date.now();
         
         // Crear un ID único para esta notificación específica
-        const notificationId = `${type}_${count}_${newRecords}`;
+        const notificationId = `${type}_${count}_${newRecords}_${now}`;
         
-        // Verificar si ya procesamos esta notificación exacta
-        if (processedNotificationsRef.current.has(notificationId)) {
-          console.log('Notification already processed:', notificationId);
-          return;
-        }
-        
-        // Verificar tiempo desde la última notificación del mismo tipo
+        // Verificar si ya procesamos una notificación similar recientemente
         const lastTime = lastNotificationTimeRef.current[type] || 0;
         if (now - lastTime < 3000) { // 3 segundos de cooldown por tipo
           console.log('Notification cooldown active for type:', type);
@@ -106,36 +99,39 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         let message = '';
         let details: any = {};
         
-        // Extraer información adicional del primer registro nuevo usando los nombres de columna correctos
-        if (data && data.length > 0) {
-          const latestRecord = data[0];
-          
+        // Usar latestRecord si está disponible, si no usar el primer elemento de data
+        const recordToUse = latestRecord || (data && data.length > 0 ? data[0] : null);
+        
+        console.log('Record to use for notification:', recordToUse);
+        
+        if (recordToUse) {
           switch (type) {
             case 'medications':
               title = 'Nuevos datos de DrugDealer';
               message = `Se han añadido ${newRecords} nuevos registros de medicamentos`;
               details = {
-                laboratory: latestRecord.nombre_lab || 'No especificado',
-                drug: latestRecord.nombre_del_farmaco || 'No especificado',
-                userEmail: latestRecord.user_email || 'Usuario anónimo'
+                laboratory: recordToUse.nombre_lab || 'No especificado',
+                drug: recordToUse.nombre_del_farmaco || 'No especificado',
+                userEmail: recordToUse.user_email || 'Usuario anónimo'
               };
+              console.log('DrugDealer notification details:', details);
               break;
             case 'unmetNeeds':
               title = 'Nuevos datos de Unmet Needs';
               message = `Se han añadido ${newRecords} nuevos registros de unmet needs`;
               details = {
-                laboratory: latestRecord.lab || 'No especificado',
-                drug: latestRecord.farmaco || 'No especificado',
-                userEmail: latestRecord.user_email || 'Usuario anónimo'
+                laboratory: recordToUse.lab || 'No especificado',
+                drug: recordToUse.farmaco || 'No especificado',
+                userEmail: recordToUse.user_email || 'Usuario anónimo'
               };
               break;
             case 'pharmaTactics':
               title = 'Nuevas Tactics disponibles';
               message = `Se han añadido ${newRecords} nuevas tactics`;
               details = {
-                laboratory: latestRecord.laboratorio || 'No especificado',
-                drug: latestRecord.farmaco || 'No especificado',
-                userEmail: latestRecord.user_email || 'Usuario anónimo'
+                laboratory: recordToUse.laboratorio || 'No especificado',
+                drug: recordToUse.farmaco || 'No especificado',
+                userEmail: recordToUse.user_email || 'Usuario anónimo'
               };
               break;
             default:

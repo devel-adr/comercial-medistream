@@ -17,6 +17,7 @@ export const useSupabaseData = (refreshInterval = 30000) => {
       const { data: medications, error } = await supabase
         .from('DrugDealer_table')
         .select('*')
+        .order('created_at', { ascending: false })
         .order('ID_NUM', { ascending: false });
 
       if (error) {
@@ -25,6 +26,7 @@ export const useSupabaseData = (refreshInterval = 30000) => {
 
       const newCount = medications?.length || 0;
       console.log('Data fetched successfully:', newCount, 'records');
+      console.log('Latest record details:', medications?.[0]);
       
       // Check if we have new data (only after initial load)
       if (!isInitialLoadRef.current && 
@@ -38,6 +40,7 @@ export const useSupabaseData = (refreshInterval = 30000) => {
         if (timeSinceLastEvent >= 5000) {
           const newRecords = newCount - previousCountRef.current;
           console.log('New DrugDealer data detected:', newRecords, 'new records');
+          console.log('Latest record for notification:', medications?.[0]);
           
           lastEventTimeRef.current = now;
           
@@ -47,7 +50,8 @@ export const useSupabaseData = (refreshInterval = 30000) => {
               type: 'medications', 
               count: newCount,
               newRecords: newRecords,
-              data: medications || []
+              data: medications || [],
+              latestRecord: medications?.[0] || null
             } 
           }));
         } else {
