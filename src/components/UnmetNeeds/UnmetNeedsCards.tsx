@@ -87,7 +87,7 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
   };
 
   return (
-    <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
+    <div className="grid grid-cols-[repeat(auto-fit,_minmax(380px,_1fr))] gap-6">
       {data.map((item, index) => {
         const isSelected = selectedIds.has(item.id_UN_table?.toString());
         const itemId = item.id_UN_table?.toString();
@@ -96,7 +96,7 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
         return (
           <Card 
             key={item.id_UN_table || index}
-            className={`relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border-2 break-inside-avoid mb-6 ${getHorizonteColor(item.horizonte_temporal)} ${
+            className={`relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border-2 ${getHorizonteColor(item.horizonte_temporal)} ${
               isSelected ? 'ring-2 ring-blue-500 bg-blue-50/50 dark:bg-blue-900/20' : ''
             }`}
           >
