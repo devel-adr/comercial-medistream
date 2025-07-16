@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
 import { playNotificationSound } from '@/utils/notificationSounds';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
@@ -109,10 +110,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             case 'medications':
               title = 'Nuevos datos de DrugDealer';
               message = `Se han añadido ${newRecords} nuevos registros de medicamentos`;
+              // Solo mostrar laboratorio y email para DrugDealer
               details = {
                 laboratory: recordToUse.nombre_lab || 'No especificado',
-                drug: recordToUse.nombre_del_farmaco || 'No especificado',
-                userEmail: recordToUse.user_email || 'Usuario anónimo'
+                userEmail: recordToUse.user_email || recordToUse.correo || 'No especificado'
               };
               console.log('DrugDealer notification details:', details);
               break;

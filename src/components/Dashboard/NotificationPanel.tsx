@@ -159,7 +159,8 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({
                                 <span>{notification.details.laboratory}</span>
                               </div>
                             )}
-                            {notification.details.drug && (
+                            {/* Solo mostrar fármaco si NO es una notificación de medications (DrugDealer) */}
+                            {notification.details.drug && notification.type !== 'medications' && (
                               <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
                                 <Pill className="w-3 h-3" />
                                 <span className="font-medium">Fármaco:</span>
