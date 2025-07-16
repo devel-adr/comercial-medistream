@@ -29,7 +29,7 @@ export const AnalysisBar: React.FC<AnalysisBarProps> = ({ onSearch }) => {
     try {
       console.log('Sending analysis request to webhook:', searchTerm);
 
-      const response = await fetch('https://develms.app.n8n.cloud/webhook/starter', {
+      const response = await fetch('https://develms.app.n8n.cloud/webhook-test/starter-desarrollo', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -74,7 +74,7 @@ export const AnalysisBar: React.FC<AnalysisBarProps> = ({ onSearch }) => {
         <div>
           <h2 className="text-xl font-bold mb-2">Análisis de Laboratorio</h2>
           <p className="text-blue-100 mb-4">
-            Introduce información del laboratorio o medicamento para análisis automático
+            Introduce el laboratorio para el análisis automático
           </p>
         </div>
         <form onSubmit={handleSearch} className="flex gap-2">
@@ -82,7 +82,7 @@ export const AnalysisBar: React.FC<AnalysisBarProps> = ({ onSearch }) => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
               type="text"
-              placeholder="Ej: Análisis de eficacia del medicamento X en ensayos fase III..."
+              placeholder="Ej: Novartis..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/70 focus:bg-white/30"

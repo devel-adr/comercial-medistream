@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BarChart3, FileText, Users, Target, Clock, Lightbulb, Eye, Atom } from 'lucide-react';
+import { BarChart3, FileText, Users, Target, Clock, Lightbulb, Star, Atom, Trash2, HelpCircle } from 'lucide-react';
 
 interface UnmetNeedsCardsProps {
   data: any[];
@@ -13,7 +12,10 @@ interface UnmetNeedsCardsProps {
   formatSelections: Record<string, string>;
   onFormatChange: (id: string, format: string) => void;
   formatOptions: string[];
-  onViewDetails?: (unmetNeed: any) => void;
+  onToggleFavorite?: (unmetNeed: any) => void;
+  onDelete?: (unmetNeed: any) => void;
+  localFavorites?: Set<string>;
+  onToggleLocalFavorite?: (id: string) => void;
 }
 
 export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
@@ -23,7 +25,10 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
   formatSelections,
   onFormatChange,
   formatOptions,
-  onViewDetails
+  onToggleFavorite,
+  onDelete,
+  localFavorites = new Set(),
+  onToggleLocalFavorite
 }) => {
   const getImpactColor = (impacto: string) => {
     if (!impacto) return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
@@ -43,17 +48,51 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
     return 'border-gray-200';
   };
 
-  const handleViewDetails = (item: any) => {
-    console.log('Eye button clicked for item:', item);
-    if (onViewDetails) {
-      onViewDetails(item);
+  const formatQuestions = (questions: string) => {
+    if (!questions || !questions.trim()) return [];
+    
+    // Split by numbered patterns like "1.-", "2.-", etc.
+    const questionPattern = /(\d+\.\-\s*)/;
+    const parts = questions.split(questionPattern).filter(part => part.trim());
+    
+    const formattedQuestions = [];
+    for (let i = 0; i < parts.length; i += 2) {
+      if (parts[i] && parts[i + 1]) {
+        formattedQuestions.push(parts[i] + parts[i + 1].trim());
+      }
+    }
+    
+    // If no numbered pattern found, try to split by periods followed by space and capital letter
+    if (formattedQuestions.length === 0) {
+      const sentences = questions.split(/\.\s+(?=[A-Z¿])/);
+      return sentences.map(sentence => sentence.endsWith('.') ? sentence : sentence + '.');
+    }
+    
+    return formattedQuestions;
+  };
+
+  const handleToggleFavorite = (item: any) => {
+    console.log('Star button clicked for item:', item);
+    const itemId = item.id_UN_table?.toString();
+    if (onToggleLocalFavorite && itemId) {
+      onToggleLocalFavorite(itemId);
+    }
+  };
+
+  const handleDelete = (item: any) => {
+    console.log('Delete button clicked for item:', item);
+    if (onDelete) {
+      onDelete(item);
     }
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+    <div className="grid grid-cols-[repeat(auto-fit,_minmax(380px,_1fr))] gap-6">
       {data.map((item, index) => {
         const isSelected = selectedIds.has(item.id_UN_table?.toString());
+        const itemId = item.id_UN_table?.toString();
+        const isFavorite = localFavorites.has(itemId);
+        
         return (
           <Card 
             key={item.id_UN_table || index}
@@ -65,7 +104,7 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
             
             <CardContent className="p-5 space-y-4">
               {/* Header */}
-              <div className="flex justify-between items-start">
+              <div className="flex justify-between items-start relative z-10">
                 <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                   #{item.id_UN_table || index + 1}
                 </div>
@@ -79,37 +118,64 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      handleViewDetails(item);
+                      handleToggleFavorite(item);
                     }}
-                    className="h-8 w-8 p-0 hover:bg-blue-100 dark:hover:bg-blue-900/20"
+                    className="h-8 w-8 p-0 hover:bg-yellow-100 dark:hover:bg-yellow-900/20 relative z-20"
                     type="button"
                   >
-                    <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    <Star 
+                      className={`w-4 h-4 ${
+                        isFavorite 
+                          ? 'text-yellow-500 fill-yellow-500' 
+                          : 'text-gray-400 hover:text-yellow-500'
+                      }`} 
+                    />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleDelete(item);
+                    }}
+                    className="h-8 w-8 p-0 hover:bg-red-100 dark:hover:bg-red-900/20 relative z-20"
+                    type="button"
+                  >
+                    <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
                   </Button>
                 </div>
               </div>
 
-              {/* Basic Info Grid */}
+              {/* Basic Info Grid - Only show fields that have content */}
               <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="bg-blue-50 dark:bg-blue-900/20 p-2 rounded border-l-2 border-blue-400">
-                  <div className="text-blue-600 dark:text-blue-400 font-medium mb-1">Área Terapéutica</div>
-                  <div className="text-gray-900 dark:text-gray-100 truncate">{item.area_terapeutica || 'N/A'}</div>
-                </div>
-                <div className="bg-purple-50 dark:bg-purple-900/20 p-2 rounded border-l-2 border-purple-400">
-                  <div className="text-purple-600 dark:text-purple-400 font-medium mb-1">Fármaco</div>
-                  <div className="text-gray-900 dark:text-gray-100 truncate">{item.farmaco || 'N/A'}</div>
-                </div>
-                <div className="bg-green-50 dark:bg-green-900/20 p-2 rounded border-l-2 border-green-400">
-                  <div className="text-green-600 dark:text-green-400 font-medium mb-1">Horizonte</div>
-                  <div className="text-gray-900 dark:text-gray-100 truncate">{item.horizonte_temporal || 'N/A'}</div>
-                </div>
-                <div className="bg-orange-50 dark:bg-orange-900/20 p-2 rounded border-l-2 border-orange-400">
-                  <div className="text-orange-600 dark:text-orange-400 font-medium mb-1">Laboratorio</div>
-                  <div className="text-gray-900 dark:text-gray-100 truncate">{item.lab || 'N/A'}</div>
-                </div>
+                {item.area_terapeutica && (
+                  <div className="bg-blue-50 dark:bg-blue-900/20 p-2 rounded border-l-2 border-blue-400">
+                    <div className="text-blue-600 dark:text-blue-400 font-medium mb-1">Área Terapéutica</div>
+                    <div className="text-gray-900 dark:text-gray-100 truncate">{item.area_terapeutica}</div>
+                  </div>
+                )}
+                {item.farmaco && (
+                  <div className="bg-purple-50 dark:bg-purple-900/20 p-2 rounded border-l-2 border-purple-400">
+                    <div className="text-purple-600 dark:text-purple-400 font-medium mb-1">Fármaco</div>
+                    <div className="text-gray-900 dark:text-gray-100 truncate">{item.farmaco}</div>
+                  </div>
+                )}
+                {item.horizonte_temporal && (
+                  <div className="bg-green-50 dark:bg-green-900/20 p-2 rounded border-l-2 border-green-400">
+                    <div className="text-green-600 dark:text-green-400 font-medium mb-1">Horizonte</div>
+                    <div className="text-gray-900 dark:text-gray-100 truncate">{item.horizonte_temporal}</div>
+                  </div>
+                )}
+                {item.lab && (
+                  <div className="bg-orange-50 dark:bg-orange-900/20 p-2 rounded border-l-2 border-orange-400">
+                    <div className="text-orange-600 dark:text-orange-400 font-medium mb-1">Laboratorio</div>
+                    <div className="text-gray-900 dark:text-gray-100 truncate">{item.lab}</div>
+                  </div>
+                )}
               </div>
 
-              {/* Molécula Section */}
+              {/* Molécula Section - Only show if exists */}
               {item.molecula && item.molecula.trim() !== '' && (
                 <div className="bg-pink-50 dark:bg-pink-900/20 p-3 rounded-lg border border-pink-200 dark:border-pink-800">
                   <div className="flex items-center gap-2 mb-2">
@@ -122,9 +188,9 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
                 </div>
               )}
 
-              {/* Detailed Information */}
+              {/* Dynamic sections - Only show sections that have content */}
               <div className="space-y-3">
-                {/* Unmet Need */}
+                {/* Unmet Need - Always show since it's core content */}
                 <div className="bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
                     <FileText className="w-4 h-4 text-gray-600 dark:text-gray-400" />
@@ -135,19 +201,21 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
                   </p>
                 </div>
 
-                {/* Racional */}
-                <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Lightbulb className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                    <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">Racional</span>
+                {/* Racional - Only show if exists */}
+                {item.racional && item.racional.trim() !== '' && (
+                  <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Lightbulb className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">Racional</span>
+                    </div>
+                    <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">
+                      {item.racional}
+                    </p>
                   </div>
-                  <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">
-                    {item.racional || 'Sin información disponible'}
-                  </p>
-                </div>
+                )}
 
-                {/* Oportunidad Estratégica */}
-                {item.oportunidad_estrategica && (
+                {/* Oportunidad Estratégica - Only show if exists */}
+                {item.oportunidad_estrategica && item.oportunidad_estrategica.trim() !== '' && (
                   <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
                       <Target className="w-4 h-4 text-green-600 dark:text-green-400" />
@@ -159,16 +227,35 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
                   </div>
                 )}
 
-                {/* Conclusión */}
-                <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Users className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                    <span className="text-sm font-semibold text-purple-700 dark:text-purple-300">Conclusión</span>
+                {/* Conclusión - Only show if exists */}
+                {item.conclusion && item.conclusion.trim() !== '' && (
+                  <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Users className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                      <span className="text-sm font-semibold text-purple-700 dark:text-purple-300">Conclusión</span>
+                    </div>
+                    <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">
+                      {item.conclusion}
+                    </p>
                   </div>
-                  <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">
-                    {item.conclusion || 'Sin conclusión disponible'}
-                  </p>
-                </div>
+                )}
+
+                {/* Preguntas de ayuda - Only show if exists and format questions properly */}
+                {item.preguntas && item.preguntas.trim() !== '' && (
+                  <div className="bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <HelpCircle className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                      <span className="text-sm font-semibold text-indigo-700 dark:text-indigo-300">Preguntas de ayuda</span>
+                    </div>
+                    <div className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed space-y-3">
+                      {formatQuestions(item.preguntas).map((question, qIndex) => (
+                        <div key={qIndex} className="border-l-2 border-indigo-200 dark:border-indigo-700 pl-3">
+                          {question}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Format Selection and Action Buttons */}

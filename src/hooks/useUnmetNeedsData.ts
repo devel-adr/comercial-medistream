@@ -1,9 +1,28 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
+// Extend the existing type to include favorito and preguntas fields
+type UnmetNeedWithFavorito = {
+  id_UN_table?: number;
+  area_terapeutica?: string;
+  conclusion?: string;
+  farmaco?: string;
+  horizonte_temporal?: string;
+  id_NUM_DD?: number;
+  id_UN_NUM?: string;
+  impacto?: string;
+  lab?: string;
+  molecula?: string;
+  oportunidad_estrategica?: string;
+  racional?: string;
+  unmet_need?: string;
+  favorito?: boolean;
+  preguntas?: string;
+  user_email?: string;
+};
+
 export const useUnmetNeedsData = (refreshInterval = 30000) => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<UnmetNeedWithFavorito[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(new Date());
@@ -41,12 +60,13 @@ export const useUnmetNeedsData = (refreshInterval = 30000) => {
           
           lastEventTimeRef.current = now;
           
-          // Dispatch custom event for data update
+          // Dispatch custom event for data update with detailed data
           window.dispatchEvent(new CustomEvent('dataUpdated', { 
             detail: { 
               type: 'unmetNeeds', 
               count: newCount,
-              newRecords: newRecords
+              newRecords: newRecords,
+              data: unmetNeeds || []
             } 
           }));
         } else {
@@ -63,11 +83,67 @@ export const useUnmetNeedsData = (refreshInterval = 30000) => {
       setData(unmetNeeds || []);
       setLastUpdated(new Date());
       setError(null);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching Unmet Needs data:', err);
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const toggleFavorite = async (unmetNeed: UnmetNeedWithFavorito) => {
+    try {
+      const newFavoritoValue = !unmetNeed.favorito;
+      console.log('Toggling favorite for:', unmetNeed.id_UN_table, 'to:', newFavoritoValue);
+      
+      // Use type assertion to bypass TypeScript checking for the favorito field
+      const { error } = await supabase
+        .from('UnmetNeeds_table')
+        .update({ favorito: newFavoritoValue } as any)
+        .eq('id_UN_table', unmetNeed.id_UN_table);
+
+      if (error) {
+        throw error;
+      }
+
+      // Update local state
+      setData(prevData => 
+        prevData.map(item => 
+          item.id_UN_table === unmetNeed.id_UN_table 
+            ? { ...item, favorito: newFavoritoValue }
+            : item
+        )
+      );
+
+      console.log('Favorite status updated successfully');
+    } catch (err: any) {
+      console.error('Error updating favorite status:', err);
+      throw err;
+    }
+  };
+
+  const deleteUnmetNeed = async (unmetNeed: UnmetNeedWithFavorito) => {
+    try {
+      console.log('Deleting Unmet Need:', unmetNeed.id_UN_table);
+      
+      const { error } = await supabase
+        .from('UnmetNeeds_table')
+        .delete()
+        .eq('id_UN_table', unmetNeed.id_UN_table);
+
+      if (error) {
+        throw error;
+      }
+
+      // Update local state
+      setData(prevData => 
+        prevData.filter(item => item.id_UN_table !== unmetNeed.id_UN_table)
+      );
+
+      console.log('Unmet Need deleted successfully');
+    } catch (err: any) {
+      console.error('Error deleting Unmet Need:', err);
+      throw err;
     }
   };
 
@@ -84,6 +160,8 @@ export const useUnmetNeedsData = (refreshInterval = 30000) => {
     loading,
     error,
     lastUpdated,
-    refresh: fetchData
+    refresh: fetchData,
+    toggleFavorite,
+    deleteUnmetNeed
   };
 };

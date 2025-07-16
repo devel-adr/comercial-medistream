@@ -1,8 +1,9 @@
-
 import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
 import { playNotificationSound } from '@/utils/notificationSounds';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
 import { useUnmetNeedsData } from '@/hooks/useUnmetNeedsData';
+import { usePharmaTacticsData } from '@/hooks/usePharmaTacticsData';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface NotificationSettings {
   volume: number;
@@ -12,12 +13,17 @@ interface NotificationSettings {
 
 interface NotificationItem {
   id: string;
-  type: 'medications' | 'unmetNeeds';
+  type: 'medications' | 'unmetNeeds' | 'pharmaTactics';
   title: string;
   message: string;
   timestamp: Date;
   count: number;
   newRecords: number;
+  details?: {
+    laboratory?: string;
+    drug?: string;
+    userEmail?: string;
+  };
 }
 
 interface NotificationContextType {
@@ -38,13 +44,16 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   });
 
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const { user } = useAuth(); // Obtener el usuario autenticado
 
   // Initialize data hooks to track changes globally
   const { data: medicationsData } = useSupabaseData();
   const { data: unmetNeedsData } = useUnmetNeedsData();
+  const { data: pharmaTacticsData } = usePharmaTacticsData();
 
   const medicationsCountRef = useRef(0);
   const unmetNeedsCountRef = useRef(0);
+  const pharmaTacticsCountRef = useRef(0);
   const isInitializedRef = useRef(false);
   
   // Sistema de deduplicación mejorado
@@ -52,7 +61,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const lastNotificationTimeRef = useRef<{ [key: string]: number }>({});
   const isProcessingRef = useRef(false);
 
-  // Listen for data updates from both hooks
+  // Listen for data updates from all hooks
   useEffect(() => {
     const handleDataUpdate = (event: any) => {
       console.log('Data update detected in context:', event.detail);
@@ -66,19 +75,13 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       isProcessingRef.current = true;
       
       try {
-        const { type, count, newRecords } = event.detail;
+        const { type, count, newRecords, data, latestRecord } = event.detail;
         const now = Date.now();
         
         // Crear un ID único para esta notificación específica
-        const notificationId = `${type}_${count}_${newRecords}`;
+        const notificationId = `${type}_${count}_${newRecords}_${now}`;
         
-        // Verificar si ya procesamos esta notificación exacta
-        if (processedNotificationsRef.current.has(notificationId)) {
-          console.log('Notification already processed:', notificationId);
-          return;
-        }
-        
-        // Verificar tiempo desde la última notificación del mismo tipo
+        // Verificar si ya procesamos una notificación similar recientemente
         const lastTime = lastNotificationTimeRef.current[type] || 0;
         if (now - lastTime < 3000) { // 3 segundos de cooldown por tipo
           console.log('Notification cooldown active for type:', type);
@@ -94,14 +97,89 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
           processedNotificationsRef.current.delete(notificationId);
         }, 30000);
         
+        let title = 'Nuevos datos disponibles';
+        let message = '';
+        let details: any = {};
+        
+        // Usar latestRecord si está disponible, si no usar el primer elemento de data
+        const recordToUse = latestRecord || (data && data.length > 0 ? data[0] : null);
+        
+        console.log('Record to use for notification:', recordToUse);
+        console.log('Current authenticated user:', user);
+        
+        // Obtener el email del usuario autenticado
+        const userEmail = user?.email || 'Usuario no identificado';
+        
+        if (recordToUse) {
+          switch (type) {
+            case 'medications':
+              title = 'Nuevos datos de DrugDealer';
+              message = `Se han añadido ${newRecords} nuevos registros de medicamentos`;
+              // Para DrugDealer: laboratorio y email del usuario autenticado
+              details = {
+                laboratory: recordToUse.nombre_lab || 'No especificado',
+                userEmail: userEmail
+              };
+              console.log('DrugDealer notification details:', details);
+              break;
+            case 'unmetNeeds':
+              title = 'Nuevos datos de Unmet Needs';
+              message = `Se han añadido ${newRecords} nuevos registros de unmet needs`;
+              // Para Unmet Needs: laboratorio, fármaco y email del usuario autenticado
+              details = {
+                laboratory: recordToUse.lab || 'No especificado',
+                drug: recordToUse.farmaco || 'No especificado',
+                userEmail: userEmail
+              };
+              console.log('Unmet Needs notification details:', details);
+              break;
+            case 'pharmaTactics':
+              title = 'Nuevas Tactics disponibles';
+              message = `Se han añadido ${newRecords} nuevas tactics`;
+              // Para Tactics: laboratorio, fármaco y email del usuario autenticado
+              details = {
+                laboratory: recordToUse.laboratorio || 'No especificado',
+                drug: recordToUse.farmaco || 'No especificado',
+                userEmail: userEmail
+              };
+              console.log('PharmaTactics notification details:', details);
+              break;
+            default:
+              message = `Se han añadido ${newRecords} nuevos registros`;
+          }
+        } else {
+          // Fallback para cuando no hay data específica
+          switch (type) {
+            case 'medications':
+              title = 'Nuevos datos de DrugDealer';
+              message = `Se han añadido ${newRecords} nuevos registros de medicamentos`;
+              details = { userEmail: userEmail };
+              break;
+            case 'unmetNeeds':
+              title = 'Nuevos datos de Unmet Needs';
+              message = `Se han añadido ${newRecords} nuevos registros de unmet needs`;
+              details = { userEmail: userEmail };
+              break;
+            case 'pharmaTactics':
+              title = 'Nuevas Tactics disponibles';
+              message = `Se han añadido ${newRecords} nuevas tactics`;
+              details = { userEmail: userEmail };
+              break;
+            default:
+              message = `Se han añadido ${newRecords} nuevos registros`;
+              details = { userEmail: userEmail };
+          }
+        }
+        
         const newNotification: NotificationItem = {
           id: notificationId,
           type: type,
-          title: type === 'medications' ? 'Nuevos datos de DrugDealer' : 'Nuevos datos de Unmet Needs',
-          message: `Se han añadido ${newRecords} nuevos registros`,
+          title,
+          message,
           timestamp: new Date(),
           count,
-          newRecords
+          newRecords,
+          details
         };
 
         setNotifications(prev => {
@@ -121,9 +199,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
           return [newNotification, ...prev].slice(0, 20);
         });
         
-        let title = 'Nuevos datos disponibles';
-        let message = `Se han actualizado los datos de ${type === 'medications' ? 'DrugDealer' : 'Unmet Needs'}`;
-        
         showNotification(title, message);
         
       } finally {
@@ -140,7 +215,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     return () => {
       window.removeEventListener('dataUpdated', handleDataUpdate);
     };
-  }, []);
+  }, [user]);
 
   // Track data changes and initialize counts
   useEffect(() => {
@@ -155,10 +230,18 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (unmetNeedsData.length > 0) {
       if (!isInitializedRef.current) {
         unmetNeedsCountRef.current = unmetNeedsData.length;
-        isInitializedRef.current = true;
       }
     }
   }, [unmetNeedsData]);
+
+  useEffect(() => {
+    if (pharmaTacticsData.length > 0) {
+      if (!isInitializedRef.current) {
+        pharmaTacticsCountRef.current = pharmaTacticsData.length;
+        isInitializedRef.current = true;
+      }
+    }
+  }, [pharmaTacticsData]);
 
   const updateSettings = (newSettings: Partial<NotificationSettings>) => {
     const updated = { ...settings, ...newSettings };

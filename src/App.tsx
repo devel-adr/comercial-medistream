@@ -9,6 +9,7 @@ import { NotificationProvider } from "@/contexts/NotificationContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import UnmetNeeds from "./pages/UnmetNeeds";
+import Tactics from "./pages/Tactics";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,11 @@ const App = () => (
               <Route path="/unmet-needs" element={
                 <ProtectedRoute>
                   <UnmetNeeds />
+                </ProtectedRoute>
+              } />
+              <Route path="/tactics" element={
+                <ProtectedRoute>
+                  <Tactics />
                 </ProtectedRoute>
               } />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
