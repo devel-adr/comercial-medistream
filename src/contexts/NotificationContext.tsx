@@ -110,30 +110,34 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             case 'medications':
               title = 'Nuevos datos de DrugDealer';
               message = `Se han añadido ${newRecords} nuevos registros de medicamentos`;
-              // Solo mostrar laboratorio y email para DrugDealer
+              // Para DrugDealer: laboratorio y email del usuario
               details = {
                 laboratory: recordToUse.nombre_lab || 'No especificado',
-                userEmail: recordToUse.user_email || recordToUse.correo || 'No especificado'
+                userEmail: recordToUse.user_email || recordToUse.correo || recordToUse.email || 'No especificado'
               };
               console.log('DrugDealer notification details:', details);
               break;
             case 'unmetNeeds':
               title = 'Nuevos datos de Unmet Needs';
               message = `Se han añadido ${newRecords} nuevos registros de unmet needs`;
+              // Para Unmet Needs: laboratorio, fármaco y email del usuario
               details = {
                 laboratory: recordToUse.lab || 'No especificado',
                 drug: recordToUse.farmaco || 'No especificado',
-                userEmail: recordToUse.user_email || 'Usuario anónimo'
+                userEmail: recordToUse.user_email || recordToUse.correo || recordToUse.email || 'No especificado'
               };
+              console.log('Unmet Needs notification details:', details);
               break;
             case 'pharmaTactics':
               title = 'Nuevas Tactics disponibles';
               message = `Se han añadido ${newRecords} nuevas tactics`;
+              // Para Tactics: laboratorio, fármaco y email del usuario
               details = {
                 laboratory: recordToUse.laboratorio || 'No especificado',
                 drug: recordToUse.farmaco || 'No especificado',
-                userEmail: recordToUse.user_email || 'Usuario anónimo'
+                userEmail: recordToUse.user_email || recordToUse.correo || recordToUse.email || 'No especificado'
               };
+              console.log('PharmaTactics notification details:', details);
               break;
             default:
               message = `Se han añadido ${newRecords} nuevos registros`;
