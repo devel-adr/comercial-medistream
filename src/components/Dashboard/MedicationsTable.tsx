@@ -6,8 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Search, Eye, Link, ArrowUp, ArrowDown, BarChart3, Trash2, Star } from 'lucide-react';
+import { Search, Eye, Link, ArrowUp, ArrowDown, BarChart3, Trash2, Star, Edit } from 'lucide-react';
 import { MedicationDetailModal } from './MedicationDetailModal';
+import { EditMedicationModal } from './EditMedicationModal';
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from '@/integrations/supabase/client';
 
@@ -32,6 +33,8 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedMedication, setSelectedMedication] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingMedication, setEditingMedication] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedMedicationIds, setSelectedMedicationIds] = useState<Set<string>>(new Set());
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
@@ -285,6 +288,20 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
     }
   };
 
+  const handleEditMedication = (medication: any) => {
+    setEditingMedication(medication);
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditingMedication(null);
+  };
+
+  const handleMedicationUpdated = () => {
+    onDataChange();
+  };
+
   const isAllSelected = paginatedData.length > 0 && 
     paginatedData.every(med => selectedMedicationIds.has(String(med.ID_NUM)));
   
@@ -503,6 +520,16 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                                 <Button 
                                   variant="ghost" 
                                   size="sm" 
+                                  onClick={() => handleEditMedication(medication)}
+                                  title="Editar medicamento"
+                                  disabled={isDeleting}
+                                  className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
                                   onClick={() => handleDeleteMedication(medicationId)}
                                   title="Eliminar medicamento"
                                   disabled={isDeleting}
@@ -612,6 +639,13 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
           setIsModalOpen(false);
           setSelectedMedication(null);
         }}
+      />
+
+      <EditMedicationModal
+        medication={editingMedication}
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        onUpdate={handleMedicationUpdated}
       />
     </div>
   );
