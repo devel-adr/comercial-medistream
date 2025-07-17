@@ -260,7 +260,7 @@ const UnmetNeeds = () => {
           </div>
 
           {/* KPIs */}
-          <UnmetNeedsKPIs data={filteredData} loading={loading} />
+          <UnmetNeedsKPIs data={filteredData} />
 
           {/* Actions Bar */}
           <Card className="shadow-lg">
@@ -333,7 +333,7 @@ const UnmetNeeds = () => {
                     <SelectValue placeholder="Laboratorio" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos</SelectItem>
+                    <SelectItem value="all">Todos</SelectItem>
                     {uniqueLabs.map((lab) => (
                       <SelectItem key={lab} value={lab}>
                         {lab}
@@ -347,7 +347,7 @@ const UnmetNeeds = () => {
                     <SelectValue placeholder="Área Terapéutica" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todas</SelectItem>
+                    <SelectItem value="all">Todas</SelectItem>
                     {uniqueAreas.map((area) => (
                       <SelectItem key={area} value={area}>
                         {area}
@@ -361,7 +361,7 @@ const UnmetNeeds = () => {
                     <SelectValue placeholder="Impacto" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos</SelectItem>
+                    <SelectItem value="all">Todos</SelectItem>
                     {uniqueImpacts.map((impact) => (
                       <SelectItem key={impact} value={impact}>
                         {impact}
@@ -375,7 +375,7 @@ const UnmetNeeds = () => {
                     <SelectValue placeholder="Horizonte" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos</SelectItem>
+                    <SelectItem value="all">Todos</SelectItem>
                     {uniqueHorizons.map((horizon) => (
                       <SelectItem key={horizon} value={horizon}>
                         {horizon}
