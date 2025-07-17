@@ -1,9 +1,10 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BarChart3, FileText, Users, Target, Clock, Lightbulb, Star, Atom, Trash2, HelpCircle } from 'lucide-react';
+import { BarChart3, FileText, Users, Target, Clock, Lightbulb, Star, Atom, Trash2, HelpCircle, Edit } from 'lucide-react';
 
 interface UnmetNeedsCardsProps {
   data: any[];
@@ -14,6 +15,7 @@ interface UnmetNeedsCardsProps {
   formatOptions: string[];
   onToggleFavorite?: (unmetNeed: any) => void;
   onDelete?: (unmetNeed: any) => void;
+  onEdit?: (unmetNeed: any) => void;
   localFavorites?: Set<string>;
   onToggleLocalFavorite?: (id: string) => void;
 }
@@ -27,6 +29,7 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
   formatOptions,
   onToggleFavorite,
   onDelete,
+  onEdit,
   localFavorites = new Set(),
   onToggleLocalFavorite
 }) => {
@@ -86,6 +89,13 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
     }
   };
 
+  const handleEdit = (item: any) => {
+    console.log('Edit button clicked for item:', item);
+    if (onEdit) {
+      onEdit(item);
+    }
+  };
+
   return (
     <div className="grid grid-cols-[repeat(auto-fit,_minmax(380px,_1fr))] gap-6">
       {data.map((item, index) => {
@@ -130,6 +140,19 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
                           : 'text-gray-400 hover:text-yellow-500'
                       }`} 
                     />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleEdit(item);
+                    }}
+                    className="h-8 w-8 p-0 hover:bg-blue-100 dark:hover:bg-blue-900/20 relative z-20"
+                    type="button"
+                  >
+                    <Edit className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                   </Button>
                   <Button
                     variant="ghost"

@@ -15,6 +15,7 @@ import { UnmetNeedsKPIs } from '@/components/UnmetNeeds/UnmetNeedsKPIs';
 import { UnmetNeedsCards } from '@/components/UnmetNeeds/UnmetNeedsCards';
 import { UnmetNeedsDetailModal } from '@/components/UnmetNeeds/UnmetNeedsDetailModal';
 import { AddUnmetNeedModal } from '@/components/UnmetNeeds/AddUnmetNeedModal';
+import { EditUnmetNeedModal } from '@/components/UnmetNeeds/EditUnmetNeedModal';
 import { CustomFieldsForm } from '@/components/UnmetNeeds/CustomFieldsForm';
 
 const formatOptions = ['Programa', 'Webinar', 'Podcast', 'Personalizado (DOCS only)'];
@@ -35,6 +36,8 @@ const UnmetNeeds = () => {
   const [selectedUnmetNeed, setSelectedUnmetNeed] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingUnmetNeed, setEditingUnmetNeed] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isGeneratingTactics, setIsGeneratingTactics] = useState(false);
   const [localFavorites, setLocalFavorites] = useState<Set<string>>(new Set());
   const [customFields, setCustomFields] = useState<Record<string, {
@@ -47,7 +50,6 @@ const UnmetNeeds = () => {
 
   const { data: unmetNeeds, loading, error, refresh, toggleFavorite, deleteUnmetNeed } = useUnmetNeedsData();
 
-  // Load favorites from localStorage on component mount
   useEffect(() => {
     const savedFavorites = localStorage.getItem('unmetNeedsFavorites');
     if (savedFavorites) {
@@ -60,7 +62,6 @@ const UnmetNeeds = () => {
     }
   }, []);
 
-  // Save favorites to localStorage whenever localFavorites changes
   useEffect(() => {
     localStorage.setItem('unmetNeedsFavorites', JSON.stringify(Array.from(localFavorites)));
   }, [localFavorites]);
@@ -96,7 +97,6 @@ const UnmetNeeds = () => {
 
   const filteredAndSortedData = useMemo(() => {
     let filtered = unmetNeeds.filter(item => {
-      // Global search
       if (searchTerm) {
         const searchLower = searchTerm.toLowerCase();
         const searchFields = [
@@ -117,7 +117,6 @@ const UnmetNeeds = () => {
         }
       }
 
-      // Specific filters
       if (filters.lab && item.lab !== filters.lab) return false;
       if (filters.area_terapeutica && item.area_terapeutica !== filters.area_terapeutica) return false;
       if (filters.farmaco && item.farmaco !== filters.farmaco) return false;
@@ -125,7 +124,6 @@ const UnmetNeeds = () => {
       if (filters.impacto && item.impacto !== filters.impacto) return false;
       if (filters.horizonte_temporal && item.horizonte_temporal !== filters.horizonte_temporal) return false;
       
-      // Favoritos filter using local favorites
       const itemId = item.id_UN_table?.toString();
       if (filters.favoritos === 'si' && !localFavorites.has(itemId)) return false;
       if (filters.favoritos === 'no' && localFavorites.has(itemId)) return false;
@@ -142,7 +140,6 @@ const UnmetNeeds = () => {
       newSelected.add(id);
     } else {
       newSelected.delete(id);
-      // Clear custom fields when deselecting
       if (customFields[id]) {
         setCustomFields(prev => {
           const newFields = { ...prev };
@@ -160,7 +157,6 @@ const UnmetNeeds = () => {
       [id]: format
     }));
 
-    // Clear custom fields if switching away from Personalizado format
     if (format !== 'Personalizado (DOCS only)' && customFields[id]) {
       setCustomFields(prev => {
         const newFields = { ...prev };
@@ -202,6 +198,11 @@ const UnmetNeeds = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleEdit = (unmetNeed: any) => {
+    setEditingUnmetNeed(unmetNeed);
+    setIsEditModalOpen(true);
   };
 
   const handleDelete = async (unmetNeed: any) => {
@@ -252,7 +253,6 @@ const UnmetNeeds = () => {
       return;
     }
 
-    // Check if all selected rows have a format assigned
     const missingFormats = Array.from(selectedRows).filter(id => !formatSelections[id]);
     if (missingFormats.length > 0) {
       toast({
@@ -263,7 +263,6 @@ const UnmetNeeds = () => {
       return;
     }
 
-    // Check custom fields completion for Personalizado format
     if (hasCustomFormat && !areCustomFieldsComplete()) {
       toast({
         title: "Error",
@@ -276,19 +275,16 @@ const UnmetNeeds = () => {
     setIsGeneratingTactics(true);
 
     try {
-      // Prepare data for webhook with individual variables
       const selectedItems = Array.from(selectedRows).map(id => {
         const item = unmetNeeds.find(n => n.id_UN_table?.toString() === id);
         return item;
       });
 
-      // Create individual variables for each selected Unmet Need including ID
       const webhookData = {
         timestamp: new Date().toISOString(),
         total_items: selectedRows.size
       };
 
-      // Add individual variables for each selected Unmet Need including ID
       selectedItems.forEach((item, index) => {
         const itemId = item?.id_UN_table?.toString();
         webhookData[`id_unmet_need_${index + 1}`] = item?.id_UN_table || '';
@@ -304,7 +300,6 @@ const UnmetNeeds = () => {
         webhookData[`formato_${index + 1}`] = formatSelections[itemId] || '';
         webhookData[`impacto_${index + 1}`] = item?.impacto || '';
 
-        // Add custom fields if format is Personalizado (DOCS only)
         if (formatSelections[itemId] === 'Personalizado (DOCS only)' && customFields[itemId]) {
           const customFieldsData = customFields[itemId];
           webhookData[`capitulos_${index + 1}`] = customFieldsData.capitulos;
@@ -317,7 +312,6 @@ const UnmetNeeds = () => {
 
       console.log('Sending data to webhook:', webhookData);
 
-      // Send data to webhook
       const response = await fetch('https://develms.app.n8n.cloud/webhook/tactics', {
         method: 'POST',
         headers: {
@@ -330,18 +324,15 @@ const UnmetNeeds = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      // Store selected data locally for Tactics page
       localStorage.setItem('selectedUnmetNeeds', JSON.stringify(Array.from(selectedRows).map(id => {
         const item = unmetNeeds.find(n => n.id_UN_table?.toString() === id);
         const itemId = item?.id_UN_table?.toString();
         
-        // Create a properly typed result object
         const result: any = {
           ...item,
           format: formatSelections[id]
         };
 
-        // Add custom fields if applicable
         if (formatSelections[id] === 'Personalizado (DOCS only)' && customFields[id]) {
           result.customFields = customFields[id];
         }
@@ -354,7 +345,6 @@ const UnmetNeeds = () => {
         description: `Se han enviado ${selectedRows.size} Unmet Needs al webhook y se han preparado las tácticas.`,
       });
 
-      // Navigate to tactics page
       window.location.href = '/tactics';
 
     } catch (error) {
@@ -370,7 +360,7 @@ const UnmetNeeds = () => {
   };
 
   const handleAddSuccess = () => {
-    refresh(); // Refresh data after successful addition
+    refresh();
   };
 
   if (loading) {
@@ -421,10 +411,8 @@ const UnmetNeeds = () => {
             </div>
           </div>
 
-          {/* KPIs */}
           <UnmetNeedsKPIs data={filteredAndSortedData} />
 
-          {/* Enhanced Filters Panel */}
           <Card className="shadow-lg">
             <CardHeader>
               <div className="flex items-center space-x-2">
@@ -582,7 +570,6 @@ const UnmetNeeds = () => {
             </CardContent>
           </Card>
 
-          {/* Cards View */}
           <Card className="shadow-lg">
             <CardHeader>
               <CardTitle className="text-xl font-semibold">
@@ -599,13 +586,13 @@ const UnmetNeeds = () => {
                 formatOptions={formatOptions}
                 onToggleFavorite={handleToggleFavorite}
                 onDelete={handleDelete}
+                onEdit={handleEdit}
                 localFavorites={localFavorites}
                 onToggleLocalFavorite={handleToggleLocalFavorite}
               />
             </CardContent>
           </Card>
 
-          {/* Custom Fields Form */}
           {hasCustomFormat && (
             <CustomFieldsForm
               selectedRows={selectedRows}
@@ -616,7 +603,6 @@ const UnmetNeeds = () => {
             />
           )}
 
-          {/* Generate Tactics Button */}
           <div className="flex justify-center">
             <Card className="shadow-lg">
               <CardContent className="p-6">
@@ -654,7 +640,6 @@ const UnmetNeeds = () => {
             </Card>
           </div>
 
-          {/* Detail Modal */}
           <UnmetNeedsDetailModal
             isOpen={isDetailModalOpen}
             onClose={() => {
@@ -664,11 +649,20 @@ const UnmetNeeds = () => {
             unmetNeed={selectedUnmetNeed}
           />
 
-          {/* Add Modal */}
           <AddUnmetNeedModal
             isOpen={isAddModalOpen}
             onClose={() => setIsAddModalOpen(false)}
             onSuccess={handleAddSuccess}
+          />
+
+          <EditUnmetNeedModal
+            unmetNeed={editingUnmetNeed}
+            isOpen={isEditModalOpen}
+            onClose={() => {
+              setIsEditModalOpen(false);
+              setEditingUnmetNeed(null);
+            }}
+            onSuccess={refresh}
           />
         </div>
       </div>

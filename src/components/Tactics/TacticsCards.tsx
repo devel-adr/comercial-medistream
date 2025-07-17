@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { FileText, ExternalLink, Presentation, Eye, Star, Trash2 } from 'lucide-react';
+import { FileText, ExternalLink, Presentation, Eye, Star, Trash2, Edit } from 'lucide-react';
 import { TacticsDetailModal } from './TacticsDetailModal';
+import { EditTacticsModal } from './EditTacticsModal';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -35,6 +35,8 @@ export const TacticsCards: React.FC<TacticsCardsProps> = ({
 }) => {
   const [selectedTactic, setSelectedTactic] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [editingTactic, setEditingTactic] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
@@ -71,6 +73,11 @@ export const TacticsCards: React.FC<TacticsCardsProps> = ({
   const handleViewDetails = (tactic: any) => {
     setSelectedTactic(tactic);
     setIsDetailModalOpen(true);
+  };
+
+  const handleEditTactic = (tactic: any) => {
+    setEditingTactic(tactic);
+    setIsEditModalOpen(true);
   };
 
   const handleOpenUrl = (url: string) => {
@@ -217,6 +224,15 @@ export const TacticsCards: React.FC<TacticsCardsProps> = ({
                     <Button
                       variant="ghost"
                       size="sm"
+                      onClick={() => handleEditTactic(tactic)}
+                      className="p-1 h-8 w-8 hover:text-blue-500"
+                      disabled={isDeleting}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => handleDelete(tactic)}
                       className="p-1 h-8 w-8 hover:text-red-500"
                       disabled={isDeleting}
@@ -296,6 +312,19 @@ export const TacticsCards: React.FC<TacticsCardsProps> = ({
         onClose={() => {
           setIsDetailModalOpen(false);
           setSelectedTactic(null);
+        }}
+      />
+
+      <EditTacticsModal
+        tactic={editingTactic}
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingTactic(null);
+        }}
+        onSuccess={() => {
+          // Refresh data by triggering a page reload or calling refresh function
+          window.location.reload();
         }}
       />
     </>
