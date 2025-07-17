@@ -11,11 +11,20 @@ import { TacticsKPIs } from '@/components/Tactics/TacticsKPIs';
 import { TacticsCards } from '@/components/Tactics/TacticsCards';
 import { DynamicFiltersPanel } from '@/components/Tactics/DynamicFiltersPanel';
 
+interface TacticsFilters {
+  laboratorio?: string;
+  areaTerapeutica?: string;
+  farmaco?: string;
+  molecula?: string;
+  formato?: string;
+  favoritos?: boolean;
+}
+
 const Tactics = () => {
   const { data, loading, error } = usePharmaTacticsData();
   const { favorites, toggleFavorite, isFavorite } = useTacticsFavorites();
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeFilters, setActiveFilters] = useState({});
+  const [activeFilters, setActiveFilters] = useState<TacticsFilters>({});
 
   if (error) {
     return (
