@@ -348,7 +348,7 @@ const UnmetNeeds = () => {
         <AddUnmetNeedModal
           isOpen={isAddModalOpen}
           onClose={() => setIsAddModalOpen(false)}
-          onAdd={() => {
+          onSuccess={() => {
             refetch();
           }}
         />
