@@ -7,6 +7,7 @@ import { StatsCards } from '@/components/Dashboard/StatsCards';
 import { MedicationsTable } from '@/components/Dashboard/MedicationsTable';
 import { SimpleFiltersPanel } from '@/components/Dashboard/SimpleFiltersPanel';
 import { AddMedicationModal } from '@/components/Dashboard/AddMedicationModal';
+import { FeedbackAssistant } from '@/components/FeedbackAssistant';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { Navigation } from '@/components/Navigation';
@@ -73,6 +74,8 @@ const Index = () => {
           onClose={() => setIsAddModalOpen(false)}
           onSuccess={handleAddSuccess}
         />
+        
+        <FeedbackAssistant />
         
         <Toaster />
       </div>
