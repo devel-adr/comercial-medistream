@@ -24,17 +24,88 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
     favoritos: ''
   });
 
-  // Opciones únicas para cada filtro
-  const uniqueOptions = useMemo(() => ({
-    laboratorios: [...new Set(medications.map(med => med.nombre_lab).filter(Boolean))].sort(),
-    areasTerapeuticas: [...new Set(medications.map(med => med.area_terapeutica).filter(Boolean))].sort(),
-    farmacos: [...new Set(medications.map(med => med.nombre_del_farmaco).filter(Boolean))].sort(),
-    moleculas: [...new Set(medications.map(med => med.nombre_de_la_molecula).filter(Boolean))].sort(),
-    estados: [...new Set(medications.map(med => med.estado_en_espana).filter(Boolean))].sort()
-  }), [medications]);
+  // Filtrar datos basándose en las selecciones previas
+  const filteredData = useMemo(() => {
+    let filtered = [...medications];
+    
+    if (filters.laboratorio) {
+      filtered = filtered.filter(med => med.nombre_lab === filters.laboratorio);
+    }
+    if (filters.areaTerapeutica) {
+      filtered = filtered.filter(med => med.area_terapeutica === filters.areaTerapeutica);
+    }
+    if (filters.farmaco) {
+      filtered = filtered.filter(med => med.nombre_del_farmaco === filters.farmaco);
+    }
+    if (filters.molecula) {
+      filtered = filtered.filter(med => med.nombre_de_la_molecula === filters.molecula);
+    }
+    
+    return filtered;
+  }, [medications, filters]);
+
+  // Opciones dinámicas basadas en filtros anteriores
+  const dynamicOptions = useMemo(() => {
+    // Para laboratorios, siempre mostrar todos
+    const laboratorios = [...new Set(medications.map(med => med.nombre_lab).filter(Boolean))].sort();
+    
+    // Para áreas terapéuticas, filtrar por laboratorio seleccionado
+    let dataForAreas = medications;
+    if (filters.laboratorio) {
+      dataForAreas = medications.filter(med => med.nombre_lab === filters.laboratorio);
+    }
+    const areasTerapeuticas = [...new Set(dataForAreas.map(med => med.area_terapeutica).filter(Boolean))].sort();
+    
+    // Para fármacos, filtrar por laboratorio y área seleccionados
+    let dataForFarmacos = medications;
+    if (filters.laboratorio) {
+      dataForFarmacos = dataForFarmacos.filter(med => med.nombre_lab === filters.laboratorio);
+    }
+    if (filters.areaTerapeutica) {
+      dataForFarmacos = dataForFarmacos.filter(med => med.area_terapeutica === filters.areaTerapeutica);
+    }
+    const farmacos = [...new Set(dataForFarmacos.map(med => med.nombre_del_farmaco).filter(Boolean))].sort();
+    
+    // Para moléculas, filtrar por todas las selecciones anteriores
+    let dataForMoleculas = medications;
+    if (filters.laboratorio) {
+      dataForMoleculas = dataForMoleculas.filter(med => med.nombre_lab === filters.laboratorio);
+    }
+    if (filters.areaTerapeutica) {
+      dataForMoleculas = dataForMoleculas.filter(med => med.area_terapeutica === filters.areaTerapeutica);
+    }
+    if (filters.farmaco) {
+      dataForMoleculas = dataForMoleculas.filter(med => med.nombre_del_farmaco === filters.farmaco);
+    }
+    const moleculas = [...new Set(dataForMoleculas.map(med => med.nombre_de_la_molecula).filter(Boolean))].sort();
+    
+    // Para estados, usar los datos filtrados
+    const estados = [...new Set(filteredData.map(med => med.estado_en_espana).filter(Boolean))].sort();
+
+    return {
+      laboratorios,
+      areasTerapeuticas,
+      farmacos,
+      moleculas,
+      estados
+    };
+  }, [medications, filters, filteredData]);
 
   const handleFilterChange = (key: string, value: any) => {
     const newFilters = { ...filters, [key]: value };
+    
+    // Limpiar filtros dependientes cuando se cambia un filtro padre
+    if (key === 'laboratorio') {
+      newFilters.areaTerapeutica = '';
+      newFilters.farmaco = '';
+      newFilters.molecula = '';
+    } else if (key === 'areaTerapeutica') {
+      newFilters.farmaco = '';
+      newFilters.molecula = '';
+    } else if (key === 'farmaco') {
+      newFilters.molecula = '';
+    }
+    
     setFilters(newFilters);
     onFiltersChange(newFilters);
   };
@@ -59,7 +130,7 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
       <CardContent className="p-6">
         <div className="flex items-center gap-2 mb-4">
           <Filter className="w-5 h-5 text-blue-600" />
-          <h3 className="text-lg font-semibold">Filtros</h3>
+          <h3 className="text-lg font-semibold">Filtros Dinámicos</h3>
           {activeFiltersCount > 0 && (
             <Badge variant="secondary">{activeFiltersCount}</Badge>
           )}
@@ -76,7 +147,7 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
                 <SelectValue placeholder="Todos" />
               </SelectTrigger>
               <SelectContent className="max-h-[200px]">
-                {uniqueOptions.laboratorios.map((lab) => (
+                {dynamicOptions.laboratorios.map((lab) => (
                   <SelectItem key={lab} value={lab}>{lab}</SelectItem>
                 ))}
               </SelectContent>
@@ -88,12 +159,13 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
             <Select
               value={filters.areaTerapeutica}
               onValueChange={(value) => handleFilterChange('areaTerapeutica', value)}
+              disabled={!filters.laboratorio && dynamicOptions.areasTerapeuticas.length === 0}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Todas" />
+                <SelectValue placeholder={filters.laboratorio ? "Seleccionar área" : "Todas"} />
               </SelectTrigger>
               <SelectContent className="max-h-[200px]">
-                {uniqueOptions.areasTerapeuticas.map((area) => (
+                {dynamicOptions.areasTerapeuticas.map((area) => (
                   <SelectItem key={area} value={area}>{area}</SelectItem>
                 ))}
               </SelectContent>
@@ -105,12 +177,13 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
             <Select
               value={filters.farmaco}
               onValueChange={(value) => handleFilterChange('farmaco', value)}
+              disabled={!filters.areaTerapeutica && dynamicOptions.farmacos.length === 0}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Todos" />
+                <SelectValue placeholder={filters.areaTerapeutica ? "Seleccionar fármaco" : "Todos"} />
               </SelectTrigger>
               <SelectContent className="max-h-[200px]">
-                {uniqueOptions.farmacos.slice(0, 100).map((farmaco) => (
+                {dynamicOptions.farmacos.slice(0, 100).map((farmaco) => (
                   <SelectItem key={farmaco} value={farmaco}>{farmaco}</SelectItem>
                 ))}
               </SelectContent>
@@ -122,12 +195,13 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
             <Select
               value={filters.molecula}
               onValueChange={(value) => handleFilterChange('molecula', value)}
+              disabled={!filters.farmaco && dynamicOptions.moleculas.length === 0}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Todas" />
+                <SelectValue placeholder={filters.farmaco ? "Seleccionar molécula" : "Todas"} />
               </SelectTrigger>
               <SelectContent className="max-h-[200px]">
-                {uniqueOptions.moleculas.slice(0, 100).map((molecula) => (
+                {dynamicOptions.moleculas.slice(0, 100).map((molecula) => (
                   <SelectItem key={molecula} value={molecula}>{molecula}</SelectItem>
                 ))}
               </SelectContent>
@@ -144,7 +218,7 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
                 <SelectValue placeholder="Todos" />
               </SelectTrigger>
               <SelectContent className="max-h-[200px]">
-                {uniqueOptions.estados.map((estado) => (
+                {dynamicOptions.estados.map((estado) => (
                   <SelectItem key={estado} value={estado}>{estado}</SelectItem>
                 ))}
               </SelectContent>

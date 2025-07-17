@@ -1,50 +1,21 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Navigation } from '@/components/Navigation';
 import { ThemeProvider } from '@/components/ThemeProvider';
-import { Search, Filter, BarChart3, Star } from 'lucide-react';
+import { Search, BarChart3 } from 'lucide-react';
 import { usePharmaTacticsData } from '@/hooks/usePharmaTacticsData';
 import { useTacticsFavorites } from '@/hooks/useTacticsFavorites';
 import { TacticsKPIs } from '@/components/Tactics/TacticsKPIs';
 import { TacticsCards } from '@/components/Tactics/TacticsCards';
+import { DynamicFiltersPanel } from '@/components/Tactics/DynamicFiltersPanel';
 
 const Tactics = () => {
   const { data, loading, error } = usePharmaTacticsData();
   const { favorites, toggleFavorite, isFavorite } = useTacticsFavorites();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedLab, setSelectedLab] = useState('');
-  const [selectedArea, setSelectedArea] = useState('');
-  const [selectedFormat, setSelectedFormat] = useState('');
-  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
-
-  // Get unique values for filters and filter out empty/null values
-  const uniqueLabs = [...new Set(data.map(item => item.laboratorio))]
-    .filter(lab => lab && lab.trim() !== '')
-    .sort();
-  
-  const uniqueAreas = [...new Set(data.map(item => item.area_terapeutica))]
-    .filter(area => area && area.trim() !== '')
-    .sort();
-  
-  const uniqueFormats = [...new Set(data.map(item => item.formato))]
-    .filter(format => format && format.trim() !== '')
-    .sort();
-
-  const clearFilters = () => {
-    setSearchTerm('');
-    setSelectedLab('');
-    setSelectedArea('');
-    setSelectedFormat('');
-    setShowOnlyFavorites(false);
-  };
-
-  const handleFavoritesChange = (checked: boolean | "indeterminate") => {
-    setShowOnlyFavorites(checked === true);
-  };
+  const [activeFilters, setActiveFilters] = useState({});
 
   if (error) {
     return (
@@ -76,109 +47,42 @@ const Tactics = () => {
               Tactics
             </h1>
             <p className="text-gray-600 dark:text-gray-300">
-              Gestión y visualización de tactics farmacéuticas
+              Gestión y visualización de tactics farmacéuticas con filtros dinámicos
             </p>
           </div>
 
           <TacticsKPIs data={data} loading={loading} />
 
-          {/* Filters Section */}
+          {/* Search Section */}
           <Card className="shadow-lg">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <Filter className="w-5 h-5" />
-                  Filtros
-                </CardTitle>
-                <button
-                  onClick={clearFilters}
-                  className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200"
-                >
-                  Limpiar filtros
-                </button>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <Input
-                    placeholder="Buscar tactics..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                
-                <Select value={selectedLab} onValueChange={setSelectedLab}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar laboratorio" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos los laboratorios</SelectItem>
-                    {uniqueLabs.map((lab) => (
-                      <SelectItem key={lab} value={lab}>
-                        {lab}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Select value={selectedArea} onValueChange={setSelectedArea}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar área" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas las áreas</SelectItem>
-                    {uniqueAreas.map((area) => (
-                      <SelectItem key={area} value={area}>
-                        {area}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Select value={selectedFormat} onValueChange={setSelectedFormat}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar formato" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos los formatos</SelectItem>
-                    {uniqueFormats.map((format) => (
-                      <SelectItem key={format} value={format}>
-                        {format}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="favorites"
-                  checked={showOnlyFavorites}
-                  onCheckedChange={handleFavoritesChange}
+            <CardContent className="p-6">
+              <div className="relative max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder="Buscar tactics..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
                 />
-                <label
-                  htmlFor="favorites"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2"
-                >
-                  <Star className="w-4 h-4" />
-                  Mostrar solo favoritos
-                </label>
               </div>
             </CardContent>
           </Card>
+
+          {/* Dynamic Filters */}
+          <DynamicFiltersPanel 
+            onFiltersChange={setActiveFilters}
+            tactics={data}
+          />
 
           {/* Tactics Cards */}
           <TacticsCards
             data={data}
             loading={loading}
             searchTerm={searchTerm}
-            selectedLab={selectedLab === 'all' ? '' : selectedLab}
-            selectedArea={selectedArea === 'all' ? '' : selectedArea}
-            selectedFormat={selectedFormat === 'all' ? '' : selectedFormat}
-            showOnlyFavorites={showOnlyFavorites}
+            selectedLab={activeFilters.laboratorio || ''}
+            selectedArea={activeFilters.areaTerapeutica || ''}
+            selectedFormat={activeFilters.formato || ''}
+            showOnlyFavorites={activeFilters.favoritos || false}
             favorites={favorites}
             toggleFavorite={toggleFavorite}
             isFavorite={isFavorite}
