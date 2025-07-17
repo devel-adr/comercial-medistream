@@ -19,7 +19,6 @@ interface TacticsCardsProps {
   favorites: Set<string>;
   toggleFavorite: (id: string) => void;
   isFavorite: (id: string) => boolean;
-  refresh?: () => void;
 }
 
 export const TacticsCards: React.FC<TacticsCardsProps> = ({
@@ -32,8 +31,7 @@ export const TacticsCards: React.FC<TacticsCardsProps> = ({
   showOnlyFavorites,
   favorites,
   toggleFavorite,
-  isFavorite,
-  refresh
+  isFavorite
 }) => {
   const [selectedTactic, setSelectedTactic] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -101,15 +99,6 @@ export const TacticsCards: React.FC<TacticsCardsProps> = ({
     setEditingTactic(null);
   };
 
-  const handleUpdateSuccess = () => {
-    if (refresh) {
-      refresh();
-    } else {
-      // Fallback to page reload if refresh function is not provided
-      window.location.reload();
-    }
-  };
-
   const handleDelete = async (tactic: any) => {
     const tacticId = tactic.id?.toString();
     
@@ -148,11 +137,6 @@ export const TacticsCards: React.FC<TacticsCardsProps> = ({
       // Remove from favorites if it was favorited
       if (isFavorite(tacticId)) {
         toggleFavorite(tacticId);
-      }
-
-      // Refresh data
-      if (refresh) {
-        refresh();
       }
 
     } catch (error) {
@@ -340,7 +324,10 @@ export const TacticsCards: React.FC<TacticsCardsProps> = ({
         tactic={editingTactic}
         isOpen={isEditModalOpen}
         onClose={handleCloseEditModal}
-        onUpdate={handleUpdateSuccess}
+        onUpdate={() => {
+          // This would trigger a refetch of the data
+          window.location.reload();
+        }}
       />
     </>
   );
