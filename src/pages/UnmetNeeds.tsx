@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -16,7 +17,7 @@ import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 const UnmetNeeds = () => {
-  const { data, loading, error, refetch } = useUnmetNeedsData();
+  const { data, loading, error, refresh: refetch } = useUnmetNeedsData();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedArea, setSelectedArea] = useState('');
   const [selectedFarmaco, setSelectedFarmaco] = useState('');
@@ -51,9 +52,8 @@ const UnmetNeeds = () => {
     .filter(horizonte => horizonte && horizonte.trim() !== '')
     .sort();
 
-  const formatOptions = [...new Set(data.map(item => item.formato))]
-    .filter(format => format && format.trim() !== '')
-    .sort();
+  // Create a mock formato field since it doesn't exist in UnmetNeedWithFavorito
+  const formatOptions = ['Documento', 'Presentación', 'Informe', 'Estudio'];
 
   const clearFilters = () => {
     setSearchTerm('');
@@ -190,7 +190,7 @@ const UnmetNeeds = () => {
             </p>
           </div>
 
-          <UnmetNeedsKPIs data={data} loading={loading} />
+          <UnmetNeedsKPIs data={data} />
 
           {/* Filters Section */}
           <Card className="shadow-lg">
@@ -348,7 +348,7 @@ const UnmetNeeds = () => {
         <AddUnmetNeedModal
           isOpen={isAddModalOpen}
           onClose={() => setIsAddModalOpen(false)}
-          onAdded={() => {
+          onAdd={() => {
             refetch();
           }}
         />
