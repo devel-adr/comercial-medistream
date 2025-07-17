@@ -105,7 +105,7 @@ export const FiltersPanel: React.FC<FiltersPanelProps> = ({
               <SelectTrigger>
                 <SelectValue placeholder="Seleccionar laboratorio" />
               </SelectTrigger>
-              <SelectContent className="max-h-[200px]">
+              <SelectContent className="max-h-[300px]">
                 {uniqueOptions.laboratorios.map((lab) => (
                   <SelectItem key={lab} value={lab}>{lab}</SelectItem>
                 ))}
@@ -123,7 +123,7 @@ export const FiltersPanel: React.FC<FiltersPanelProps> = ({
               <SelectTrigger>
                 <SelectValue placeholder="Seleccionar área" />
               </SelectTrigger>
-              <SelectContent className="max-h-[200px]">
+              <SelectContent className="max-h-[300px]">
                 {uniqueOptions.areasTerapeuticas.map((area) => (
                   <SelectItem key={area} value={area}>{area}</SelectItem>
                 ))}
@@ -141,8 +141,8 @@ export const FiltersPanel: React.FC<FiltersPanelProps> = ({
               <SelectTrigger>
                 <SelectValue placeholder="Seleccionar fármaco" />
               </SelectTrigger>
-              <SelectContent className="max-h-[200px]">
-                {uniqueOptions.farmacos.slice(0, 100).map((farmaco) => (
+              <SelectContent className="max-h-[300px]">
+                {uniqueOptions.farmacos.map((farmaco) => (
                   <SelectItem key={farmaco} value={farmaco}>{farmaco}</SelectItem>
                 ))}
               </SelectContent>
@@ -159,8 +159,8 @@ export const FiltersPanel: React.FC<FiltersPanelProps> = ({
               <SelectTrigger>
                 <SelectValue placeholder="Seleccionar molécula" />
               </SelectTrigger>
-              <SelectContent className="max-h-[200px]">
-                {uniqueOptions.moleculas.slice(0, 100).map((molecula) => (
+              <SelectContent className="max-h-[300px]">
+                {uniqueOptions.moleculas.map((molecula) => (
                   <SelectItem key={molecula} value={molecula}>{molecula}</SelectItem>
                 ))}
               </SelectContent>
@@ -177,8 +177,8 @@ export const FiltersPanel: React.FC<FiltersPanelProps> = ({
               <SelectTrigger>
                 <SelectValue placeholder="Seleccionar mecanismo" />
               </SelectTrigger>
-              <SelectContent className="max-h-[200px]">
-                {uniqueOptions.mecanismosAccion.slice(0, 100).map((mecanismo) => (
+              <SelectContent className="max-h-[300px]">
+                {uniqueOptions.mecanismosAccion.map((mecanismo) => (
                   <SelectItem key={mecanismo} value={mecanismo}>{mecanismo}</SelectItem>
                 ))}
               </SelectContent>
@@ -195,8 +195,8 @@ export const FiltersPanel: React.FC<FiltersPanelProps> = ({
               <SelectTrigger>
                 <SelectValue placeholder="Seleccionar sub área" />
               </SelectTrigger>
-              <SelectContent className="max-h-[200px]">
-                {uniqueOptions.subAreasTratamiento.slice(0, 100).map((subArea) => (
+              <SelectContent className="max-h-[300px]">
+                {uniqueOptions.subAreasTratamiento.map((subArea) => (
                   <SelectItem key={subArea} value={subArea}>{subArea}</SelectItem>
                 ))}
               </SelectContent>
@@ -213,7 +213,7 @@ export const FiltersPanel: React.FC<FiltersPanelProps> = ({
               <SelectTrigger>
                 <SelectValue placeholder="Seleccionar línea" />
               </SelectTrigger>
-              <SelectContent className="max-h-[200px]">
+              <SelectContent className="max-h-[300px]">
                 {uniqueOptions.lineasTratamiento.map((linea) => (
                   <SelectItem key={linea} value={linea}>{linea}</SelectItem>
                 ))}
@@ -231,8 +231,8 @@ export const FiltersPanel: React.FC<FiltersPanelProps> = ({
               <SelectTrigger>
                 <SelectValue placeholder="Seleccionar alteración" />
               </SelectTrigger>
-              <SelectContent className="max-h-[200px]">
-                {uniqueOptions.alteracionesGeneticas.slice(0, 100).map((alt) => (
+              <SelectContent className="max-h-[300px]">
+                {uniqueOptions.alteracionesGeneticas.map((alt) => (
                   <SelectItem key={alt} value={alt}>{alt}</SelectItem>
                 ))}
               </SelectContent>
@@ -242,7 +242,7 @@ export const FiltersPanel: React.FC<FiltersPanelProps> = ({
           {/* Estado en España */}
           <div>
             <label className="text-sm font-medium mb-3 block">Estado en España</label>
-            <div className="space-y-2 max-h-32 overflow-y-auto">
+            <div className="space-y-2 max-h-48 overflow-y-auto">
               {uniqueOptions.estados.map((estado) => (
                 <div key={estado} className="flex items-center space-x-2">
                   <Checkbox

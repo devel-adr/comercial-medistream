@@ -146,7 +146,7 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
               <SelectTrigger>
                 <SelectValue placeholder="Todos" />
               </SelectTrigger>
-              <SelectContent className="max-h-[200px]">
+              <SelectContent className="max-h-[300px]">
                 {dynamicOptions.laboratorios.map((lab) => (
                   <SelectItem key={lab} value={lab}>{lab}</SelectItem>
                 ))}
@@ -164,7 +164,7 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
               <SelectTrigger>
                 <SelectValue placeholder={filters.laboratorio ? "Seleccionar área" : "Todas"} />
               </SelectTrigger>
-              <SelectContent className="max-h-[200px]">
+              <SelectContent className="max-h-[300px]">
                 {dynamicOptions.areasTerapeuticas.map((area) => (
                   <SelectItem key={area} value={area}>{area}</SelectItem>
                 ))}
@@ -182,8 +182,8 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
               <SelectTrigger>
                 <SelectValue placeholder={filters.areaTerapeutica ? "Seleccionar fármaco" : "Todos"} />
               </SelectTrigger>
-              <SelectContent className="max-h-[200px]">
-                {dynamicOptions.farmacos.slice(0, 100).map((farmaco) => (
+              <SelectContent className="max-h-[300px]">
+                {dynamicOptions.farmacos.map((farmaco) => (
                   <SelectItem key={farmaco} value={farmaco}>{farmaco}</SelectItem>
                 ))}
               </SelectContent>
@@ -200,8 +200,8 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
               <SelectTrigger>
                 <SelectValue placeholder={filters.farmaco ? "Seleccionar molécula" : "Todas"} />
               </SelectTrigger>
-              <SelectContent className="max-h-[200px]">
-                {dynamicOptions.moleculas.slice(0, 100).map((molecula) => (
+              <SelectContent className="max-h-[300px]">
+                {dynamicOptions.moleculas.map((molecula) => (
                   <SelectItem key={molecula} value={molecula}>{molecula}</SelectItem>
                 ))}
               </SelectContent>
@@ -217,7 +217,7 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
               <SelectTrigger>
                 <SelectValue placeholder="Todos" />
               </SelectTrigger>
-              <SelectContent className="max-h-[200px]">
+              <SelectContent className="max-h-[300px]">
                 {dynamicOptions.estados.map((estado) => (
                   <SelectItem key={estado} value={estado}>{estado}</SelectItem>
                 ))}

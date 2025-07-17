@@ -146,7 +146,7 @@ export const DynamicFiltersPanel: React.FC<DynamicFiltersPanelProps> = ({
               <SelectTrigger>
                 <SelectValue placeholder="Todos" />
               </SelectTrigger>
-              <SelectContent className="max-h-[200px]">
+              <SelectContent className="max-h-[300px]">
                 <SelectItem value="all">Todos los laboratorios</SelectItem>
                 {dynamicOptions.laboratorios.map((lab) => (
                   <SelectItem key={lab} value={lab}>{lab}</SelectItem>
@@ -165,7 +165,7 @@ export const DynamicFiltersPanel: React.FC<DynamicFiltersPanelProps> = ({
               <SelectTrigger>
                 <SelectValue placeholder={filters.laboratorio ? "Seleccionar área" : "Todas"} />
               </SelectTrigger>
-              <SelectContent className="max-h-[200px]">
+              <SelectContent className="max-h-[300px]">
                 <SelectItem value="all">Todas las áreas</SelectItem>
                 {dynamicOptions.areasTerapeuticas.map((area) => (
                   <SelectItem key={area} value={area}>{area}</SelectItem>
@@ -184,9 +184,9 @@ export const DynamicFiltersPanel: React.FC<DynamicFiltersPanelProps> = ({
               <SelectTrigger>
                 <SelectValue placeholder={filters.areaTerapeutica ? "Seleccionar fármaco" : "Todos"} />
               </SelectTrigger>
-              <SelectContent className="max-h-[200px]">
+              <SelectContent className="max-h-[300px]">
                 <SelectItem value="all">Todos los fármacos</SelectItem>
-                {dynamicOptions.farmacos.slice(0, 100).map((farmaco) => (
+                {dynamicOptions.farmacos.map((farmaco) => (
                   <SelectItem key={farmaco} value={farmaco}>{farmaco}</SelectItem>
                 ))}
               </SelectContent>
@@ -203,9 +203,9 @@ export const DynamicFiltersPanel: React.FC<DynamicFiltersPanelProps> = ({
               <SelectTrigger>
                 <SelectValue placeholder={filters.farmaco ? "Seleccionar molécula" : "Todas"} />
               </SelectTrigger>
-              <SelectContent className="max-h-[200px]">
+              <SelectContent className="max-h-[300px]">
                 <SelectItem value="all">Todas las moléculas</SelectItem>
-                {dynamicOptions.moleculas.slice(0, 100).map((molecula) => (
+                {dynamicOptions.moleculas.map((molecula) => (
                   <SelectItem key={molecula} value={molecula}>{molecula}</SelectItem>
                 ))}
               </SelectContent>
@@ -221,7 +221,7 @@ export const DynamicFiltersPanel: React.FC<DynamicFiltersPanelProps> = ({
               <SelectTrigger>
                 <SelectValue placeholder="Todos" />
               </SelectTrigger>
-              <SelectContent className="max-h-[200px]">
+              <SelectContent className="max-h-[300px]">
                 <SelectItem value="all">Todos los formatos</SelectItem>
                 {dynamicOptions.formatos.map((formato) => (
                   <SelectItem key={formato} value={formato}>{formato}</SelectItem>
