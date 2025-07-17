@@ -17,19 +17,22 @@ import { UnmetNeedsDetailModal } from '@/components/UnmetNeeds/UnmetNeedsDetailM
 import { AddUnmetNeedModal } from '@/components/UnmetNeeds/AddUnmetNeedModal';
 import { EditUnmetNeedModal } from '@/components/UnmetNeeds/EditUnmetNeedModal';
 import { CustomFieldsForm } from '@/components/UnmetNeeds/CustomFieldsForm';
+import { DynamicFiltersPanel } from '@/components/UnmetNeeds/DynamicFiltersPanel';
+
+interface UnmetNeedsFilters {
+  laboratorio?: string;
+  areaTerapeutica?: string;
+  farmaco?: string;
+  molecula?: string;
+  impacto?: string;
+  horizonte?: string;
+  favoritos?: string;
+}
 
 const formatOptions = ['Programa', 'Webinar', 'Podcast', 'Personalizado (DOCS only)'];
 
 const UnmetNeeds = () => {
-  const [filters, setFilters] = useState({
-    lab: '',
-    area_terapeutica: '',
-    farmaco: '',
-    molecula: '',
-    impacto: '',
-    horizonte_temporal: '',
-    favoritos: ''
-  });
+  const [activeFilters, setActiveFilters] = useState<UnmetNeedsFilters>({});
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [formatSelections, setFormatSelections] = useState<Record<string, string>>({});
@@ -86,15 +89,6 @@ const UnmetNeeds = () => {
     });
   };
 
-  const uniqueOptions = useMemo(() => ({
-    labs: [...new Set(unmetNeeds.map(item => item.lab).filter(Boolean))].sort(),
-    areasTerapeuticas: [...new Set(unmetNeeds.map(item => item.area_terapeutica).filter(Boolean))].sort(),
-    farmacos: [...new Set(unmetNeeds.map(item => item.farmaco).filter(Boolean))].sort(),
-    moleculas: [...new Set(unmetNeeds.map(item => item.molecula).filter(Boolean))].sort(),
-    impactos: [...new Set(unmetNeeds.map(item => item.impacto).filter(Boolean))].sort(),
-    horizontesTemporales: [...new Set(unmetNeeds.map(item => item.horizonte_temporal).filter(Boolean))].sort()
-  }), [unmetNeeds]);
-
   const filteredAndSortedData = useMemo(() => {
     let filtered = unmetNeeds.filter(item => {
       if (searchTerm) {
@@ -117,22 +111,22 @@ const UnmetNeeds = () => {
         }
       }
 
-      if (filters.lab && item.lab !== filters.lab) return false;
-      if (filters.area_terapeutica && item.area_terapeutica !== filters.area_terapeutica) return false;
-      if (filters.farmaco && item.farmaco !== filters.farmaco) return false;
-      if (filters.molecula && item.molecula !== filters.molecula) return false;
-      if (filters.impacto && item.impacto !== filters.impacto) return false;
-      if (filters.horizonte_temporal && item.horizonte_temporal !== filters.horizonte_temporal) return false;
+      if (activeFilters.laboratorio && item.lab !== activeFilters.laboratorio) return false;
+      if (activeFilters.areaTerapeutica && item.area_terapeutica !== activeFilters.areaTerapeutica) return false;
+      if (activeFilters.farmaco && item.farmaco !== activeFilters.farmaco) return false;
+      if (activeFilters.molecula && item.molecula !== activeFilters.molecula) return false;
+      if (activeFilters.impacto && item.impacto !== activeFilters.impacto) return false;
+      if (activeFilters.horizonte && item.horizonte_temporal !== activeFilters.horizonte) return false;
       
       const itemId = item.id_UN_table?.toString();
-      if (filters.favoritos === 'si' && !localFavorites.has(itemId)) return false;
-      if (filters.favoritos === 'no' && localFavorites.has(itemId)) return false;
+      if (activeFilters.favoritos === 'si' && !localFavorites.has(itemId)) return false;
+      if (activeFilters.favoritos === 'no' && localFavorites.has(itemId)) return false;
       
       return true;
     });
 
     return filtered;
-  }, [unmetNeeds, filters, searchTerm, localFavorites]);
+  }, [unmetNeeds, activeFilters, searchTerm, localFavorites]);
 
   const handleSelectRow = (id: string, checked: boolean) => {
     const newSelected = new Set(selectedRows);
@@ -413,162 +407,26 @@ const UnmetNeeds = () => {
 
           <UnmetNeedsKPIs data={filteredAndSortedData} />
 
+          {/* Search Section */}
           <Card className="shadow-lg">
-            <CardHeader>
-              <div className="flex items-center space-x-2">
-                <Filter className="w-5 h-5 text-blue-600" />
-                <CardTitle className="text-lg">Filtros y Búsqueda</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                <div className="md:col-span-4">
-                  <label className="text-sm font-medium mb-2 block">Búsqueda Global</label>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <Input
-                      placeholder="Buscar en todos los campos..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Laboratorio</label>
-                  <Select
-                    value={filters.lab}
-                    onValueChange={(value) => setFilters(prev => ({ ...prev, lab: value === 'all' ? '' : value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar laboratorio" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos los laboratorios</SelectItem>
-                      {uniqueOptions.labs.map((lab) => (
-                        <SelectItem key={lab} value={lab}>{lab}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Área Terapéutica</label>
-                  <Select
-                    value={filters.area_terapeutica}
-                    onValueChange={(value) => setFilters(prev => ({ ...prev, area_terapeutica: value === 'all' ? '' : value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar área" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todas las áreas</SelectItem>
-                      {uniqueOptions.areasTerapeuticas.map((area) => (
-                        <SelectItem key={area} value={area}>{area}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Fármaco</label>
-                  <Select
-                    value={filters.farmaco}
-                    onValueChange={(value) => setFilters(prev => ({ ...prev, farmaco: value === 'all' ? '' : value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar fármaco" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos los fármacos</SelectItem>
-                      {uniqueOptions.farmacos.map((farmaco) => (
-                        <SelectItem key={farmaco} value={farmaco}>{farmaco}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Favoritos</label>
-                  <Select
-                    value={filters.favoritos}
-                    onValueChange={(value) => setFilters(prev => ({ ...prev, favoritos: value === 'all' ? '' : value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Todos" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      <SelectItem value="si">
-                        <div className="flex items-center gap-2">
-                          <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                          Solo Favoritos
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="no">Sin Favoritos</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Molécula</label>
-                  <Select
-                    value={filters.molecula}
-                    onValueChange={(value) => setFilters(prev => ({ ...prev, molecula: value === 'all' ? '' : value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar molécula" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todas las moléculas</SelectItem>
-                      {uniqueOptions.moleculas.map((molecula) => (
-                        <SelectItem key={molecula} value={molecula}>{molecula}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Impacto</label>
-                  <Select
-                    value={filters.impacto}
-                    onValueChange={(value) => setFilters(prev => ({ ...prev, impacto: value === 'all' ? '' : value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar impacto" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos los impactos</SelectItem>
-                      {uniqueOptions.impactos.map((impacto) => (
-                        <SelectItem key={impacto} value={impacto}>{impacto}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Horizonte Temporal</label>
-                  <Select
-                    value={filters.horizonte_temporal}
-                    onValueChange={(value) => setFilters(prev => ({ ...prev, horizonte_temporal: value === 'all' ? '' : value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar horizonte" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos los horizontes</SelectItem>
-                      {uniqueOptions.horizontesTemporales.map((horizonte) => (
-                        <SelectItem key={horizonte} value={horizonte}>{horizonte}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+            <CardContent className="p-6">
+              <div className="relative max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder="Buscar unmet needs..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
               </div>
             </CardContent>
           </Card>
+
+          {/* Dynamic Filters */}
+          <DynamicFiltersPanel 
+            onFiltersChange={setActiveFilters}
+            unmetNeeds={unmetNeeds}
+          />
 
           <Card className="shadow-lg">
             <CardHeader>

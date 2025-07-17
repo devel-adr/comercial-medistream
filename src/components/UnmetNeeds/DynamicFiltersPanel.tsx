@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Filter, X, Star } from 'lucide-react';
 
 interface DynamicFiltersPanelProps {
@@ -23,7 +22,7 @@ export const DynamicFiltersPanel: React.FC<DynamicFiltersPanelProps> = ({
     molecula: '',
     impacto: '',
     horizonte: '',
-    favoritos: false
+    favoritos: ''
   });
 
   // Filtrar datos basándose en las selecciones previas
@@ -96,7 +95,7 @@ export const DynamicFiltersPanel: React.FC<DynamicFiltersPanelProps> = ({
   }, [unmetNeeds, filters, filteredData]);
 
   const handleFilterChange = (key: string, value: any) => {
-    const newFilters = { ...filters, [key]: value };
+    const newFilters = { ...filters, [key]: value === 'all' ? '' : value };
     
     // Limpiar filtros dependientes cuando se cambia un filtro padre
     if (key === 'laboratorio') {
@@ -114,12 +113,6 @@ export const DynamicFiltersPanel: React.FC<DynamicFiltersPanelProps> = ({
     onFiltersChange(newFilters);
   };
 
-  const handleFavoritesChange = (checked: boolean | "indeterminate") => {
-    const newFilters = { ...filters, favoritos: checked === true };
-    setFilters(newFilters);
-    onFiltersChange(newFilters);
-  };
-
   const clearFilters = () => {
     const emptyFilters = {
       laboratorio: '',
@@ -128,40 +121,26 @@ export const DynamicFiltersPanel: React.FC<DynamicFiltersPanelProps> = ({
       molecula: '',
       impacto: '',
       horizonte: '',
-      favoritos: false
+      favoritos: ''
     };
     setFilters(emptyFilters);
     onFiltersChange(emptyFilters);
   };
 
-  const activeFiltersCount = Object.entries(filters).filter(([key, value]) => 
-    key === 'favoritos' ? value === true : value !== ''
-  ).length;
+  const activeFiltersCount = Object.values(filters).filter(value => value !== '').length;
 
   return (
     <Card className="shadow-lg">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="w-5 h-5" />
-            Filtros Dinámicos
-            {activeFiltersCount > 0 && (
-              <Badge variant="secondary">{activeFiltersCount}</Badge>
-            )}
-          </CardTitle>
-          <Button
-            variant="outline"
-            onClick={clearFilters}
-            disabled={activeFiltersCount === 0}
-            size="sm"
-          >
-            <X className="w-4 h-4 mr-2" />
-            Limpiar filtros
-          </Button>
+      <CardContent className="p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Filter className="w-5 h-5 text-blue-600" />
+          <h3 className="text-lg font-semibold">Filtros Dinámicos</h3>
+          {activeFiltersCount > 0 && (
+            <Badge variant="secondary">{activeFiltersCount}</Badge>
+          )}
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 xl:grid-cols-7 gap-4">
           <div>
             <label className="text-sm font-medium mb-1 block">Laboratorio</label>
             <Select
@@ -169,9 +148,10 @@ export const DynamicFiltersPanel: React.FC<DynamicFiltersPanelProps> = ({
               onValueChange={(value) => handleFilterChange('laboratorio', value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Seleccionar laboratorio" />
+                <SelectValue placeholder="Todos" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-[200px]">
+                <SelectItem value="all">Todos los laboratorios</SelectItem>
                 {dynamicOptions.laboratorios.map((lab) => (
                   <SelectItem key={lab} value={lab}>{lab}</SelectItem>
                 ))}
@@ -184,12 +164,13 @@ export const DynamicFiltersPanel: React.FC<DynamicFiltersPanelProps> = ({
             <Select
               value={filters.areaTerapeutica}
               onValueChange={(value) => handleFilterChange('areaTerapeutica', value)}
-              disabled={!filters.laboratorio}
+              disabled={!filters.laboratorio && dynamicOptions.areasTerapeuticas.length === 0}
             >
               <SelectTrigger>
-                <SelectValue placeholder={filters.laboratorio ? "Seleccionar área" : "Selecciona laboratorio primero"} />
+                <SelectValue placeholder={filters.laboratorio ? "Seleccionar área" : "Todas"} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-[200px]">
+                <SelectItem value="all">Todas las áreas</SelectItem>
                 {dynamicOptions.areasTerapeuticas.map((area) => (
                   <SelectItem key={area} value={area}>{area}</SelectItem>
                 ))}
@@ -202,13 +183,14 @@ export const DynamicFiltersPanel: React.FC<DynamicFiltersPanelProps> = ({
             <Select
               value={filters.farmaco}
               onValueChange={(value) => handleFilterChange('farmaco', value)}
-              disabled={!filters.areaTerapeutica}
+              disabled={!filters.areaTerapeutica && dynamicOptions.farmacos.length === 0}
             >
               <SelectTrigger>
-                <SelectValue placeholder={filters.areaTerapeutica ? "Seleccionar fármaco" : "Selecciona área primero"} />
+                <SelectValue placeholder={filters.areaTerapeutica ? "Seleccionar fármaco" : "Todos"} />
               </SelectTrigger>
-              <SelectContent>
-                {dynamicOptions.farmacos.map((farmaco) => (
+              <SelectContent className="max-h-[200px]">
+                <SelectItem value="all">Todos los fármacos</SelectItem>
+                {dynamicOptions.farmacos.slice(0, 100).map((farmaco) => (
                   <SelectItem key={farmaco} value={farmaco}>{farmaco}</SelectItem>
                 ))}
               </SelectContent>
@@ -220,13 +202,14 @@ export const DynamicFiltersPanel: React.FC<DynamicFiltersPanelProps> = ({
             <Select
               value={filters.molecula}
               onValueChange={(value) => handleFilterChange('molecula', value)}
-              disabled={!filters.farmaco}
+              disabled={!filters.farmaco && dynamicOptions.moleculas.length === 0}
             >
               <SelectTrigger>
-                <SelectValue placeholder={filters.farmaco ? "Seleccionar molécula" : "Selecciona fármaco primero"} />
+                <SelectValue placeholder={filters.farmaco ? "Seleccionar molécula" : "Todas"} />
               </SelectTrigger>
-              <SelectContent>
-                {dynamicOptions.moleculas.map((molecula) => (
+              <SelectContent className="max-h-[200px]">
+                <SelectItem value="all">Todas las moléculas</SelectItem>
+                {dynamicOptions.moleculas.slice(0, 100).map((molecula) => (
                   <SelectItem key={molecula} value={molecula}>{molecula}</SelectItem>
                 ))}
               </SelectContent>
@@ -240,9 +223,10 @@ export const DynamicFiltersPanel: React.FC<DynamicFiltersPanelProps> = ({
               onValueChange={(value) => handleFilterChange('impacto', value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Seleccionar impacto" />
+                <SelectValue placeholder="Todos" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-[200px]">
+                <SelectItem value="all">Todos los impactos</SelectItem>
                 {dynamicOptions.impactos.map((impacto) => (
                   <SelectItem key={impacto} value={impacto}>{impacto}</SelectItem>
                 ))}
@@ -257,30 +241,50 @@ export const DynamicFiltersPanel: React.FC<DynamicFiltersPanelProps> = ({
               onValueChange={(value) => handleFilterChange('horizonte', value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Seleccionar horizonte" />
+                <SelectValue placeholder="Todos" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-[200px]">
+                <SelectItem value="all">Todos los horizontes</SelectItem>
                 {dynamicOptions.horizontes.map((horizonte) => (
                   <SelectItem key={horizonte} value={horizonte}>{horizonte}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-        </div>
-        
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="favorites"
-            checked={filters.favoritos}
-            onCheckedChange={handleFavoritesChange}
-          />
-          <label
-            htmlFor="favorites"
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2"
-          >
-            <Star className="w-4 h-4" />
-            Mostrar solo favoritos
-          </label>
+
+          <div>
+            <label className="text-sm font-medium mb-1 block">Favoritos</label>
+            <Select
+              value={filters.favoritos}
+              onValueChange={(value) => handleFilterChange('favoritos', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Todos" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="si">
+                  <div className="flex items-center gap-2">
+                    <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                    Solo Favoritos
+                  </div>
+                </SelectItem>
+                <SelectItem value="no">Sin Favoritos</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-end">
+            <Button
+              variant="outline"
+              onClick={clearFilters}
+              disabled={activeFiltersCount === 0}
+              className="w-full"
+            >
+              <X className="w-4 h-4 mr-2" />
+              Limpiar
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
