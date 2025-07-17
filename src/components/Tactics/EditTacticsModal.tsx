@@ -58,7 +58,9 @@ export const EditTacticsModal: React.FC<EditTacticsModalProps> = ({
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
+      // Using type assertion to work around TypeScript limitations
+      // Note: This assumes the PharmaTactics_table exists in your Supabase database
+      const { error } = await (supabase as any)
         .from('PharmaTactics_table')
         .update(formData)
         .eq('id', tactic.id);

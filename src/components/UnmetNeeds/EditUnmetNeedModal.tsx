@@ -63,7 +63,7 @@ export const EditUnmetNeedModal: React.FC<EditUnmetNeedModalProps> = ({
 
     try {
       const { error } = await supabase
-        .from('UN_table')
+        .from('UnmetNeeds_table')
         .update(formData)
         .eq('id_UN_table', unmetNeed.id_UN_table);
 
