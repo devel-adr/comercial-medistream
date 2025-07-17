@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { FileText, ExternalLink, Presentation, Eye, Star, Trash2 } from 'lucide-react';
+import { FileText, ExternalLink, Presentation, Eye, Star, Trash2, Edit } from 'lucide-react';
 import { TacticsDetailModal } from './TacticsDetailModal';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -19,6 +18,7 @@ interface TacticsCardsProps {
   favorites: Set<string>;
   toggleFavorite: (id: string) => void;
   isFavorite: (id: string) => boolean;
+  onEdit?: (tactic: any) => void;
 }
 
 export const TacticsCards: React.FC<TacticsCardsProps> = ({
@@ -31,7 +31,8 @@ export const TacticsCards: React.FC<TacticsCardsProps> = ({
   showOnlyFavorites,
   favorites,
   toggleFavorite,
-  isFavorite
+  isFavorite,
+  onEdit
 }) => {
   const [selectedTactic, setSelectedTactic] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -85,6 +86,12 @@ export const TacticsCards: React.FC<TacticsCardsProps> = ({
       title: isFavorite(tactic.id?.toString()) ? "Removido de favoritos" : "Añadido a favoritos",
       description: `"${tactic.unmet_need}" ${isFavorite(tactic.id?.toString()) ? "removido de" : "añadido a"} favoritos.`,
     });
+  };
+
+  const handleEdit = (tactic: any) => {
+    if (onEdit) {
+      onEdit(tactic);
+    }
   };
 
   const handleDelete = async (tactic: any) => {
@@ -213,6 +220,15 @@ export const TacticsCards: React.FC<TacticsCardsProps> = ({
                             : 'text-gray-400'
                         }`} 
                       />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEdit(tactic)}
+                      className="p-1 h-8 w-8 hover:text-blue-500"
+                      disabled={isDeleting}
+                    >
+                      <Edit className="w-4 h-4" />
                     </Button>
                     <Button
                       variant="ghost"
