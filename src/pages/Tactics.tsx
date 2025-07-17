@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,7 +12,7 @@ import { TacticsKPIs } from '@/components/Tactics/TacticsKPIs';
 import { TacticsCards } from '@/components/Tactics/TacticsCards';
 
 const Tactics = () => {
-  const { data, loading, error } = usePharmaTacticsData();
+  const { data, loading, error, refresh } = usePharmaTacticsData();
   const { favorites, toggleFavorite, isFavorite } = useTacticsFavorites();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLab, setSelectedLab] = useState('');
@@ -182,6 +181,7 @@ const Tactics = () => {
             favorites={favorites}
             toggleFavorite={toggleFavorite}
             isFavorite={isFavorite}
+            refresh={refresh}
           />
         </div>
       </div>

@@ -11,7 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { Save, X } from 'lucide-react';
 
 interface EditTacticModalProps {
@@ -76,16 +77,23 @@ export const EditTacticModal: React.FC<EditTacticModalProps> = ({
     setIsUpdating(true);
 
     try {
-      // Since PharmaTactics_table doesn't exist in the schema, we'll simulate the update
-      // In a real implementation, you would need to add this table to your Supabase schema
-      console.log('Simulating tactic update:', formData);
+      console.log('Updating tactic with ID:', tactic.id, 'Data:', formData);
       
-      // Simulate a delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { error } = await (supabase as any)
+        .from('PharmaTactics_table')
+        .update(formData)
+        .eq('id', tactic.id);
+
+      if (error) {
+        console.error('Supabase update error:', error);
+        throw new Error(`Error al actualizar: ${error.message}`);
+      }
+
+      console.log('Tactic updated successfully in Supabase');
 
       toast({
         title: "Tactic actualizada",
-        description: "La tactic ha sido actualizada correctamente (simulado).",
+        description: "La tactic ha sido actualizada correctamente.",
       });
 
       onUpdate();
@@ -94,7 +102,7 @@ export const EditTacticModal: React.FC<EditTacticModalProps> = ({
       console.error('Error updating tactic:', error);
       toast({
         title: "Error",
-        description: "Hubo un problema al actualizar la tactic.",
+        description: error instanceof Error ? error.message : "Hubo un problema al actualizar la tactic.",
         variant: "destructive",
       });
     } finally {
