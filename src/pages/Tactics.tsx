@@ -11,18 +11,15 @@ import { usePharmaTacticsData } from '@/hooks/usePharmaTacticsData';
 import { useTacticsFavorites } from '@/hooks/useTacticsFavorites';
 import { TacticsKPIs } from '@/components/Tactics/TacticsKPIs';
 import { TacticsCards } from '@/components/Tactics/TacticsCards';
-import { EditTacticModal } from '@/components/Tactics/EditTacticModal';
 
 const Tactics = () => {
-  const { data, loading, error, refresh } = usePharmaTacticsData();
+  const { data, loading, error } = usePharmaTacticsData();
   const { favorites, toggleFavorite, isFavorite } = useTacticsFavorites();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLab, setSelectedLab] = useState('');
   const [selectedArea, setSelectedArea] = useState('');
   const [selectedFormat, setSelectedFormat] = useState('');
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
-  const [editingTactic, setEditingTactic] = useState(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // Get unique values for filters and filter out empty/null values
   const uniqueLabs = [...new Set(data.map(item => item.laboratorio))]
@@ -47,11 +44,6 @@ const Tactics = () => {
 
   const handleFavoritesChange = (checked: boolean | "indeterminate") => {
     setShowOnlyFavorites(checked === true);
-  };
-
-  const handleEditTactic = (tactic: any) => {
-    setEditingTactic(tactic);
-    setIsEditModalOpen(true);
   };
 
   if (error) {
@@ -190,17 +182,6 @@ const Tactics = () => {
             favorites={favorites}
             toggleFavorite={toggleFavorite}
             isFavorite={isFavorite}
-            onEdit={handleEditTactic}
-          />
-
-          <EditTacticModal
-            tactic={editingTactic}
-            isOpen={isEditModalOpen}
-            onClose={() => {
-              setIsEditModalOpen(false);
-              setEditingTactic(null);
-            }}
-            onSuccess={refresh}
           />
         </div>
       </div>
