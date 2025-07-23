@@ -7,100 +7,204 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instanciate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "12.2.3 (519615d)"
+  }
   public: {
     Tables: {
       DrugDealer_table: {
         Row: {
-          alteracion_genetica_dirigida: string
-          area_terapeutica: string
-          ensayos_clinicos_relevantes: string
-          estado_en_espana: string
-          fecha_de_aprobacion_espana: string
-          fuente_url: string
+          alteracion_genetica_dirigida: string | null
+          area_terapeutica: string | null
+          ensayos_clinicos_relevantes: string | null
+          estado_en_espana: string | null
+          fecha_de_aprobacion_espana: string | null
+          fuente_url: string | null
           ID_NUM: number
-          linea_de_tratamiento: string
-          mecanismo_de_accion: string
+          linea_de_tratamiento: string | null
+          mecanismo_de_accion: string | null
           nombre_de_la_molecula: string
           nombre_del_farmaco: string
           nombre_lab: string
-          sub_area_de_tratamiento: string
+          sub_area_de_tratamiento: string | null
         }
         Insert: {
-          alteracion_genetica_dirigida: string
-          area_terapeutica: string
-          ensayos_clinicos_relevantes: string
-          estado_en_espana: string
-          fecha_de_aprobacion_espana: string
-          fuente_url: string
+          alteracion_genetica_dirigida?: string | null
+          area_terapeutica?: string | null
+          ensayos_clinicos_relevantes?: string | null
+          estado_en_espana?: string | null
+          fecha_de_aprobacion_espana?: string | null
+          fuente_url?: string | null
           ID_NUM?: number
-          linea_de_tratamiento: string
-          mecanismo_de_accion: string
+          linea_de_tratamiento?: string | null
+          mecanismo_de_accion?: string | null
           nombre_de_la_molecula: string
           nombre_del_farmaco: string
           nombre_lab: string
-          sub_area_de_tratamiento: string
+          sub_area_de_tratamiento?: string | null
         }
         Update: {
-          alteracion_genetica_dirigida?: string
-          area_terapeutica?: string
-          ensayos_clinicos_relevantes?: string
-          estado_en_espana?: string
-          fecha_de_aprobacion_espana?: string
-          fuente_url?: string
+          alteracion_genetica_dirigida?: string | null
+          area_terapeutica?: string | null
+          ensayos_clinicos_relevantes?: string | null
+          estado_en_espana?: string | null
+          fecha_de_aprobacion_espana?: string | null
+          fuente_url?: string | null
           ID_NUM?: number
-          linea_de_tratamiento?: string
-          mecanismo_de_accion?: string
+          linea_de_tratamiento?: string | null
+          mecanismo_de_accion?: string | null
           nombre_de_la_molecula?: string
           nombre_del_farmaco?: string
           nombre_lab?: string
-          sub_area_de_tratamiento?: string
+          sub_area_de_tratamiento?: string | null
+        }
+        Relationships: []
+      }
+      Facturas_table: {
+        Row: {
+          Cantidad: number
+          Cuatrimestre: string
+          fecha_analizado: string | null
+          fecha_emision: string
+          ficheroURL: string
+          id: number
+          nombre_archivo: string
+          nombre_proveedor: string
+        }
+        Insert: {
+          Cantidad: number
+          Cuatrimestre: string
+          fecha_analizado?: string | null
+          fecha_emision: string
+          ficheroURL: string
+          id?: number
+          nombre_archivo: string
+          nombre_proveedor: string
+        }
+        Update: {
+          Cantidad?: number
+          Cuatrimestre?: string
+          fecha_analizado?: string | null
+          fecha_emision?: string
+          ficheroURL?: string
+          id?: number
+          nombre_archivo?: string
+          nombre_proveedor?: string
+        }
+        Relationships: []
+      }
+      mejoras_comercial_table: {
+        Row: {
+          id: number
+          mejora_solicitada: string | null
+          persona_Solicitante: string | null
+          sector: string | null
+        }
+        Insert: {
+          id?: number
+          mejora_solicitada?: string | null
+          persona_Solicitante?: string | null
+          sector?: string | null
+        }
+        Update: {
+          id?: number
+          mejora_solicitada?: string | null
+          persona_Solicitante?: string | null
+          sector?: string | null
+        }
+        Relationships: []
+      }
+      PharmaTactics_table: {
+        Row: {
+          area_terapeutica: string | null
+          farmaco: string | null
+          formato: string | null
+          id: number
+          id_unmetNeed: number
+          laboratorio: string | null
+          molecula: string | null
+          text_docs: string | null
+          unmet_need: string | null
+          URL_docs: string | null
+          URL_ppt: string | null
+        }
+        Insert: {
+          area_terapeutica?: string | null
+          farmaco?: string | null
+          formato?: string | null
+          id?: number
+          id_unmetNeed: number
+          laboratorio?: string | null
+          molecula?: string | null
+          text_docs?: string | null
+          unmet_need?: string | null
+          URL_docs?: string | null
+          URL_ppt?: string | null
+        }
+        Update: {
+          area_terapeutica?: string | null
+          farmaco?: string | null
+          formato?: string | null
+          id?: number
+          id_unmetNeed?: number
+          laboratorio?: string | null
+          molecula?: string | null
+          text_docs?: string | null
+          unmet_need?: string | null
+          URL_docs?: string | null
+          URL_ppt?: string | null
         }
         Relationships: []
       }
       UnmetNeeds_table: {
         Row: {
-          area_terapeutica: string
-          conclusion: string
+          area_terapeutica: string | null
+          conclusion: string | null
           farmaco: string
-          horizonte_temporal: string
+          horizonte_temporal: string | null
           id_NUM_DD: number
           id_UN_NUM: string
           id_UN_table: number
-          impacto: string
+          impacto: string | null
           lab: string
           molecula: string
           oportunidad_estrategica: string | null
-          racional: string
+          preguntas: string | null
+          racional: string | null
           unmet_need: string
         }
         Insert: {
-          area_terapeutica: string
-          conclusion: string
+          area_terapeutica?: string | null
+          conclusion?: string | null
           farmaco: string
-          horizonte_temporal: string
+          horizonte_temporal?: string | null
           id_NUM_DD: number
           id_UN_NUM: string
           id_UN_table?: number
-          impacto: string
+          impacto?: string | null
           lab: string
           molecula: string
           oportunidad_estrategica?: string | null
-          racional: string
+          preguntas?: string | null
+          racional?: string | null
           unmet_need: string
         }
         Update: {
-          area_terapeutica?: string
-          conclusion?: string
+          area_terapeutica?: string | null
+          conclusion?: string | null
           farmaco?: string
-          horizonte_temporal?: string
+          horizonte_temporal?: string | null
           id_NUM_DD?: number
           id_UN_NUM?: string
           id_UN_table?: number
-          impacto?: string
+          impacto?: string | null
           lab?: string
           molecula?: string
           oportunidad_estrategica?: string | null
-          racional?: string
+          preguntas?: string | null
+          racional?: string | null
           unmet_need?: string
         }
         Relationships: []
@@ -139,21 +243,25 @@ export type Database = {
   }
 }
 
-type DefaultSchema = Database[Extract<keyof Database, "public">]
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
@@ -171,14 +279,16 @@ export type Tables<
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
@@ -194,14 +304,16 @@ export type TablesInsert<
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
@@ -217,14 +329,16 @@ export type TablesUpdate<
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
@@ -232,14 +346,16 @@ export type Enums<
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
