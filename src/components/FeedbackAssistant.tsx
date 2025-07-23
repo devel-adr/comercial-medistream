@@ -24,22 +24,13 @@ export const FeedbackAssistant = () => {
     setLoading(true);
 
     try {
-      // Map form data to UnmetNeeds_table structure
+      // Send data to mejoras_comercial_table with correct field mappings
       const { error } = await supabase
-        .from('UnmetNeeds_table')
+        .from('mejoras_comercial_table')
         .insert([{
-          area_terapeutica: formData.sector,
-          unmet_need: formData.mejora_solicitada,
-          lab: formData.persona_Solicitante,
-          // Required fields with default values
-          farmaco: 'Solicitud de mejora',
-          molecula: 'N/A',
-          racional: formData.mejora_solicitada,
-          impacto: 'Por evaluar',
-          conclusion: 'Pendiente de revisión',
-          horizonte_temporal: 'Por definir',
-          id_NUM_DD: 0,
-          id_UN_NUM: `MEJORA-${Date.now()}`
+          sector: formData.sector,
+          mejora_solicitada: formData.mejora_solicitada,
+          persona_Solicitante: formData.persona_Solicitante
         }]);
 
       if (error) {
