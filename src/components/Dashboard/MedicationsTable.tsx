@@ -263,7 +263,7 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
 
       console.log('Sending medication data to webhook:', selectedMedicationsData);
 
-      const response = await fetch('https://develms.app.n8n.cloud/webhook/unmet_needs', {
+      const response = await fetch('https://develms.app.n8n.cloud/webhook-test/un_desarrollo', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
