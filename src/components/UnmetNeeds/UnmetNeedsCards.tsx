@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BarChart3, FileText, Users, Target, Clock, Lightbulb, Star, Atom, Trash2, HelpCircle, Edit } from 'lucide-react';
+import { BarChart3, FileText, Users, Target, Clock, Lightbulb, Star, Atom, Trash2, HelpCircle, Edit, User, Bot } from 'lucide-react';
 
 interface UnmetNeedsCardsProps {
   data: any[];
@@ -115,8 +115,21 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
             <CardContent className="p-5 space-y-4">
               {/* Header */}
               <div className="flex justify-between items-start relative z-10">
-                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                  #{item.id_UN_table || index + 1}
+                <div className="flex items-center gap-2">
+                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                    #{item.id_UN_table || index + 1}
+                  </div>
+                  <div className="flex-shrink-0">
+                    {item.manually_added ? (
+                      <div className="flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-900/20">
+                        <User className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center w-5 h-5 rounded-full bg-gray-100 dark:bg-gray-700">
+                        <Bot className="w-3 h-3 text-gray-600 dark:text-gray-400" />
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge className={`${getImpactColor(item.impacto)} px-2 py-1 text-xs font-semibold uppercase tracking-wider`}>

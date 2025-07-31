@@ -51,7 +51,10 @@ export const AddMedicationModal: React.FC<AddMedicationModalProps> = ({
     try {
       const { error } = await supabase
         .from('DrugDealer_table')
-        .insert([formData]);
+        .insert([{
+          ...formData,
+          manually_added: true
+        }]);
 
       if (error) {
         throw error;

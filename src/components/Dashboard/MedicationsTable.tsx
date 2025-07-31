@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Search, Eye, Link, ArrowUp, ArrowDown, BarChart3, Trash2, Star, Edit } from 'lucide-react';
+import { Search, Eye, Link, ArrowUp, ArrowDown, BarChart3, Trash2, Star, Edit, User, Bot } from 'lucide-react';
 import { MedicationDetailModal } from './MedicationDetailModal';
 import { EditMedicationModal } from './EditMedicationModal';
 import { toast } from "@/hooks/use-toast";
@@ -350,6 +350,7 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                         </TableHead>
                         <TableHead className="w-[50px] text-center font-semibold">UM</TableHead>
                         <TableHead className="w-[50px] text-center font-semibold">⭐</TableHead>
+                        <TableHead className="w-[50px] text-center font-semibold">Origen</TableHead>
                         <TableHead 
                           className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[120px]"
                           onClick={() => handleSort('nombre_lab')}
@@ -461,6 +462,19 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                                   }`}
                                 />
                               </Button>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <div className="flex justify-center">
+                                {medication.manually_added ? (
+                                  <div className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/20">
+                                    <User className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700">
+                                    <Bot className="w-3 h-3 text-gray-600 dark:text-gray-400" />
+                                  </div>
+                                )}
+                              </div>
                             </TableCell>
                             <TableCell className="font-medium">
                               <div className="w-[100px] truncate" title={medication.nombre_lab}>
