@@ -14,6 +14,8 @@ interface TacticsCardsProps {
   searchTerm: string;
   selectedLab: string;
   selectedArea: string;
+  selectedFarmaco: string;
+  selectedMolecula: string;
   selectedFormat: string;
   showOnlyFavorites: boolean;
   favorites: Set<string>;
@@ -27,6 +29,8 @@ export const TacticsCards: React.FC<TacticsCardsProps> = ({
   searchTerm,
   selectedLab,
   selectedArea,
+  selectedFarmaco,
+  selectedMolecula,
   selectedFormat,
   showOnlyFavorites,
   favorites,
@@ -49,10 +53,12 @@ export const TacticsCards: React.FC<TacticsCardsProps> = ({
     
     const matchesLab = !selectedLab || item.laboratorio === selectedLab;
     const matchesArea = !selectedArea || item.area_terapeutica === selectedArea;
+    const matchesFarmaco = !selectedFarmaco || item.farmaco === selectedFarmaco;
+    const matchesMolecula = !selectedMolecula || item.molecula === selectedMolecula;
     const matchesFormat = !selectedFormat || item.formato === selectedFormat;
     const matchesFavorites = !showOnlyFavorites || isFavorite(item.id?.toString());
     
-    return matchesSearch && matchesLab && matchesArea && matchesFormat && matchesFavorites;
+    return matchesSearch && matchesLab && matchesArea && matchesFarmaco && matchesMolecula && matchesFormat && matchesFavorites;
   });
 
   const getFormatColor = (format: string) => {

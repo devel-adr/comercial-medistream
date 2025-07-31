@@ -17,7 +17,7 @@ interface TacticsFilters {
   farmaco?: string;
   molecula?: string;
   formato?: string;
-  favoritos?: boolean;
+  favoritos?: string;
 }
 
 const Tactics = () => {
@@ -90,8 +90,10 @@ const Tactics = () => {
             searchTerm={searchTerm}
             selectedLab={activeFilters.laboratorio || ''}
             selectedArea={activeFilters.areaTerapeutica || ''}
+            selectedFarmaco={activeFilters.farmaco || ''}
+            selectedMolecula={activeFilters.molecula || ''}
             selectedFormat={activeFilters.formato || ''}
-            showOnlyFavorites={activeFilters.favoritos || false}
+            showOnlyFavorites={activeFilters.favoritos === 'si'}
             favorites={favorites}
             toggleFavorite={toggleFavorite}
             isFavorite={isFavorite}
