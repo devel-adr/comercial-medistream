@@ -107,40 +107,31 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         console.log('Record to use for notification:', recordToUse);
         console.log('Current authenticated user:', user);
         
-        // Obtener el email del usuario autenticado
-        const userEmail = user?.email || 'Usuario no identificado';
-        
         if (recordToUse) {
           switch (type) {
             case 'medications':
               title = 'Nuevos datos de DrugDealer';
               message = `Se han añadido ${newRecords} nuevos registros de medicamentos`;
-              // Para DrugDealer: laboratorio y email del usuario autenticado
               details = {
-                laboratory: recordToUse.nombre_lab || 'No especificado',
-                userEmail: userEmail
+                laboratory: recordToUse.nombre_lab || 'No especificado'
               };
               console.log('DrugDealer notification details:', details);
               break;
             case 'unmetNeeds':
               title = 'Nuevos datos de Unmet Needs';
               message = `Se han añadido ${newRecords} nuevos registros de unmet needs`;
-              // Para Unmet Needs: laboratorio, fármaco y email del usuario autenticado
               details = {
                 laboratory: recordToUse.lab || 'No especificado',
-                drug: recordToUse.farmaco || 'No especificado',
-                userEmail: userEmail
+                drug: recordToUse.farmaco || 'No especificado'
               };
               console.log('Unmet Needs notification details:', details);
               break;
             case 'pharmaTactics':
               title = 'Nuevas Tactics disponibles';
               message = `Se han añadido ${newRecords} nuevas tactics`;
-              // Para Tactics: laboratorio, fármaco y email del usuario autenticado
               details = {
                 laboratory: recordToUse.laboratorio || 'No especificado',
-                drug: recordToUse.farmaco || 'No especificado',
-                userEmail: userEmail
+                drug: recordToUse.farmaco || 'No especificado'
               };
               console.log('PharmaTactics notification details:', details);
               break;
@@ -153,21 +144,21 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             case 'medications':
               title = 'Nuevos datos de DrugDealer';
               message = `Se han añadido ${newRecords} nuevos registros de medicamentos`;
-              details = { userEmail: userEmail };
+              details = {};
               break;
             case 'unmetNeeds':
               title = 'Nuevos datos de Unmet Needs';
               message = `Se han añadido ${newRecords} nuevos registros de unmet needs`;
-              details = { userEmail: userEmail };
+              details = {};
               break;
             case 'pharmaTactics':
               title = 'Nuevas Tactics disponibles';
               message = `Se han añadido ${newRecords} nuevas tactics`;
-              details = { userEmail: userEmail };
+              details = {};
               break;
             default:
               message = `Se han añadido ${newRecords} nuevos registros`;
-              details = { userEmail: userEmail };
+              details = {};
           }
         }
         

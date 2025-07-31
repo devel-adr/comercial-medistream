@@ -167,13 +167,6 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({
                                 <span>{notification.details.drug}</span>
                               </div>
                             )}
-                            {notification.details.userEmail && (
-                              <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
-                                <Mail className="w-3 h-3" />
-                                <span className="font-medium">Usuario:</span>
-                                <span className="truncate">{notification.details.userEmail}</span>
-                              </div>
-                            )}
                           </div>
                           <Separator className="my-2" />
                         </>
