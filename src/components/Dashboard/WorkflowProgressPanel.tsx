@@ -48,6 +48,23 @@ const getStatusColor = (status: string) => {
   }
 };
 
+const getStatusText = (status: string) => {
+  switch (status) {
+    case 'running':
+      return 'En Progreso';
+    case 'success':
+      return 'Exitosa';
+    case 'error':
+      return 'Error';
+    case 'waiting':
+      return 'Esperando';
+    case 'canceled':
+      return 'Cancelada';
+    default:
+      return status;
+  }
+};
+
 const formatDateTime = (dateString: string) => {
   const date = new Date(dateString);
   return {
@@ -75,7 +92,7 @@ const WorkflowSection: React.FC<{
   color: string;
 }> = ({ title, executions, color }) => {
   const latestExecution = executions[0];
-  const isRunning = latestExecution?.status === 'running';
+  const runningExecutions = executions.filter(exec => exec.status === 'running');
 
   return (
     <div className="mb-6">
@@ -84,11 +101,17 @@ const WorkflowSection: React.FC<{
           <div className={`w-3 h-3 rounded-full ${color}`}></div>
           {title}
           <span className="text-sm font-normal text-gray-500">({executions.length})</span>
+          {runningExecutions.length > 0 && (
+            <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+              <Loader2 className="w-3 h-3 animate-spin mr-1" />
+              {runningExecutions.length} en progreso
+            </Badge>
+          )}
         </h3>
         {latestExecution && (
           <Badge variant="secondary" className={getStatusColor(latestExecution.status)}>
             {getStatusIcon(latestExecution.status)}
-            <span className="ml-1 capitalize">{latestExecution.status}</span>
+            <span className="ml-1">{getStatusText(latestExecution.status)}</span>
           </Badge>
         )}
       </div>
@@ -103,11 +126,16 @@ const WorkflowSection: React.FC<{
           {executions.map((execution) => {
             const { date, time } = formatDateTime(execution.startedAt);
             const duration = calculateDuration(execution.startedAt, execution.stoppedAt);
+            const isRunning = execution.status === 'running';
 
             return (
               <div
                 key={execution.id}
-                className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600"
+                className={`p-3 rounded-lg border ${
+                  isRunning 
+                    ? 'bg-blue-50 border-blue-200 dark:bg-blue-950 dark:border-blue-800' 
+                    : 'bg-gray-50 border-gray-200 dark:bg-gray-700 dark:border-gray-600'
+                }`}
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
@@ -115,6 +143,11 @@ const WorkflowSection: React.FC<{
                     <span className="text-sm font-medium">
                       Ejecución #{execution.id.slice(-8)}
                     </span>
+                    {isRunning && (
+                      <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                        {getStatusText(execution.status)}
+                      </Badge>
+                    )}
                   </div>
                   <span className="text-xs text-gray-500 dark:text-gray-400">
                     {time}
@@ -122,7 +155,10 @@ const WorkflowSection: React.FC<{
                 </div>
                 
                 <div className="flex justify-between text-xs text-gray-600 dark:text-gray-300">
-                  <span>Duración: {duration}</span>
+                  <span>
+                    Duración: {duration}
+                    {isRunning && <span className="text-blue-600 dark:text-blue-400"> (en progreso)</span>}
+                  </span>
                   <span>{date}</span>
                 </div>
                 
