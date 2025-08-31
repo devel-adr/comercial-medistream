@@ -6,7 +6,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Search, Lock, Mail } from 'lucide-react';
-import AnimatedNetworkBackground from '@/components/AnimatedNetworkBackground';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -33,9 +32,29 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Animated Network Background */}
-      <AnimatedNetworkBackground />
+    <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-teal-900 to-cyan-900 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-white rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-300 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 w-32 h-32 bg-teal-200 rounded-full blur-2xl animate-pulse delay-500"></div>
+      </div>
+      
+      {/* Floating particles */}
+      <div className="absolute inset-0 opacity-20">
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className={`absolute w-2 h-2 bg-white rounded-full animate-pulse`}
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${2 + Math.random() * 3}s`
+            }}
+          ></div>
+        ))}
+      </div>
       
       <div className="w-full max-w-md relative z-10">
         {/* Logo Section */}
