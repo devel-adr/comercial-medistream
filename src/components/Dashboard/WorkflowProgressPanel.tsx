@@ -1,11 +1,12 @@
 
 import React from 'react';
-import { X, Play, CheckCircle, XCircle, Clock, Loader2, RefreshCw } from 'lucide-react';
+import { X, Play, CheckCircle, XCircle, Clock, Loader2, RefreshCw, AlertCircle, Wifi, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useWorkflowStatus } from '@/hooks/useWorkflowStatus';
 import { WorkflowExecution } from '@/services/n8nService';
 
@@ -83,6 +84,7 @@ const WorkflowSection: React.FC<{
         <h3 className="font-semibold text-lg flex items-center gap-2">
           <div className={`w-3 h-3 rounded-full ${color}`}></div>
           {title}
+          <span className="text-sm font-normal text-gray-500">({executions.length})</span>
         </h3>
         {latestExecution && (
           <Badge variant="secondary" className={getStatusColor(latestExecution.status)}>
@@ -124,6 +126,14 @@ const WorkflowSection: React.FC<{
                   <span>Duración: {duration}</span>
                   <span>{date}</span>
                 </div>
+                
+                {execution.mode && (
+                  <div className="mt-1">
+                    <span className="text-xs bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded">
+                      {execution.mode}
+                    </span>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -145,9 +155,19 @@ export const WorkflowProgressPanel: React.FC<WorkflowProgressPanelProps> = ({
   isOpen,
   onClose
 }) => {
-  const { workflowStatuses, loading, error, lastUpdated, refresh } = useWorkflowStatus();
+  const { 
+    workflowStatuses, 
+    loading, 
+    error, 
+    lastUpdated, 
+    connectionStatus,
+    refresh, 
+    testConnection 
+  } = useWorkflowStatus();
 
   if (!isOpen) return null;
+
+  const totalExecutions = Object.values(workflowStatuses).reduce((sum, execs) => sum + execs.length, 0);
 
   return (
     <div className="fixed inset-0 z-50 bg-black/20" onClick={onClose}>
@@ -161,6 +181,11 @@ export const WorkflowProgressPanel: React.FC<WorkflowProgressPanelProps> = ({
               <CardTitle className="text-lg flex items-center gap-2">
                 <Play className="w-5 h-5" />
                 Estado de Automatizaciones
+                {connectionStatus === 'connected' ? (
+                  <Wifi className="w-4 h-4 text-green-500" title="Conectado" />
+                ) : connectionStatus === 'disconnected' ? (
+                  <WifiOff className="w-4 h-4 text-red-500" title="Desconectado" />
+                ) : null}
               </CardTitle>
               <div className="flex items-center gap-2">
                 <Button
@@ -181,9 +206,14 @@ export const WorkflowProgressPanel: React.FC<WorkflowProgressPanelProps> = ({
                 </Button>
               </div>
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Última actualización: {lastUpdated.toLocaleTimeString('es-ES')}
-            </p>
+            <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+              <span>
+                Última actualización: {lastUpdated.toLocaleTimeString('es-ES')}
+              </span>
+              <span>
+                Total: {totalExecutions} ejecuciones
+              </span>
+            </div>
           </CardHeader>
           
           <CardContent className="pt-0">
@@ -196,17 +226,31 @@ export const WorkflowProgressPanel: React.FC<WorkflowProgressPanelProps> = ({
                   </p>
                 </div>
               ) : error ? (
-                <div className="text-center py-8 text-red-500">
-                  <XCircle className="w-8 h-8 mx-auto mb-2" />
-                  <p className="text-sm">Error: {error}</p>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={refresh} 
-                    className="mt-2"
-                  >
-                    Reintentar
-                  </Button>
+                <div className="space-y-4">
+                  <Alert variant="destructive">
+                    <AlertCircle className="w-4 h-4" />
+                    <AlertDescription className="text-sm">
+                      <strong>Error de conexión:</strong> {error}
+                    </AlertDescription>
+                  </Alert>
+                  
+                  <div className="text-center">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={testConnection}
+                      className="mb-2"
+                    >
+                      Probar Conexión
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={refresh}
+                    >
+                      Reintentar Carga
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-4">
