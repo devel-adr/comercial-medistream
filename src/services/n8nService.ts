@@ -24,10 +24,9 @@ export interface WorkflowInfo {
 }
 
 const createHeaders = () => ({
-  'Authorization': `Bearer ${N8N_API_KEY}`,
+  'X-N8N-API-KEY': N8N_API_KEY,
   'Content-Type': 'application/json',
-  'Accept': 'application/json',
-  'X-Requested-With': 'XMLHttpRequest'
+  'Accept': 'application/json'
 });
 
 const makeRequest = async (url: string, options: RequestInit = {}) => {
@@ -90,7 +89,7 @@ export const n8nService = {
     try {
       console.log(`🔍 Fetching executions for workflow ${workflowId} (limit: ${limit})...`);
       
-      const url = `${N8N_BASE_URL}/executions?workflowId=${workflowId}&limit=${limit}`;
+      const url = `${N8N_BASE_URL}/executions?workflowId=${workflowId}&limit=${limit}&includeData=false`;
       const response = await makeRequest(url, { method: 'GET' });
       
       if (!response.ok) {
@@ -116,12 +115,18 @@ export const n8nService = {
         count: data.data?.length || 0,
         sample: data.data?.[0] ? {
           id: data.data[0].id,
-          status: data.data[0].status,
+          status: data.data[0].finished ? 'success' : 'running',
           startedAt: data.data[0].startedAt
         } : null
       });
       
-      return data.data || [];
+      // Map the response to match our interface, deriving status from finished field
+      const executions = data.data?.map((execution: any) => ({
+        ...execution,
+        status: execution.finished ? 'success' : 'running'
+      })) || [];
+      
+      return executions;
     } catch (error) {
       console.error(`💥 Error fetching executions for workflow ${workflowId}:`, error);
       throw error;
