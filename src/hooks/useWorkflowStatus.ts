@@ -11,13 +11,14 @@ export const useWorkflowStatus = (refreshInterval: number = 10000) => {
   const intervalRef = useRef<NodeJS.Timeout>();
 
   const testConnection = async () => {
-    console.log('Testing n8n connection...');
+    console.log('🔍 Testing n8n connection...');
     try {
       const isConnected = await n8nService.testConnection();
       setConnectionStatus(isConnected ? 'connected' : 'disconnected');
+      console.log(`🔗 Connection test result: ${isConnected ? 'CONNECTED' : 'DISCONNECTED'}`);
       return isConnected;
     } catch (error) {
-      console.error('Connection test failed:', error);
+      console.error('💥 Connection test failed:', error);
       setConnectionStatus('disconnected');
       return false;
     }
@@ -25,34 +26,50 @@ export const useWorkflowStatus = (refreshInterval: number = 10000) => {
 
   const fetchWorkflowStatuses = async () => {
     try {
-      console.log('🔄 Fetching workflow statuses...');
+      console.log('🔄 Starting workflow status fetch...');
       setError(null);
       
-      // Primero probar la conexión
+      // Test connection first
       const isConnected = await testConnection();
       if (!isConnected) {
-        throw new Error('No se puede conectar con el servidor n8n. Verifica la URL y la API key.');
+        throw new Error('No se puede establecer conexión con n8n. Verifica la URL y API key.');
       }
 
+      console.log('🎯 Connection successful, fetching workflow data...');
       const statuses = await n8nService.getAllWorkflowsStatus();
-      console.log('✅ Workflow statuses fetched successfully:', statuses);
+      
+      console.log('✅ Workflow statuses fetched successfully:', {
+        totalWorkflows: Object.keys(statuses).length,
+        totalExecutions: Object.values(statuses).reduce((sum, execs) => sum + execs.length, 0),
+        details: Object.entries(statuses).map(([name, execs]) => ({
+          workflow: name,
+          executions: execs.length,
+          latestStatus: execs[0]?.status || 'none'
+        }))
+      });
       
       setWorkflowStatuses(statuses);
       setLastUpdated(new Date());
       setConnectionStatus('connected');
       
-      // Logging detallado del estado de cada workflow
-      Object.entries(statuses).forEach(([name, executions]) => {
-        console.log(`📊 ${name}: ${executions.length} executions`);
-        if (executions.length > 0) {
-          const latest = executions[0];
-          console.log(`   Latest execution: ${latest.status} (${latest.id})`);
-        }
-      });
-      
     } catch (err) {
-      console.error('❌ Error fetching workflow statuses:', err);
-      setError(err instanceof Error ? err.message : 'Error desconocido al obtener el estado de los workflows');
+      console.error('❌ Error in fetchWorkflowStatuses:', err);
+      
+      let errorMessage = 'Error desconocido al obtener el estado de los workflows';
+      
+      if (err instanceof Error) {
+        if (err.message.includes('CORS')) {
+          errorMessage = 'Error de CORS: El navegador bloquea la conexión. Verifica la configuración del servidor n8n.';
+        } else if (err.message.includes('API Key')) {
+          errorMessage = 'API Key inválida. Verifica las credenciales de n8n.';
+        } else if (err.message.includes('conexión')) {
+          errorMessage = 'No se puede conectar con el servidor n8n. Verifica la URL y conectividad.';
+        } else {
+          errorMessage = err.message;
+        }
+      }
+      
+      setError(errorMessage);
       setConnectionStatus('disconnected');
     } finally {
       setLoading(false);
@@ -61,6 +78,7 @@ export const useWorkflowStatus = (refreshInterval: number = 10000) => {
 
   useEffect(() => {
     console.log('🚀 Initializing useWorkflowStatus hook...');
+    console.log(`⚙️ Refresh interval: ${refreshInterval}ms`);
     
     // Initial fetch
     fetchWorkflowStatuses();
@@ -85,16 +103,18 @@ export const useWorkflowStatus = (refreshInterval: number = 10000) => {
     await fetchWorkflowStatuses();
   };
 
-  // Log del estado actual cada vez que cambie
+  // Log current state changes
   useEffect(() => {
-    console.log('📊 Current workflow statuses state:', {
+    const stateInfo = {
       workflowCount: Object.keys(workflowStatuses).length,
       totalExecutions: Object.values(workflowStatuses).reduce((sum, execs) => sum + execs.length, 0),
       loading,
-      error,
+      error: error ? error.substring(0, 100) + '...' : null,
       connectionStatus,
       lastUpdated: lastUpdated.toISOString()
-    });
+    };
+    
+    console.log('📊 Workflow status state update:', stateInfo);
   }, [workflowStatuses, loading, error, connectionStatus, lastUpdated]);
 
   return {
