@@ -2,33 +2,28 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Bell, Settings, Search } from 'lucide-react';
-import { useNotification } from '@/contexts/NotificationContext';
+import { Settings, Search, Activity } from 'lucide-react';
 import { SettingsPanel } from './SettingsPanel';
-import { NotificationPanel } from './NotificationPanel';
+import { WorkflowProgressPanel } from './WorkflowProgressPanel';
+import { useWorkflowStatus } from '@/hooks/useWorkflowStatus';
 
 interface HeaderProps {
   onToggleFilters: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({ onToggleFilters }) => {
-  const { notifications, clearNotifications } = useNotification();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isNotificationPanelOpen, setIsNotificationPanelOpen] = useState(false);
+  const [isWorkflowPanelOpen, setIsWorkflowPanelOpen] = useState(false);
+  const { workflowStatuses } = useWorkflowStatus();
 
-  // Request notification permissions on component mount
-  useEffect(() => {
-    if ('Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission();
-    }
-  }, []);
+  // Count running workflows
+  const runningCount = Object.values(workflowStatuses).reduce((count, executions) => {
+    const hasRunning = executions.some(exec => exec.status === 'running');
+    return count + (hasRunning ? 1 : 0);
+  }, 0);
 
-  const handleNotificationClick = () => {
-    setIsNotificationPanelOpen(true);
-  };
-
-  const handleClearNotifications = () => {
-    clearNotifications();
+  const handleWorkflowClick = () => {
+    setIsWorkflowPanelOpen(true);
   };
 
   return (
@@ -57,13 +52,13 @@ export const Header: React.FC<HeaderProps> = ({ onToggleFilters }) => {
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  onClick={handleNotificationClick}
+                  onClick={handleWorkflowClick}
                   className="relative"
                 >
-                  <Bell className="w-5 h-5" />
-                  {notifications.length > 0 && (
-                    <Badge className="absolute -top-1 -right-1 w-5 h-5 p-0 flex items-center justify-center text-xs bg-red-500 animate-pulse">
-                      {notifications.length > 9 ? '9+' : notifications.length}
+                  <Activity className="w-5 h-5" />
+                  {runningCount > 0 && (
+                    <Badge className="absolute -top-1 -right-1 w-5 h-5 p-0 flex items-center justify-center text-xs bg-blue-500 animate-pulse">
+                      {runningCount}
                     </Badge>
                   )}
                 </Button>
@@ -86,11 +81,9 @@ export const Header: React.FC<HeaderProps> = ({ onToggleFilters }) => {
         onClose={() => setIsSettingsOpen(false)} 
       />
       
-      <NotificationPanel
-        isOpen={isNotificationPanelOpen}
-        onClose={() => setIsNotificationPanelOpen(false)}
-        notifications={notifications}
-        onClearNotifications={handleClearNotifications}
+      <WorkflowProgressPanel
+        isOpen={isWorkflowPanelOpen}
+        onClose={() => setIsWorkflowPanelOpen(false)}
       />
     </>
   );
