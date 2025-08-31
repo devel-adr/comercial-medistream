@@ -70,45 +70,51 @@ export const n8nService = {
       
       // Map the response to match our interface with improved status detection
       const executions = data.data?.map((execution: any) => {
-        let status = 'running';
+        let status = 'running'; // Default to running
         
         console.log(`🔍 Analyzing execution ${execution.id}:`, {
           finished: execution.finished,
           stoppedAt: execution.stoppedAt,
           waitTill: execution.waitTill,
-          mode: execution.mode
+          mode: execution.mode,
+          rawStatus: execution.status
         });
         
-        if (execution.finished) {
-          // If finished is true, determine if it was successful or failed/canceled
-          if (execution.stoppedAt) {
-            // Check if there are error indicators
-            if (execution.data && execution.data.resultData && execution.data.resultData.error) {
-              status = 'error';
-            } else {
-              // If finished and stopped without errors, it's successful
-              status = 'success';
-            }
+        // First check if explicitly marked as running or in progress
+        if (!execution.finished && !execution.stoppedAt) {
+          // No stoppedAt and not finished = definitely running
+          status = 'running';
+          console.log(`📊 Execution ${execution.id} is RUNNING (not finished, no stoppedAt)`);
+        }
+        // Check if it's waiting
+        else if (execution.waitTill && !execution.finished) {
+          status = 'waiting';
+          console.log(`📊 Execution ${execution.id} is WAITING (has waitTill)`);
+        }
+        // Check if it's finished
+        else if (execution.finished) {
+          // If finished is true, determine success or error
+          if (execution.status === 'error' || (execution.data && execution.data.resultData && execution.data.resultData.error)) {
+            status = 'error';
+            console.log(`📊 Execution ${execution.id} FINISHED with ERROR`);
           } else {
-            // Finished but no stoppedAt usually means canceled
-            status = 'canceled';
-          }
-        } else {
-          // Not finished yet
-          if (execution.waitTill) {
-            status = 'waiting';
-          } else if (execution.stoppedAt) {
-            // Has stoppedAt but not finished = canceled
-            status = 'canceled';
-          } else {
-            // No stoppedAt and not finished = still running
-            status = 'running';
+            status = 'success';
+            console.log(`📊 Execution ${execution.id} FINISHED successfully`);
           }
         }
+        // Check if it was canceled (has stoppedAt but not finished)
+        else if (execution.stoppedAt && !execution.finished) {
+          status = 'canceled';
+          console.log(`📊 Execution ${execution.id} was CANCELED (has stoppedAt but not finished)`);
+        }
         
-        // Additional check for explicit error status
+        // Override with explicit status if available
         if (execution.status === 'error') {
           status = 'error';
+        } else if (execution.status === 'canceled' || execution.status === 'cancelled') {
+          status = 'canceled';
+        } else if (execution.status === 'running' || execution.status === 'new') {
+          status = 'running';
         }
         
         console.log(`📊 Execution ${execution.id} final status: ${status}`);
@@ -187,6 +193,17 @@ export const n8nService = {
             stoppedAt: executions[0].stoppedAt
           });
         }
+        
+        // Log running executions specifically
+        const runningExecs = executions.filter(e => e.status === 'running');
+        if (runningExecs.length > 0) {
+          console.log(`🏃‍♂️ Running executions for ${name}:`, runningExecs.map(e => ({
+            id: e.id,
+            startedAt: e.startedAt,
+            finished: e.finished,
+            stoppedAt: e.stoppedAt
+          })));
+        }
       } catch (error) {
         console.error(`💥 Failed to fetch executions for ${name}:`, error);
         errors.push(`${name}: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -196,7 +213,8 @@ export const n8nService = {
 
     console.log('\n📋 Final results summary:');
     Object.entries(results).forEach(([name, executions]) => {
-      console.log(`  ${name}: ${executions.length} executions`);
+      const running = executions.filter(e => e.status === 'running').length;
+      console.log(`  ${name}: ${executions.length} executions (${running} running)`);
     });
     
     if (errors.length > 0) {
