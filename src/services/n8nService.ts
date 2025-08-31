@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface WorkflowExecution {
@@ -63,12 +64,11 @@ export const n8nService = {
           finished: data.data[0].finished,
           stoppedAt: data.data[0].stoppedAt,
           waitTill: data.data[0].waitTill,
-          startedAt: data.data[0].startedAt,
-          status: data.data[0].status
+          startedAt: data.data[0].startedAt
         } : null
       });
       
-      // Map the response to match our interface with SIMPLIFIED status detection
+      // Map the response to match our interface with improved status detection
       const executions = data.data?.map((execution: any) => {
         let status = 'running'; // Default to running
         
@@ -80,48 +80,57 @@ export const n8nService = {
           rawStatus: execution.status
         });
         
-        // SIMPLIFIED LOGIC: Trust the API status first, then use our logic
-        if (execution.status) {
-          // If API provides explicit status, use it
-          if (execution.status === 'running' || execution.status === 'new') {
-            status = 'running';
-            console.log(`📊 Execution ${execution.id} explicitly marked as RUNNING by API (status: ${execution.status})`);
-          } else if (execution.status === 'success') {
-            status = 'success';
-            console.log(`📊 Execution ${execution.id} explicitly marked as SUCCESS by API`);
-          } else if (execution.status === 'error') {
-            status = 'error';
-            console.log(`📊 Execution ${execution.id} explicitly marked as ERROR by API`);
-          } else if (execution.status === 'waiting') {
+        // NEW LOGIC: Check if execution is truly running by examining time
+        const now = new Date();
+        const startTime = new Date(execution.startedAt);
+        const timeDiff = now.getTime() - startTime.getTime();
+        
+        // If execution started recently and is not finished, it's likely running
+        if (!execution.finished) {
+          // Check if it has waitTill (waiting state)
+          if (execution.waitTill && new Date(execution.waitTill) > now) {
             status = 'waiting';
-            console.log(`📊 Execution ${execution.id} explicitly marked as WAITING by API`);
-          } else if (execution.status === 'canceled' || execution.status === 'cancelled') {
-            status = 'canceled';
-            console.log(`📊 Execution ${execution.id} explicitly marked as CANCELED by API`);
+            console.log(`📊 Execution ${execution.id} is WAITING (has future waitTill: ${execution.waitTill})`);
           }
-        } else {
-          // Fallback logic when no explicit status from API
-          if (!execution.finished) {
-            // Check if it has waitTill (waiting state)
-            if (execution.waitTill && new Date(execution.waitTill) > new Date()) {
-              status = 'waiting';
-              console.log(`📊 Execution ${execution.id} is WAITING (future waitTill: ${execution.waitTill})`);
-            } 
-            // If not finished and no future waitTill, it's running (even if it has stoppedAt)
-            else {
+          // Check if it's been stopped (has stoppedAt)
+          else if (execution.stoppedAt) {
+            const stopTime = new Date(execution.stoppedAt);
+            const timeSinceStopped = now.getTime() - stopTime.getTime();
+            
+            // If stopped very recently (less than 30 seconds), might still be finishing up
+            if (timeSinceStopped < 30000) {
               status = 'running';
-              console.log(`📊 Execution ${execution.id} is RUNNING (not finished)`);
-            }
-          } else {
-            // Finished executions
-            if (execution.data && execution.data.resultData && execution.data.resultData.error) {
-              status = 'error';
-              console.log(`📊 Execution ${execution.id} FINISHED with ERROR`);
+              console.log(`📊 Execution ${execution.id} is RUNNING (recently stopped but not finished yet)`);
             } else {
-              status = 'success';
-              console.log(`📊 Execution ${execution.id} FINISHED successfully`);
+              status = 'canceled';
+              console.log(`📊 Execution ${execution.id} was CANCELED (stopped but not finished)`);
             }
           }
+          // No stoppedAt and not finished = definitely running
+          else {
+            status = 'running';
+            console.log(`📊 Execution ${execution.id} is RUNNING (not finished, no stoppedAt)`);
+          }
+        }
+        // If finished, determine success or error
+        else {
+          if (execution.status === 'error' || (execution.data && execution.data.resultData && execution.data.resultData.error)) {
+            status = 'error';
+            console.log(`📊 Execution ${execution.id} FINISHED with ERROR`);
+          } else {
+            status = 'success';
+            console.log(`📊 Execution ${execution.id} FINISHED successfully`);
+          }
+        }
+        
+        // Override with explicit status if available and reliable
+        if (execution.status === 'error') {
+          status = 'error';
+        } else if (execution.status === 'success') {
+          status = 'success';
+        } else if (execution.status === 'running' || execution.status === 'new') {
+          status = 'running';
+          console.log(`📊 Execution ${execution.id} explicitly marked as RUNNING by API`);
         }
         
         console.log(`📊 Execution ${execution.id} final status: ${status}`);
@@ -187,7 +196,7 @@ export const n8nService = {
     for (const [workflowId, name] of Object.entries(workflows)) {
       try {
         console.log(`\n🔄 Processing ${name} (${workflowId})...`);
-        const executions = await this.getWorkflowExecutions(workflowId, 10);
+        const executions = await this.getWorkflowExecutions(workflowId, 10); // Limited to 10 executions per workflow
         results[name] = executions;
         console.log(`✅ Successfully fetched ${executions.length} executions for ${name}`);
         
