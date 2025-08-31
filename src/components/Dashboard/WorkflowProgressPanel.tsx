@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { X, Play, CheckCircle, XCircle, Clock, Loader2, RefreshCw, AlertCircle, Wifi, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -101,7 +100,7 @@ const WorkflowSection: React.FC<{
         </div>
       ) : (
         <div className="space-y-2">
-          {executions.slice(0, 3).map((execution) => {
+          {executions.map((execution) => {
             const { date, time } = formatDateTime(execution.startedAt);
             const duration = calculateDuration(execution.startedAt, execution.stoppedAt);
 
@@ -137,14 +136,6 @@ const WorkflowSection: React.FC<{
               </div>
             );
           })}
-          
-          {executions.length > 3 && (
-            <div className="text-center py-2">
-              <span className="text-xs text-gray-500 dark:text-gray-400">
-                +{executions.length - 3} ejecuciones más
-              </span>
-            </div>
-          )}
         </div>
       )}
     </div>

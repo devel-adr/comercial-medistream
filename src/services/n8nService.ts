@@ -49,7 +49,7 @@ const makeN8nRequest = async (path: string, method: string = 'GET') => {
 };
 
 export const n8nService = {
-  async getWorkflowExecutions(workflowId: string, limit: number = 10): Promise<WorkflowExecution[]> {
+  async getWorkflowExecutions(workflowId: string, limit: number = 50): Promise<WorkflowExecution[]> {
     try {
       console.log(`🔍 Fetching executions for workflow ${workflowId} (limit: ${limit})...`);
       
@@ -61,16 +61,46 @@ export const n8nService = {
         count: data.data?.length || 0,
         sample: data.data?.[0] ? {
           id: data.data[0].id,
-          status: data.data[0].finished ? 'success' : 'running',
+          status: data.data[0].finished ? (data.data[0].stoppedAt ? 'success' : 'canceled') : 'running',
           startedAt: data.data[0].startedAt
         } : null
       });
       
-      // Map the response to match our interface, deriving status from finished field
-      const executions = data.data?.map((execution: any) => ({
-        ...execution,
-        status: execution.finished ? 'success' : 'running'
-      })) || [];
+      // Map the response to match our interface, properly handling canceled executions
+      const executions = data.data?.map((execution: any) => {
+        let status = 'running';
+        
+        if (execution.finished) {
+          // If finished is true, check if it was successful or canceled
+          if (execution.stoppedAt && execution.waitTill === null) {
+            status = 'success';
+          } else if (execution.stoppedAt) {
+            // If it has stoppedAt but didn't complete successfully, it was likely canceled
+            status = 'canceled';
+          }
+        } else if (execution.waitTill) {
+          status = 'waiting';
+        }
+        
+        // Check for error status in the execution data
+        if (execution.status === 'error' || (execution.data && execution.data.resultData && execution.data.resultData.error)) {
+          status = 'error';
+        }
+        
+        return {
+          ...execution,
+          status
+        };
+      }) || [];
+      
+      console.log(`📊 Status breakdown:`, {
+        total: executions.length,
+        running: executions.filter(e => e.status === 'running').length,
+        success: executions.filter(e => e.status === 'success').length,
+        error: executions.filter(e => e.status === 'error').length,
+        canceled: executions.filter(e => e.status === 'canceled').length,
+        waiting: executions.filter(e => e.status === 'waiting').length
+      });
       
       return executions;
     } catch (error) {
@@ -115,7 +145,7 @@ export const n8nService = {
     for (const [workflowId, name] of Object.entries(workflows)) {
       try {
         console.log(`\n🔄 Processing ${name} (${workflowId})...`);
-        const executions = await this.getWorkflowExecutions(workflowId, 5);
+        const executions = await this.getWorkflowExecutions(workflowId, 50); // Increased from 5 to 50
         results[name] = executions;
         console.log(`✅ Successfully fetched ${executions.length} executions for ${name}`);
         
