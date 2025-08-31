@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Search, Lock, Mail } from 'lucide-react';
+import { Search } from 'lucide-react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -33,27 +33,53 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-teal-900 to-cyan-900 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-white rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-300 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 w-32 h-32 bg-teal-200 rounded-full blur-2xl animate-pulse delay-500"></div>
-      </div>
-      
-      {/* Floating particles */}
-      <div className="absolute inset-0 opacity-20">
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className={`absolute w-2 h-2 bg-white rounded-full animate-pulse`}
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${2 + Math.random() * 3}s`
-            }}
-          ></div>
-        ))}
+      {/* Network pattern background */}
+      <div className="absolute inset-0">
+        <svg className="w-full h-full opacity-30">
+          {/* Network nodes */}
+          {[...Array(25)].map((_, i) => {
+            const x = (i % 5) * 25 + Math.random() * 15;
+            const y = Math.floor(i / 5) * 25 + Math.random() * 15;
+            return (
+              <g key={i}>
+                <circle
+                  cx={`${x}%`}
+                  cy={`${y}%`}
+                  r="2"
+                  fill="#10b981"
+                  className="animate-pulse"
+                  style={{
+                    animationDelay: `${Math.random() * 3}s`,
+                    animationDuration: `${2 + Math.random() * 2}s`
+                  }}
+                />
+                {/* Connection lines */}
+                {i < 20 && (
+                  <line
+                    x1={`${x}%`}
+                    y1={`${y}%`}
+                    x2={`${((i + 1) % 5) * 25 + Math.random() * 15}%`}
+                    y2={`${Math.floor((i + 1) / 5) * 25 + Math.random() * 15}%`}
+                    stroke="#10b981"
+                    strokeWidth="0.5"
+                    opacity="0.6"
+                  />
+                )}
+                {i % 5 !== 4 && i < 20 && (
+                  <line
+                    x1={`${x}%`}
+                    y1={`${y}%`}
+                    x2={`${((i + 5) % 25 % 5) * 25 + Math.random() * 15}%`}
+                    y2={`${Math.floor((i + 5) / 5) * 25 + Math.random() * 15}%`}
+                    stroke="#10b981"
+                    strokeWidth="0.5"
+                    opacity="0.4"
+                  />
+                )}
+              </g>
+            );
+          })}
+        </svg>
       </div>
       
       <div className="w-full max-w-md relative z-10">
@@ -68,30 +94,28 @@ const Login = () => {
         </div>
 
         {/* Login Form */}
-        <div className="bg-white/15 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/30">
+        <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/20">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4">
-              <div className="relative">
-                <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/70 w-5 h-5" />
+              <div>
                 <Input
                   type="email"
                   placeholder="Correo electrónico"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="pl-12 h-14 bg-white/10 border-white/30 text-white placeholder:text-white/70 rounded-xl focus:border-emerald-400 focus:ring-emerald-400 backdrop-blur-sm"
+                  className="h-12 bg-white/10 border-white/20 text-white placeholder:text-white/70 rounded-2xl focus:border-teal-400 focus:ring-teal-400 backdrop-blur-sm px-4"
                 />
               </div>
               
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/70 w-5 h-5" />
+              <div>
                 <Input
                   type="password"
                   placeholder="Contraseña"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="pl-12 h-14 bg-white/10 border-white/30 text-white placeholder:text-white/70 rounded-xl focus:border-emerald-400 focus:ring-emerald-400 backdrop-blur-sm"
+                  className="h-12 bg-white/10 border-white/20 text-white placeholder:text-white/70 rounded-2xl focus:border-teal-400 focus:ring-teal-400 backdrop-blur-sm px-4"
                 />
               </div>
             </div>
@@ -105,7 +129,7 @@ const Login = () => {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-14 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+              className="w-full h-12 bg-teal-500 hover:bg-teal-600 text-white font-medium rounded-2xl shadow-lg transition-all duration-300"
             >
               {loading ? (
                 <div className="flex items-center justify-center">
@@ -118,14 +142,14 @@ const Login = () => {
             </Button>
           </form>
 
-          <div className="mt-8 text-center">
+          <div className="mt-6 text-center">
             <p className="text-white/70 text-sm">
-              Base de datos de laboratorios farmacéuticos
+              Departamento comercial
             </p>
-            <div className="flex justify-center items-center mt-4 space-x-4">
-              <div className="w-8 h-1 bg-emerald-400 rounded-full"></div>
-              <div className="w-4 h-1 bg-emerald-300 rounded-full"></div>
-              <div className="w-2 h-1 bg-emerald-200 rounded-full"></div>
+            <div className="flex justify-center items-center mt-3 space-x-2">
+              <div className="w-2 h-2 bg-teal-400 rounded-full"></div>
+              <div className="w-2 h-2 bg-teal-400 rounded-full"></div>
+              <div className="w-2 h-2 bg-teal-400 rounded-full"></div>
             </div>
           </div>
         </div>
