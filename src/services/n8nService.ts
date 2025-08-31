@@ -1,6 +1,5 @@
 
-const N8N_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiZDZmOTk0OS1lNGVjLTRjOGUtODNmNC1mMTRhZGRjNGNlZWIiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzU2NjU5NTA2fQ.oBiLr2WzPuCvkl5qeeVM9YLwHlRevjNnmdp6QjX5l5E';
-const N8N_BASE_URL = 'https://develms.app.n8n.cloud/api/v1';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface WorkflowExecution {
   id: string;
@@ -23,63 +22,28 @@ export interface WorkflowInfo {
   updatedAt: string;
 }
 
-const createHeaders = () => ({
-  'X-N8N-API-KEY': N8N_API_KEY,
-  'Content-Type': 'application/json',
-  'Accept': 'application/json'
-});
-
-const makeRequest = async (url: string, options: RequestInit = {}) => {
-  console.log(`🌐 Making request to: ${url}`);
+const makeN8nRequest = async (path: string, method: string = 'GET') => {
+  console.log(`🌐 Making request to n8n proxy: ${method} ${path}`);
   
-  const requestOptions: RequestInit = {
-    ...options,
-    headers: {
-      ...createHeaders(),
-      ...options.headers,
-    },
-    mode: 'cors',
-    credentials: 'omit',
-  };
-
-  console.log(`📋 Request options:`, {
-    method: requestOptions.method || 'GET',
-    headers: requestOptions.headers,
-    mode: requestOptions.mode,
-    credentials: requestOptions.credentials
-  });
-
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-    
-    const response = await fetch(url, {
-      ...requestOptions,
-      signal: controller.signal
-    });
-    
-    clearTimeout(timeoutId);
-    
-    console.log(`📊 Response received:`, {
-      status: response.status,
-      statusText: response.statusText,
-      ok: response.ok,
-      headers: Object.fromEntries(response.headers.entries())
+    const { data, error } = await supabase.functions.invoke('n8n-proxy', {
+      body: { path, method }
     });
 
-    return response;
-  } catch (error) {
-    console.error(`💥 Network error for ${url}:`, error);
-    
-    if (error instanceof Error) {
-      if (error.name === 'AbortError') {
-        throw new Error('La conexión ha tardado demasiado. Verifica tu conexión a internet.');
-      }
-      if (error.message.includes('Failed to fetch')) {
-        throw new Error('No se puede conectar con el servidor n8n. Posible problema de CORS o conectividad.');
-      }
+    if (error) {
+      console.error('❌ Supabase function error:', error);
+      throw new Error(`Supabase function error: ${error.message}`);
     }
-    
+
+    if (data.error) {
+      console.error('❌ n8n API error:', data.error, data.details);
+      throw new Error(`n8n API error: ${data.error}`);
+    }
+
+    console.log('✅ n8n request successful');
+    return data;
+  } catch (error) {
+    console.error('💥 Error in makeN8nRequest:', error);
     throw error;
   }
 };
@@ -89,27 +53,9 @@ export const n8nService = {
     try {
       console.log(`🔍 Fetching executions for workflow ${workflowId} (limit: ${limit})...`);
       
-      const url = `${N8N_BASE_URL}/executions?workflowId=${workflowId}&limit=${limit}&includeData=false`;
-      const response = await makeRequest(url, { method: 'GET' });
+      const path = `/executions?workflowId=${workflowId}&limit=${limit}&includeData=false`;
+      const data = await makeN8nRequest(path);
       
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`❌ API error! Status: ${response.status}, Response: ${errorText}`);
-        
-        if (response.status === 401) {
-          throw new Error('API Key inválida. Verifica las credenciales.');
-        }
-        if (response.status === 404) {
-          throw new Error(`Workflow ${workflowId} no encontrado.`);
-        }
-        if (response.status === 403) {
-          throw new Error('Sin permisos para acceder a este workflow.');
-        }
-        
-        throw new Error(`Error del servidor: ${response.status} - ${errorText}`);
-      }
-      
-      const data = await response.json();
       console.log(`✅ Executions fetched successfully:`, {
         workflowId,
         count: data.data?.length || 0,
@@ -137,22 +83,9 @@ export const n8nService = {
     try {
       console.log(`🔍 Fetching workflow info for ${workflowId}...`);
       
-      const url = `${N8N_BASE_URL}/workflows/${workflowId}`;
-      const response = await makeRequest(url, { method: 'GET' });
+      const path = `/workflows/${workflowId}`;
+      const data = await makeN8nRequest(path);
       
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`❌ API error! Status: ${response.status}, Response: ${errorText}`);
-        
-        if (response.status === 404) {
-          console.warn(`Workflow ${workflowId} not found`);
-          return null;
-        }
-        
-        throw new Error(`Error del servidor: ${response.status} - ${errorText}`);
-      }
-      
-      const data = await response.json();
       console.log(`✅ Workflow info fetched:`, {
         id: data.id,
         name: data.name,
@@ -216,23 +149,14 @@ export const n8nService = {
 
   async testConnection(): Promise<boolean> {
     try {
-      console.log('🧪 Testing n8n API connection...');
-      console.log(`🔗 Base URL: ${N8N_BASE_URL}`);
-      console.log(`🔑 API Key: ${N8N_API_KEY.substring(0, 20)}...`);
+      console.log('🧪 Testing n8n API connection via Supabase proxy...');
       
-      const url = `${N8N_BASE_URL}/workflows?limit=1`;
-      const response = await makeRequest(url, { method: 'GET' });
+      const path = '/workflows?limit=1';
+      const data = await makeN8nRequest(path);
       
-      if (response.ok) {
-        const data = await response.json();
-        console.log('✅ n8n API connection successful!');
-        console.log(`📈 API is working, found ${data.data?.length || 0} workflows in first page`);
-        return true;
-      } else {
-        const errorText = await response.text();
-        console.error('❌ n8n API connection failed:', response.status, errorText);
-        return false;
-      }
+      console.log('✅ n8n API connection successful!');
+      console.log(`📈 API is working, found ${data.data?.length || 0} workflows in first page`);
+      return true;
     } catch (error) {
       console.error('💥 n8n API connection error:', error);
       return false;
