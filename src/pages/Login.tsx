@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Search } from 'lucide-react';
+import { Search, Lock, Mail } from 'lucide-react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -33,171 +33,27 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-teal-900 to-cyan-900 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Dynamic animated network background */}
-      <div className="absolute inset-0">
-        <svg className="w-full h-full opacity-40">
-          <defs>
-            <filter id="glow">
-              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-              <feMerge> 
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-          </defs>
-          
-          {/* Animated network nodes and connections */}
-          {[...Array(30)].map((_, i) => {
-            const baseX = (i % 6) * 20;
-            const baseY = Math.floor(i / 6) * 20;
-            const animationDelay = Math.random() * 10;
-            const animationDuration = 8 + Math.random() * 4;
-            
-            return (
-              <g key={i}>
-                {/* Animated node */}
-                <circle
-                  cx={`${baseX}%`}
-                  cy={`${baseY}%`}
-                  r="2"
-                  fill="#10b981"
-                  filter="url(#glow)"
-                  className="animate-pulse"
-                  style={{
-                    animationDelay: `${animationDelay}s`,
-                    animationDuration: `${animationDuration}s`
-                  }}
-                >
-                  <animateTransform
-                    attributeName="transform"
-                    attributeType="XML"
-                    type="translate"
-                    values={`0,0; ${Math.sin(i) * 20},${Math.cos(i) * 15}; 0,0`}
-                    dur={`${animationDuration}s`}
-                    repeatCount="indefinite"
-                    begin={`${animationDelay}s`}
-                  />
-                  <animate
-                    attributeName="r"
-                    values="1.5;3;1.5"
-                    dur={`${animationDuration * 0.7}s`}
-                    repeatCount="indefinite"
-                    begin={`${animationDelay}s`}
-                  />
-                </circle>
-
-                {/* Animated connection lines */}
-                {i < 25 && (i + 1) % 6 !== 0 && (
-                  <line
-                    x1={`${baseX}%`}
-                    y1={`${baseY}%`}
-                    x2={`${baseX + 20}%`}
-                    y2={`${baseY}%`}
-                    stroke="#10b981"
-                    strokeWidth="0.8"
-                    opacity="0.6"
-                  >
-                    <animate
-                      attributeName="opacity"
-                      values="0.3;0.8;0.3"
-                      dur={`${animationDuration}s`}
-                      repeatCount="indefinite"
-                      begin={`${animationDelay + 1}s`}
-                    />
-                    <animateTransform
-                      attributeName="transform"
-                      attributeType="XML"
-                      type="translate"
-                      values={`0,0; ${Math.sin(i + 1) * 10},${Math.cos(i + 1) * 8}; 0,0`}
-                      dur={`${animationDuration}s`}
-                      repeatCount="indefinite"
-                      begin={`${animationDelay}s`}
-                    />
-                  </line>
-                )}
-
-                {/* Vertical connections */}
-                {i < 24 && (
-                  <line
-                    x1={`${baseX}%`}
-                    y1={`${baseY}%`}
-                    x2={`${baseX}%`}
-                    y2={`${baseY + 20}%`}
-                    stroke="#10b981"
-                    strokeWidth="0.8"
-                    opacity="0.4"
-                  >
-                    <animate
-                      attributeName="opacity"
-                      values="0.2;0.7;0.2"
-                      dur={`${animationDuration * 1.2}s`}
-                      repeatCount="indefinite"
-                      begin={`${animationDelay + 2}s`}
-                    />
-                    <animateTransform
-                      attributeName="transform"
-                      attributeType="XML"
-                      type="translate"
-                      values={`0,0; ${Math.cos(i) * 8},${Math.sin(i) * 12}; 0,0`}
-                      dur={`${animationDuration * 1.1}s`}
-                      repeatCount="indefinite"
-                      begin={`${animationDelay}s`}
-                    />
-                  </line>
-                )}
-
-                {/* Diagonal connections */}
-                {i < 23 && (i + 1) % 6 !== 0 && (
-                  <line
-                    x1={`${baseX}%`}
-                    y1={`${baseY}%`}
-                    x2={`${baseX + 20}%`}
-                    y2={`${baseY + 20}%`}
-                    stroke="#10b981"
-                    strokeWidth="0.5"
-                    opacity="0.3"
-                  >
-                    <animate
-                      attributeName="opacity"
-                      values="0.1;0.5;0.1"
-                      dur={`${animationDuration * 1.5}s`}
-                      repeatCount="indefinite"
-                      begin={`${animationDelay + 3}s`}
-                    />
-                  </line>
-                )}
-              </g>
-            );
-          })}
-
-          {/* Additional floating particles */}
-          {[...Array(15)].map((_, i) => (
-            <circle
-              key={`particle-${i}`}
-              cx="0"
-              cy="0"
-              r="1"
-              fill="#0d9488"
-              opacity="0.6"
-            >
-              <animateTransform
-                attributeName="transform"
-                attributeType="XML"
-                type="translate"
-                values={`${Math.random() * 100},${Math.random() * 100}; ${Math.random() * 100},${Math.random() * 100}; ${Math.random() * 100},${Math.random() * 100}`}
-                dur={`${15 + Math.random() * 10}s`}
-                repeatCount="indefinite"
-                begin={`${Math.random() * 5}s`}
-              />
-              <animate
-                attributeName="opacity"
-                values="0.2;0.8;0.2"
-                dur={`${3 + Math.random() * 2}s`}
-                repeatCount="indefinite"
-              />
-            </circle>
-          ))}
-        </svg>
+      {/* Animated background elements */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-white rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-300 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 w-32 h-32 bg-teal-200 rounded-full blur-2xl animate-pulse delay-500"></div>
+      </div>
+      
+      {/* Floating particles */}
+      <div className="absolute inset-0 opacity-20">
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className={`absolute w-2 h-2 bg-white rounded-full animate-pulse`}
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${2 + Math.random() * 3}s`
+            }}
+          ></div>
+        ))}
       </div>
       
       <div className="w-full max-w-md relative z-10">
@@ -212,28 +68,30 @@ const Login = () => {
         </div>
 
         {/* Login Form */}
-        <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/20">
+        <div className="bg-white/15 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/30">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4">
-              <div>
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/70 w-5 h-5" />
                 <Input
                   type="email"
                   placeholder="Correo electrónico"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="h-12 bg-white/10 border-white/20 text-white placeholder:text-white/70 rounded-2xl focus:border-teal-400 focus:ring-teal-400 backdrop-blur-sm px-4"
+                  className="pl-12 h-14 bg-white/10 border-white/30 text-white placeholder:text-white/70 rounded-xl focus:border-emerald-400 focus:ring-emerald-400 backdrop-blur-sm"
                 />
               </div>
               
-              <div>
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/70 w-5 h-5" />
                 <Input
                   type="password"
                   placeholder="Contraseña"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="h-12 bg-white/10 border-white/20 text-white placeholder:text-white/70 rounded-2xl focus:border-teal-400 focus:ring-teal-400 backdrop-blur-sm px-4"
+                  className="pl-12 h-14 bg-white/10 border-white/30 text-white placeholder:text-white/70 rounded-xl focus:border-emerald-400 focus:ring-emerald-400 backdrop-blur-sm"
                 />
               </div>
             </div>
@@ -247,7 +105,7 @@ const Login = () => {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-12 bg-teal-500 hover:bg-teal-600 text-white font-medium rounded-2xl shadow-lg transition-all duration-300"
+              className="w-full h-14 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
             >
               {loading ? (
                 <div className="flex items-center justify-center">
@@ -260,14 +118,14 @@ const Login = () => {
             </Button>
           </form>
 
-          <div className="mt-6 text-center">
+          <div className="mt-8 text-center">
             <p className="text-white/70 text-sm">
-              Departamento médico
+              Base de datos de laboratorios farmacéuticos
             </p>
-            <div className="flex justify-center items-center mt-3 space-x-2">
-              <div className="w-2 h-2 bg-teal-400 rounded-full animate-pulse"></div>
-              <div className="w-2 h-2 bg-teal-400 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-              <div className="w-2 h-2 bg-teal-400 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+            <div className="flex justify-center items-center mt-4 space-x-4">
+              <div className="w-8 h-1 bg-emerald-400 rounded-full"></div>
+              <div className="w-4 h-1 bg-emerald-300 rounded-full"></div>
+              <div className="w-2 h-1 bg-emerald-200 rounded-full"></div>
             </div>
           </div>
         </div>
