@@ -144,7 +144,7 @@ const Login = () => {
 
           <div className="mt-6 text-center">
             <p className="text-white/70 text-sm">
-              Departamento comercial
+              Departamento médico
             </p>
             <div className="flex justify-center items-center mt-3 space-x-2">
               <div className="w-2 h-2 bg-teal-400 rounded-full"></div>
