@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Bell, Settings, Search } from 'lucide-react';
-import { useTheme } from '@/components/ThemeProvider';
 import { useNotification } from '@/contexts/NotificationContext';
 import { SettingsPanel } from './SettingsPanel';
 import { NotificationPanel } from './NotificationPanel';
@@ -13,7 +12,6 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ onToggleFilters }) => {
-  const { theme, toggleTheme } = useTheme();
   const { notifications, clearNotifications } = useNotification();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isNotificationPanelOpen, setIsNotificationPanelOpen] = useState(false);
@@ -70,15 +68,6 @@ export const Header: React.FC<HeaderProps> = ({ onToggleFilters }) => {
                   )}
                 </Button>
               </div>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleTheme}
-                className="p-2"
-              >
-                {theme === 'light' ? '🌙' : '☀️'}
-              </Button>
 
               <Button 
                 variant="ghost" 

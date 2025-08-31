@@ -10,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNotification } from '@/contexts/NotificationContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Volume2, VolumeX, Mail, LogOut, User, Play, Palette, Bell } from 'lucide-react';
+import { useTheme } from '@/components/ThemeProvider';
+import { Volume2, VolumeX, Mail, LogOut, User, Play, Palette, Bell, Moon, Sun } from 'lucide-react';
 import { playNotificationSound } from '@/utils/notificationSounds';
 
 interface SettingsPanelProps {
@@ -21,6 +22,7 @@ interface SettingsPanelProps {
 export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose }) => {
   const { settings, updateSettings } = useNotification();
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [selectedSound, setSelectedSound] = useState(settings.soundType || 'default');
 
   useEffect(() => {
@@ -107,6 +109,31 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose })
               <div className="space-y-2">
                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{user?.email}</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">ID: {user?.ID}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Theme Settings Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Palette className="w-5 h-5 text-purple-600" />
+                Configuración de Tema
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <Label className="font-medium flex items-center gap-2">
+                    {theme === 'light' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                    Modo oscuro
+                  </Label>
+                  <p className="text-sm text-gray-500">Cambia entre tema claro y oscuro</p>
+                </div>
+                <Switch
+                  checked={theme === 'dark'}
+                  onCheckedChange={toggleTheme}
+                />
               </div>
             </CardContent>
           </Card>
