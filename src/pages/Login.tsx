@@ -40,55 +40,57 @@ const Login = () => {
       <div className="w-full max-w-md relative z-10">
         {/* Logo Section */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-teal-400 rounded-3xl mb-6 mx-auto">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl mb-4 shadow-2xl transform hover:scale-105 transition-transform">
             <Search className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-4xl font-bold text-white mb-3 tracking-wide">MEDISTREAM</h1>
-          <p className="text-white/80 text-base mb-6">Portal de Acceso Seguro</p>
-          <div className="w-20 h-0.5 bg-white/60 mx-auto"></div>
+          <h1 className="text-4xl font-bold text-white mb-2 tracking-wide">MEDISTREAM</h1>
+          <p className="text-emerald-200 text-lg">Portal de Acceso Seguro</p>
+          <div className="w-24 h-1 bg-gradient-to-r from-emerald-400 to-teal-500 mx-auto mt-4 rounded-full"></div>
         </div>
 
         {/* Login Form */}
-        <div className="bg-black/20 backdrop-blur-sm rounded-3xl p-8 border border-white/10">
+        <div className="bg-white/15 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/30">
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="relative">
-              <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/70 w-5 h-5" />
-              <input
-                type="email"
-                placeholder="Correo electrónico"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/20 text-white placeholder:text-white/70 rounded-2xl focus:outline-none focus:border-teal-400 focus:bg-white/15 transition-all"
-              />
-            </div>
-            
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/70 w-5 h-5" />
-              <input
-                type="password"
-                placeholder="Contraseña"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/20 text-white placeholder:text-white/70 rounded-2xl focus:outline-none focus:border-teal-400 focus:bg-white/15 transition-all"
-              />
+            <div className="space-y-4">
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/70 w-5 h-5" />
+                <Input
+                  type="email"
+                  placeholder="Correo electrónico"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="pl-12 h-14 bg-white/10 border-white/30 text-white placeholder:text-white/70 rounded-xl focus:border-emerald-400 focus:ring-emerald-400 backdrop-blur-sm"
+                />
+              </div>
+              
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/70 w-5 h-5" />
+                <Input
+                  type="password"
+                  placeholder="Contraseña"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="pl-12 h-14 bg-white/10 border-white/30 text-white placeholder:text-white/70 rounded-xl focus:border-emerald-400 focus:ring-emerald-400 backdrop-blur-sm"
+                />
+              </div>
             </div>
 
             {error && (
-              <Alert className="bg-red-500/20 border-red-500/30 text-white">
-                <AlertDescription className="text-sm">{error}</AlertDescription>
+              <Alert className="bg-red-500/20 border-red-500/50 text-white backdrop-blur-sm">
+                <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
 
             <Button
               type="submit"
               disabled={loading}
-              className="w-full py-4 bg-cyan-400 hover:bg-cyan-500 text-gray-900 font-semibold rounded-2xl transition-colors mt-8 text-lg"
+              className="w-full h-14 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
             >
               {loading ? (
                 <div className="flex items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-gray-900/30 border-t-gray-900 rounded-full animate-spin mr-2"></div>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
                   Iniciando sesión...
                 </div>
               ) : (
@@ -98,18 +100,18 @@ const Login = () => {
           </form>
 
           <div className="mt-8 text-center">
-            <p className="text-white/70 text-base mb-4">
-              Departamento comercial
+            <p className="text-white/70 text-sm">
+              Base de datos de laboratorios farmacéuticos
             </p>
-            <div className="flex justify-center items-center space-x-2">
-              <div className="w-2 h-2 bg-cyan-400 rounded-full"></div>
-              <div className="w-2 h-2 bg-cyan-400 rounded-full"></div>
-              <div className="w-2 h-2 bg-cyan-400 rounded-full"></div>
+            <div className="flex justify-center items-center mt-4 space-x-4">
+              <div className="w-8 h-1 bg-emerald-400 rounded-full"></div>
+              <div className="w-4 h-1 bg-emerald-300 rounded-full"></div>
+              <div className="w-2 h-1 bg-emerald-200 rounded-full"></div>
             </div>
           </div>
         </div>
 
-        <div className="text-center mt-8">
+        <div className="text-center mt-6">
           <p className="text-white/50 text-sm">
             © 2025 Medistream System. Acceso autorizado únicamente.
           </p>
