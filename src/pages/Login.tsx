@@ -1,11 +1,19 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Search, Lock, Mail } from 'lucide-react';
+
+interface Node {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  connections: number[];
+}
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -14,6 +22,142 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const animationRef = useRef<number>();
+  const mouseRef = useRef({ x: 0, y: 0 });
+  const nodesRef = useRef<Node[]>([]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const resizeCanvas = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      initNodes();
+    };
+
+    const initNodes = () => {
+      const nodeCount = 50;
+      nodesRef.current = [];
+      
+      for (let i = 0; i < nodeCount; i++) {
+        nodesRef.current.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          vx: (Math.random() - 0.5) * 0.5,
+          vy: (Math.random() - 0.5) * 0.5,
+          connections: []
+        });
+      }
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseRef.current = {
+        x: e.clientX,
+        y: e.clientY
+      };
+    };
+
+    const animate = () => {
+      ctx.fillStyle = 'rgba(6, 78, 59, 0.1)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const nodes = nodesRef.current;
+      const mouse = mouseRef.current;
+
+      // Update node positions
+      nodes.forEach((node) => {
+        // Mouse attraction
+        const dx = mouse.x - node.x;
+        const dy = mouse.y - node.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance < 150) {
+          const force = (150 - distance) / 150 * 0.02;
+          node.vx += (dx / distance) * force;
+          node.vy += (dy / distance) * force;
+        }
+
+        // Apply velocity with damping
+        node.vx *= 0.98;
+        node.vy *= 0.98;
+        node.x += node.vx;
+        node.y += node.vy;
+
+        // Bounce off edges
+        if (node.x < 0 || node.x > canvas.width) {
+          node.vx *= -0.8;
+          node.x = Math.max(0, Math.min(canvas.width, node.x));
+        }
+        if (node.y < 0 || node.y > canvas.height) {
+          node.vy *= -0.8;
+          node.y = Math.max(0, Math.min(canvas.height, node.y));
+        }
+      });
+
+      // Draw connections
+      ctx.strokeStyle = 'rgba(45, 212, 191, 0.3)';
+      ctx.lineWidth = 1;
+      
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const dx = nodes[i].x - nodes[j].x;
+          const dy = nodes[i].y - nodes[j].y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          
+          if (distance < 120) {
+            const opacity = (120 - distance) / 120 * 0.4;
+            ctx.globalAlpha = opacity;
+            ctx.beginPath();
+            ctx.moveTo(nodes[i].x, nodes[i].y);
+            ctx.lineTo(nodes[j].x, nodes[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Draw nodes
+      ctx.globalAlpha = 1;
+      nodes.forEach((node) => {
+        const dx = mouse.x - node.x;
+        const dy = mouse.y - node.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const isNear = distance < 100;
+        
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, isNear ? 4 : 2, 0, Math.PI * 2);
+        ctx.fillStyle = isNear ? 'rgba(45, 212, 191, 0.9)' : 'rgba(45, 212, 191, 0.6)';
+        ctx.fill();
+        
+        if (isNear) {
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, 8, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(45, 212, 191, 0.3)';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+      });
+
+      animationRef.current = requestAnimationFrame(animate);
+    };
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('mousemove', handleMouseMove);
+    animate();
+
+    return () => {
+      window.removeEventListener('resize', resizeCanvas);
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,27 +177,18 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-teal-900 to-cyan-900 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Animated background elements */}
+      {/* Dynamic Network Background */}
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full"
+        style={{ background: 'linear-gradient(135deg, #064e3b 0%, #0f766e 50%, #155e75 100%)' }}
+      />
+      
+      {/* Additional animated elements */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-white rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-300 rounded-full blur-3xl animate-pulse delay-1000"></div>
         <div className="absolute top-1/2 left-1/2 w-32 h-32 bg-teal-200 rounded-full blur-2xl animate-pulse delay-500"></div>
-      </div>
-      
-      {/* Floating particles */}
-      <div className="absolute inset-0 opacity-20">
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className={`absolute w-2 h-2 bg-white rounded-full animate-pulse`}
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${2 + Math.random() * 3}s`
-            }}
-          ></div>
-        ))}
       </div>
       
       <div className="w-full max-w-md relative z-10">
