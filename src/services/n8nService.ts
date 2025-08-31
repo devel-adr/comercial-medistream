@@ -49,7 +49,7 @@ const makeN8nRequest = async (path: string, method: string = 'GET') => {
 };
 
 export const n8nService = {
-  async getWorkflowExecutions(workflowId: string, limit: number = 50): Promise<WorkflowExecution[]> {
+  async getWorkflowExecutions(workflowId: string, limit: number = 10): Promise<WorkflowExecution[]> {
     try {
       console.log(`🔍 Fetching executions for workflow ${workflowId} (limit: ${limit})...`);
       
@@ -61,31 +61,57 @@ export const n8nService = {
         count: data.data?.length || 0,
         sample: data.data?.[0] ? {
           id: data.data[0].id,
-          status: data.data[0].finished ? (data.data[0].stoppedAt ? 'success' : 'canceled') : 'running',
+          finished: data.data[0].finished,
+          stoppedAt: data.data[0].stoppedAt,
+          waitTill: data.data[0].waitTill,
           startedAt: data.data[0].startedAt
         } : null
       });
       
-      // Map the response to match our interface, properly handling canceled executions
+      // Map the response to match our interface with improved status detection
       const executions = data.data?.map((execution: any) => {
         let status = 'running';
         
+        console.log(`🔍 Analyzing execution ${execution.id}:`, {
+          finished: execution.finished,
+          stoppedAt: execution.stoppedAt,
+          waitTill: execution.waitTill,
+          mode: execution.mode
+        });
+        
         if (execution.finished) {
-          // If finished is true, check if it was successful or canceled
-          if (execution.stoppedAt && execution.waitTill === null) {
-            status = 'success';
-          } else if (execution.stoppedAt) {
-            // If it has stoppedAt but didn't complete successfully, it was likely canceled
+          // If finished is true, determine if it was successful or failed/canceled
+          if (execution.stoppedAt) {
+            // Check if there are error indicators
+            if (execution.data && execution.data.resultData && execution.data.resultData.error) {
+              status = 'error';
+            } else {
+              // If finished and stopped without errors, it's successful
+              status = 'success';
+            }
+          } else {
+            // Finished but no stoppedAt usually means canceled
             status = 'canceled';
           }
-        } else if (execution.waitTill) {
-          status = 'waiting';
+        } else {
+          // Not finished yet
+          if (execution.waitTill) {
+            status = 'waiting';
+          } else if (execution.stoppedAt) {
+            // Has stoppedAt but not finished = canceled
+            status = 'canceled';
+          } else {
+            // No stoppedAt and not finished = still running
+            status = 'running';
+          }
         }
         
-        // Check for error status in the execution data
-        if (execution.status === 'error' || (execution.data && execution.data.resultData && execution.data.resultData.error)) {
+        // Additional check for explicit error status
+        if (execution.status === 'error') {
           status = 'error';
         }
+        
+        console.log(`📊 Execution ${execution.id} final status: ${status}`);
         
         return {
           ...execution,
@@ -93,7 +119,10 @@ export const n8nService = {
         };
       }) || [];
       
-      console.log(`📊 Status breakdown:`, {
+      // Sort executions by startedAt descending (most recent first)
+      executions.sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
+      
+      console.log(`📊 Status breakdown for ${workflowId}:`, {
         total: executions.length,
         running: executions.filter(e => e.status === 'running').length,
         success: executions.filter(e => e.status === 'success').length,
@@ -145,7 +174,7 @@ export const n8nService = {
     for (const [workflowId, name] of Object.entries(workflows)) {
       try {
         console.log(`\n🔄 Processing ${name} (${workflowId})...`);
-        const executions = await this.getWorkflowExecutions(workflowId, 50); // Increased from 5 to 50
+        const executions = await this.getWorkflowExecutions(workflowId, 10); // Limited to 10 executions per workflow
         results[name] = executions;
         console.log(`✅ Successfully fetched ${executions.length} executions for ${name}`);
         
@@ -153,7 +182,9 @@ export const n8nService = {
           console.log(`🔍 Latest execution for ${name}:`, {
             id: executions[0].id,
             status: executions[0].status,
-            startedAt: executions[0].startedAt
+            startedAt: executions[0].startedAt,
+            finished: executions[0].finished,
+            stoppedAt: executions[0].stoppedAt
           });
         }
       } catch (error) {
