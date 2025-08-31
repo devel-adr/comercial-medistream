@@ -182,9 +182,9 @@ export const WorkflowProgressPanel: React.FC<WorkflowProgressPanelProps> = ({
                 <Play className="w-5 h-5" />
                 Estado de Automatizaciones
                 {connectionStatus === 'connected' ? (
-                  <Wifi className="w-4 h-4 text-green-500" title="Conectado" />
+                  <Wifi className="w-4 h-4 text-green-500" />
                 ) : connectionStatus === 'disconnected' ? (
-                  <WifiOff className="w-4 h-4 text-red-500" title="Desconectado" />
+                  <WifiOff className="w-4 h-4 text-red-500" />
                 ) : null}
               </CardTitle>
               <div className="flex items-center gap-2">
