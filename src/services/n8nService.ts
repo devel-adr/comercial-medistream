@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface WorkflowExecution {
@@ -64,13 +63,14 @@ export const n8nService = {
           finished: data.data[0].finished,
           stoppedAt: data.data[0].stoppedAt,
           waitTill: data.data[0].waitTill,
-          startedAt: data.data[0].startedAt
+          startedAt: data.data[0].startedAt,
+          status: data.data[0].status
         } : null
       });
       
-      // Map the response to match our interface with improved status detection
+      // Map the response to match our interface with corrected status detection
       const executions = data.data?.map((execution: any) => {
-        let status = 'running'; // Default to running
+        let status: 'running' | 'success' | 'error' | 'waiting' | 'canceled' | 'new' = 'new';
         
         console.log(`🔍 Analyzing execution ${execution.id}:`, {
           finished: execution.finished,
@@ -80,41 +80,74 @@ export const n8nService = {
           rawStatus: execution.status
         });
         
-        // First check if explicitly marked as running or in progress
-        if (!execution.finished && !execution.stoppedAt) {
-          // No stoppedAt and not finished = definitely running
+        // Check the raw status field first if it exists and is meaningful
+        if (execution.status === 'running' || execution.status === 'new') {
           status = 'running';
-          console.log(`📊 Execution ${execution.id} is RUNNING (not finished, no stoppedAt)`);
+          console.log(`📊 Execution ${execution.id} is RUNNING (explicit status: ${execution.status})`);
         }
-        // Check if it's waiting
-        else if (execution.waitTill && !execution.finished) {
-          status = 'waiting';
-          console.log(`📊 Execution ${execution.id} is WAITING (has waitTill)`);
+        else if (execution.status === 'success') {
+          status = 'success';
+          console.log(`📊 Execution ${execution.id} is SUCCESS (explicit status)`);
         }
-        // Check if it's finished
-        else if (execution.finished) {
-          // If finished is true, determine success or error
-          if (execution.status === 'error' || (execution.data && execution.data.resultData && execution.data.resultData.error)) {
-            status = 'error';
-            console.log(`📊 Execution ${execution.id} FINISHED with ERROR`);
-          } else {
-            status = 'success';
-            console.log(`📊 Execution ${execution.id} FINISHED successfully`);
-          }
-        }
-        // Check if it was canceled (has stoppedAt but not finished)
-        else if (execution.stoppedAt && !execution.finished) {
-          status = 'canceled';
-          console.log(`📊 Execution ${execution.id} was CANCELED (has stoppedAt but not finished)`);
-        }
-        
-        // Override with explicit status if available
-        if (execution.status === 'error') {
+        else if (execution.status === 'error') {
           status = 'error';
-        } else if (execution.status === 'canceled' || execution.status === 'cancelled') {
+          console.log(`📊 Execution ${execution.id} is ERROR (explicit status)`);
+        }
+        else if (execution.status === 'canceled' || execution.status === 'cancelled') {
           status = 'canceled';
-        } else if (execution.status === 'running' || execution.status === 'new') {
-          status = 'running';
+          console.log(`📊 Execution ${execution.id} is CANCELED (explicit status)`);
+        }
+        else if (execution.status === 'waiting') {
+          status = 'waiting';
+          console.log(`📊 Execution ${execution.id} is WAITING (explicit status)`);
+        }
+        // Fallback to analyzing the execution state if no explicit status
+        else {
+          // Check if it's waiting
+          if (execution.waitTill && !execution.finished) {
+            status = 'waiting';
+            console.log(`📊 Execution ${execution.id} is WAITING (has waitTill: ${execution.waitTill})`);
+          }
+          // Check if it's finished
+          else if (execution.finished === true) {
+            // If finished is true, determine success or error
+            if (execution.data && execution.data.resultData && execution.data.resultData.error) {
+              status = 'error';
+              console.log(`📊 Execution ${execution.id} FINISHED with ERROR`);
+            } else {
+              status = 'success';
+              console.log(`📊 Execution ${execution.id} FINISHED successfully`);
+            }
+          }
+          // Check if it's currently running (not finished and no explicit stop)
+          else if (execution.finished === false) {
+            // If not finished, check if it has been stopped/canceled
+            if (execution.stoppedAt) {
+              // Check if it was stopped recently (within last 5 minutes) - might still be running
+              const stoppedTime = new Date(execution.stoppedAt).getTime();
+              const now = new Date().getTime();
+              const timeDiff = now - stoppedTime;
+              const fiveMinutes = 5 * 60 * 1000;
+              
+              if (timeDiff < fiveMinutes && execution.mode === 'manual') {
+                // Recently stopped manual execution might still be running
+                status = 'running';
+                console.log(`📊 Execution ${execution.id} might still be RUNNING (recently stopped: ${timeDiff}ms ago)`);
+              } else {
+                status = 'canceled';
+                console.log(`📊 Execution ${execution.id} was CANCELED (stopped at: ${execution.stoppedAt})`);
+              }
+            } else {
+              // Not finished and no stoppedAt = definitely running
+              status = 'running';
+              console.log(`📊 Execution ${execution.id} is RUNNING (not finished, no stoppedAt)`);
+            }
+          }
+          else {
+            // Default fallback
+            status = 'new';
+            console.log(`📊 Execution ${execution.id} defaulted to NEW status`);
+          }
         }
         
         console.log(`📊 Execution ${execution.id} final status: ${status}`);
@@ -134,7 +167,8 @@ export const n8nService = {
         success: executions.filter(e => e.status === 'success').length,
         error: executions.filter(e => e.status === 'error').length,
         canceled: executions.filter(e => e.status === 'canceled').length,
-        waiting: executions.filter(e => e.status === 'waiting').length
+        waiting: executions.filter(e => e.status === 'waiting').length,
+        new: executions.filter(e => e.status === 'new').length
       });
       
       return executions;
@@ -201,7 +235,8 @@ export const n8nService = {
             id: e.id,
             startedAt: e.startedAt,
             finished: e.finished,
-            stoppedAt: e.stoppedAt
+            stoppedAt: e.stoppedAt,
+            status: e.status
           })));
         }
       } catch (error) {
