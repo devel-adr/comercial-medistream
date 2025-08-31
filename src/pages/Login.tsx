@@ -41,15 +41,16 @@ const Login = () => {
     };
 
     const initNodes = () => {
-      const nodeCount = 80;
+      // Increased node count significantly for denser network
+      const nodeCount = 150;
       nodesRef.current = [];
       
       for (let i = 0; i < nodeCount; i++) {
         nodesRef.current.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          vx: (Math.random() - 0.5) * 1.2,
-          vy: (Math.random() - 0.5) * 1.2,
+          vx: (Math.random() - 0.5) * 0.8,
+          vy: (Math.random() - 0.5) * 0.8,
           connections: []
         });
       }
@@ -65,11 +66,11 @@ const Login = () => {
     const animate = () => {
       timeRef.current += 0.01;
       
-      // Clear canvas with teal gradient background
+      // Background with the exact teal color from the images
       const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-      gradient.addColorStop(0, '#0d4d4d');
-      gradient.addColorStop(0.5, '#0f5f5f');
-      gradient.addColorStop(1, '#1a6b6b');
+      gradient.addColorStop(0, '#1e4d4a');
+      gradient.addColorStop(0.5, '#2a5f5a');
+      gradient.addColorStop(1, '#36706a');
       
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -80,38 +81,38 @@ const Login = () => {
       // Update node positions with constant movement
       nodes.forEach((node, index) => {
         // Add wave motion for constant movement
-        const waveX = Math.sin(timeRef.current + index * 0.1) * 0.3;
-        const waveY = Math.cos(timeRef.current + index * 0.15) * 0.3;
+        const waveX = Math.sin(timeRef.current + index * 0.1) * 0.2;
+        const waveY = Math.cos(timeRef.current + index * 0.15) * 0.2;
         
-        node.vx += waveX * 0.02;
-        node.vy += waveY * 0.02;
+        node.vx += waveX * 0.015;
+        node.vy += waveY * 0.015;
 
         // Mouse attraction/repulsion
         const dx = mouse.x - node.x;
         const dy = mouse.y - node.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
         
-        if (distance < 200) {
-          const force = (200 - distance) / 200 * 0.03;
+        if (distance < 250) {
+          const force = (250 - distance) / 250 * 0.02;
           node.vx += (dx / distance) * force;
           node.vy += (dy / distance) * force;
         }
 
-        // Apply velocity with slight damping to keep movement smooth
-        node.vx *= 0.995;
-        node.vy *= 0.995;
+        // Apply velocity with slight damping
+        node.vx *= 0.998;
+        node.vy *= 0.998;
         node.x += node.vx;
         node.y += node.vy;
 
-        // Wrap around edges instead of bouncing for continuous movement
+        // Wrap around edges for continuous movement
         if (node.x < -50) node.x = canvas.width + 50;
         if (node.x > canvas.width + 50) node.x = -50;
         if (node.y < -50) node.y = canvas.height + 50;
         if (node.y > canvas.height + 50) node.y = -50;
       });
 
-      // Draw connections with animated opacity
-      ctx.lineWidth = 1;
+      // Draw connections with increased density - more connections per node
+      ctx.lineWidth = 0.8;
       
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
@@ -119,12 +120,14 @@ const Login = () => {
           const dy = nodes[i].y - nodes[j].y;
           const distance = Math.sqrt(dx * dx + dy * dy);
           
-          if (distance < 150) {
-            const baseOpacity = (150 - distance) / 150 * 0.6;
-            const pulseOpacity = Math.sin(timeRef.current * 2 + i * 0.1) * 0.2 + 0.3;
-            const finalOpacity = Math.min(baseOpacity * pulseOpacity, 0.8);
+          // Increased connection distance for denser network
+          if (distance < 200) {
+            const baseOpacity = (200 - distance) / 200 * 0.7;
+            const pulseOpacity = Math.sin(timeRef.current * 1.5 + i * 0.1) * 0.3 + 0.4;
+            const finalOpacity = Math.min(baseOpacity * pulseOpacity, 0.9);
             
-            ctx.strokeStyle = `rgba(45, 212, 191, ${finalOpacity})`;
+            // Exact teal color from the images for connections
+            ctx.strokeStyle = `rgba(96, 255, 208, ${finalOpacity})`;
             ctx.beginPath();
             ctx.moveTo(nodes[i].x, nodes[i].y);
             ctx.lineTo(nodes[j].x, nodes[j].y);
@@ -133,31 +136,32 @@ const Login = () => {
         }
       }
 
-      // Draw nodes with pulsing animation
+      // Draw nodes with exact color matching
       nodes.forEach((node, index) => {
         const dx = mouse.x - node.x;
         const dy = mouse.y - node.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
-        const isNear = distance < 120;
+        const isNear = distance < 150;
         
-        const pulse = Math.sin(timeRef.current * 3 + index * 0.2) * 0.5 + 1;
-        const baseRadius = isNear ? 4 : 2;
+        const pulse = Math.sin(timeRef.current * 2.5 + index * 0.2) * 0.4 + 1;
+        const baseRadius = isNear ? 3.5 : 2;
         const radius = baseRadius * pulse;
         
         ctx.beginPath();
         ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
         
-        const nodeOpacity = 0.7 + Math.sin(timeRef.current * 2 + index * 0.1) * 0.3;
+        const nodeOpacity = 0.8 + Math.sin(timeRef.current * 2 + index * 0.1) * 0.2;
+        // Exact bright teal color from the images
         ctx.fillStyle = isNear ? 
-          `rgba(45, 212, 191, ${Math.min(nodeOpacity + 0.3, 1)})` : 
-          `rgba(45, 212, 191, ${nodeOpacity})`;
+          `rgba(96, 255, 208, ${Math.min(nodeOpacity + 0.2, 1)})` : 
+          `rgba(96, 255, 208, ${nodeOpacity})`;
         ctx.fill();
         
         if (isNear) {
           ctx.beginPath();
-          ctx.arc(node.x, node.y, radius + 6, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(45, 212, 191, ${0.4 * pulse})`;
-          ctx.lineWidth = 2;
+          ctx.arc(node.x, node.y, radius + 8, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(96, 255, 208, ${0.5 * pulse})`;
+          ctx.lineWidth = 1.5;
           ctx.stroke();
         }
       });
@@ -204,7 +208,7 @@ const Login = () => {
       />
       
       {/* Additional animated overlay for depth */}
-      <div className="absolute inset-0 opacity-20">
+      <div className="absolute inset-0 opacity-15">
         <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-teal-300 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-300 rounded-full blur-3xl animate-pulse delay-1000"></div>
         <div className="absolute top-1/2 left-1/2 w-32 h-32 bg-cyan-200 rounded-full blur-2xl animate-pulse delay-500"></div>
