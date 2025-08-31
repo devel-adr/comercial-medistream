@@ -80,20 +80,40 @@ export const n8nService = {
           rawStatus: execution.status
         });
         
-        // First check if explicitly marked as running or in progress
-        if (!execution.finished && !execution.stoppedAt) {
+        // NEW LOGIC: Check if execution is truly running by examining time
+        const now = new Date();
+        const startTime = new Date(execution.startedAt);
+        const timeDiff = now.getTime() - startTime.getTime();
+        
+        // If execution started recently and is not finished, it's likely running
+        if (!execution.finished) {
+          // Check if it has waitTill (waiting state)
+          if (execution.waitTill && new Date(execution.waitTill) > now) {
+            status = 'waiting';
+            console.log(`📊 Execution ${execution.id} is WAITING (has future waitTill: ${execution.waitTill})`);
+          }
+          // Check if it's been stopped (has stoppedAt)
+          else if (execution.stoppedAt) {
+            const stopTime = new Date(execution.stoppedAt);
+            const timeSinceStopped = now.getTime() - stopTime.getTime();
+            
+            // If stopped very recently (less than 30 seconds), might still be finishing up
+            if (timeSinceStopped < 30000) {
+              status = 'running';
+              console.log(`📊 Execution ${execution.id} is RUNNING (recently stopped but not finished yet)`);
+            } else {
+              status = 'canceled';
+              console.log(`📊 Execution ${execution.id} was CANCELED (stopped but not finished)`);
+            }
+          }
           // No stoppedAt and not finished = definitely running
-          status = 'running';
-          console.log(`📊 Execution ${execution.id} is RUNNING (not finished, no stoppedAt)`);
+          else {
+            status = 'running';
+            console.log(`📊 Execution ${execution.id} is RUNNING (not finished, no stoppedAt)`);
+          }
         }
-        // Check if it's waiting
-        else if (execution.waitTill && !execution.finished) {
-          status = 'waiting';
-          console.log(`📊 Execution ${execution.id} is WAITING (has waitTill)`);
-        }
-        // Check if it's finished
-        else if (execution.finished) {
-          // If finished is true, determine success or error
+        // If finished, determine success or error
+        else {
           if (execution.status === 'error' || (execution.data && execution.data.resultData && execution.data.resultData.error)) {
             status = 'error';
             console.log(`📊 Execution ${execution.id} FINISHED with ERROR`);
@@ -102,19 +122,15 @@ export const n8nService = {
             console.log(`📊 Execution ${execution.id} FINISHED successfully`);
           }
         }
-        // Check if it was canceled (has stoppedAt but not finished)
-        else if (execution.stoppedAt && !execution.finished) {
-          status = 'canceled';
-          console.log(`📊 Execution ${execution.id} was CANCELED (has stoppedAt but not finished)`);
-        }
         
-        // Override with explicit status if available
+        // Override with explicit status if available and reliable
         if (execution.status === 'error') {
           status = 'error';
-        } else if (execution.status === 'canceled' || execution.status === 'cancelled') {
-          status = 'canceled';
+        } else if (execution.status === 'success') {
+          status = 'success';
         } else if (execution.status === 'running' || execution.status === 'new') {
           status = 'running';
+          console.log(`📊 Execution ${execution.id} explicitly marked as RUNNING by API`);
         }
         
         console.log(`📊 Execution ${execution.id} final status: ${status}`);
