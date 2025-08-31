@@ -1,6 +1,6 @@
 
-const N8N_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiZDZmOTk0OS1lNGVjLTRjOGUtODNmNC1mMTRhZGRjNGNlZWIiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzU2NjU0MzUyfQ.L_weveIDvFU_VXsGkpk3-YPU71dSX_MWu5JC7DdoMrA';
-const N8N_BASE_URL = 'https://n8n.medistream.es/api/v1';
+const N8N_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiZDZmOTk0OS1lNGVjLTRjOGUtODNmNC1mMTRhZGRjNGNlZWIiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzU2NjU5NTA2fQ.oBiLr2WzPuCvkl5qeeVM9YLwHlRevjNnmdp6QjX5l5E';
+const N8N_BASE_URL = 'https://develms.app.n8n.cloud/api/v1';
 
 export interface WorkflowExecution {
   id: string;
@@ -32,57 +32,63 @@ const createHeaders = () => ({
 export const n8nService = {
   async getWorkflowExecutions(workflowId: string, limit: number = 10): Promise<WorkflowExecution[]> {
     try {
-      console.log(`Fetching executions for workflow ${workflowId}...`);
+      console.log(`🔍 Fetching executions for workflow ${workflowId}...`);
       
       const url = `${N8N_BASE_URL}/executions?workflowId=${workflowId}&limit=${limit}`;
-      console.log(`Request URL: ${url}`);
+      console.log(`📡 Request URL: ${url}`);
+      console.log(`🔑 Using API Key: ${N8N_API_KEY.substring(0, 20)}...`);
       
       const response = await fetch(url, { 
         headers: createHeaders(),
         method: 'GET'
       });
       
-      console.log(`Response status: ${response.status}`);
+      console.log(`📊 Response status: ${response.status} ${response.statusText}`);
+      console.log(`📋 Response headers:`, Object.fromEntries(response.headers.entries()));
       
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(`HTTP error! status: ${response.status}, response: ${errorText}`);
+        console.error(`❌ HTTP error! status: ${response.status}, response: ${errorText}`);
         throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
       }
       
       const data = await response.json();
-      console.log(`Executions data for ${workflowId}:`, data);
+      console.log(`✅ Executions data for ${workflowId}:`, data);
+      console.log(`📈 Found ${data.data?.length || 0} executions`);
       
       return data.data || [];
     } catch (error) {
-      console.error(`Error fetching executions for workflow ${workflowId}:`, error);
-      // En lugar de retornar array vacío, lanzamos el error para que se maneje correctamente
+      console.error(`💥 Error fetching executions for workflow ${workflowId}:`, error);
       throw error;
     }
   },
 
   async getWorkflowInfo(workflowId: string): Promise<WorkflowInfo | null> {
     try {
-      console.log(`Fetching workflow info for ${workflowId}...`);
+      console.log(`🔍 Fetching workflow info for ${workflowId}...`);
       
       const url = `${N8N_BASE_URL}/workflows/${workflowId}`;
+      console.log(`📡 Request URL: ${url}`);
+      
       const response = await fetch(url, { 
         headers: createHeaders(),
         method: 'GET'
       });
       
+      console.log(`📊 Response status: ${response.status} ${response.statusText}`);
+      
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(`HTTP error! status: ${response.status}, response: ${errorText}`);
+        console.error(`❌ HTTP error! status: ${response.status}, response: ${errorText}`);
         throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
       }
       
       const data = await response.json();
-      console.log(`Workflow info for ${workflowId}:`, data);
+      console.log(`✅ Workflow info for ${workflowId}:`, data);
       
       return data;
     } catch (error) {
-      console.error(`Error fetching workflow info for ${workflowId}:`, error);
+      console.error(`💥 Error fetching workflow info for ${workflowId}:`, error);
       return null;
     }
   },
@@ -97,34 +103,49 @@ export const n8nService = {
     const results: Record<string, WorkflowExecution[]> = {};
     const errors: string[] = [];
 
-    console.log('Starting to fetch all workflows status...');
+    console.log('🚀 Starting to fetch all workflows status...');
+    console.log('🎯 Target workflows:', workflows);
 
     for (const [workflowId, name] of Object.entries(workflows)) {
       try {
-        console.log(`Fetching executions for ${name} (${workflowId})...`);
+        console.log(`\n🔄 Processing ${name} (${workflowId})...`);
         const executions = await this.getWorkflowExecutions(workflowId, 5);
         results[name] = executions;
-        console.log(`Successfully fetched ${executions.length} executions for ${name}`);
+        console.log(`✅ Successfully fetched ${executions.length} executions for ${name}`);
+        
+        if (executions.length > 0) {
+          console.log(`🔍 Latest execution for ${name}:`, {
+            id: executions[0].id,
+            status: executions[0].status,
+            startedAt: executions[0].startedAt
+          });
+        }
       } catch (error) {
-        console.error(`Failed to fetch executions for ${name}:`, error);
+        console.error(`💥 Failed to fetch executions for ${name}:`, error);
         errors.push(`${name}: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        results[name] = []; // Asignar array vacío en caso de error
+        results[name] = [];
       }
     }
 
-    console.log('Final results:', results);
+    console.log('\n📋 Final results summary:');
+    Object.entries(results).forEach(([name, executions]) => {
+      console.log(`  ${name}: ${executions.length} executions`);
+    });
     
     if (errors.length > 0) {
-      console.warn('Some workflows failed to load:', errors);
+      console.warn('⚠️ Some workflows failed to load:', errors);
+    } else {
+      console.log('🎉 All workflows loaded successfully!');
     }
 
     return results;
   },
 
-  // Método para probar la conexión
   async testConnection(): Promise<boolean> {
     try {
-      console.log('Testing n8n API connection...');
+      console.log('🧪 Testing n8n API connection...');
+      console.log(`🔗 Base URL: ${N8N_BASE_URL}`);
+      console.log(`🔑 API Key: ${N8N_API_KEY.substring(0, 20)}...`);
       
       const url = `${N8N_BASE_URL}/workflows`;
       const response = await fetch(url, { 
@@ -132,10 +153,13 @@ export const n8nService = {
         method: 'GET'
       });
       
-      console.log(`Test connection response status: ${response.status}`);
+      console.log(`📊 Test connection response status: ${response.status} ${response.statusText}`);
+      console.log(`📋 Response headers:`, Object.fromEntries(response.headers.entries()));
       
       if (response.ok) {
+        const data = await response.json();
         console.log('✅ n8n API connection successful');
+        console.log(`📈 Found ${data.data?.length || 0} workflows in account`);
         return true;
       } else {
         const errorText = await response.text();
@@ -143,7 +167,7 @@ export const n8nService = {
         return false;
       }
     } catch (error) {
-      console.error('❌ n8n API connection error:', error);
+      console.error('💥 n8n API connection error:', error);
       return false;
     }
   }
