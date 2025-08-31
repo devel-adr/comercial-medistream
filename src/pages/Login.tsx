@@ -33,52 +33,170 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-teal-900 to-cyan-900 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Network pattern background */}
+      {/* Dynamic animated network background */}
       <div className="absolute inset-0">
-        <svg className="w-full h-full opacity-30">
-          {/* Network nodes */}
-          {[...Array(25)].map((_, i) => {
-            const x = (i % 5) * 25 + Math.random() * 15;
-            const y = Math.floor(i / 5) * 25 + Math.random() * 15;
+        <svg className="w-full h-full opacity-40">
+          <defs>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+              <feMerge> 
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+          
+          {/* Animated network nodes and connections */}
+          {[...Array(30)].map((_, i) => {
+            const baseX = (i % 6) * 20;
+            const baseY = Math.floor(i / 6) * 20;
+            const animationDelay = Math.random() * 10;
+            const animationDuration = 8 + Math.random() * 4;
+            
             return (
               <g key={i}>
+                {/* Animated node */}
                 <circle
-                  cx={`${x}%`}
-                  cy={`${y}%`}
+                  cx={`${baseX}%`}
+                  cy={`${baseY}%`}
                   r="2"
                   fill="#10b981"
+                  filter="url(#glow)"
                   className="animate-pulse"
                   style={{
-                    animationDelay: `${Math.random() * 3}s`,
-                    animationDuration: `${2 + Math.random() * 2}s`
+                    animationDelay: `${animationDelay}s`,
+                    animationDuration: `${animationDuration}s`
                   }}
-                />
-                {/* Connection lines */}
-                {i < 20 && (
+                >
+                  <animateTransform
+                    attributeName="transform"
+                    attributeType="XML"
+                    type="translate"
+                    values={`0,0; ${Math.sin(i) * 20},${Math.cos(i) * 15}; 0,0`}
+                    dur={`${animationDuration}s`}
+                    repeatCount="indefinite"
+                    begin={`${animationDelay}s`}
+                  />
+                  <animate
+                    attributeName="r"
+                    values="1.5;3;1.5"
+                    dur={`${animationDuration * 0.7}s`}
+                    repeatCount="indefinite"
+                    begin={`${animationDelay}s`}
+                  />
+                </circle>
+
+                {/* Animated connection lines */}
+                {i < 25 && (i + 1) % 6 !== 0 && (
                   <line
-                    x1={`${x}%`}
-                    y1={`${y}%`}
-                    x2={`${((i + 1) % 5) * 25 + Math.random() * 15}%`}
-                    y2={`${Math.floor((i + 1) / 5) * 25 + Math.random() * 15}%`}
+                    x1={`${baseX}%`}
+                    y1={`${baseY}%`}
+                    x2={`${baseX + 20}%`}
+                    y2={`${baseY}%`}
                     stroke="#10b981"
-                    strokeWidth="0.5"
+                    strokeWidth="0.8"
                     opacity="0.6"
-                  />
+                  >
+                    <animate
+                      attributeName="opacity"
+                      values="0.3;0.8;0.3"
+                      dur={`${animationDuration}s`}
+                      repeatCount="indefinite"
+                      begin={`${animationDelay + 1}s`}
+                    />
+                    <animateTransform
+                      attributeName="transform"
+                      attributeType="XML"
+                      type="translate"
+                      values={`0,0; ${Math.sin(i + 1) * 10},${Math.cos(i + 1) * 8}; 0,0`}
+                      dur={`${animationDuration}s`}
+                      repeatCount="indefinite"
+                      begin={`${animationDelay}s`}
+                    />
+                  </line>
                 )}
-                {i % 5 !== 4 && i < 20 && (
+
+                {/* Vertical connections */}
+                {i < 24 && (
                   <line
-                    x1={`${x}%`}
-                    y1={`${y}%`}
-                    x2={`${((i + 5) % 25 % 5) * 25 + Math.random() * 15}%`}
-                    y2={`${Math.floor((i + 5) / 5) * 25 + Math.random() * 15}%`}
+                    x1={`${baseX}%`}
+                    y1={`${baseY}%`}
+                    x2={`${baseX}%`}
+                    y2={`${baseY + 20}%`}
+                    stroke="#10b981"
+                    strokeWidth="0.8"
+                    opacity="0.4"
+                  >
+                    <animate
+                      attributeName="opacity"
+                      values="0.2;0.7;0.2"
+                      dur={`${animationDuration * 1.2}s`}
+                      repeatCount="indefinite"
+                      begin={`${animationDelay + 2}s`}
+                    />
+                    <animateTransform
+                      attributeName="transform"
+                      attributeType="XML"
+                      type="translate"
+                      values={`0,0; ${Math.cos(i) * 8},${Math.sin(i) * 12}; 0,0`}
+                      dur={`${animationDuration * 1.1}s`}
+                      repeatCount="indefinite"
+                      begin={`${animationDelay}s`}
+                    />
+                  </line>
+                )}
+
+                {/* Diagonal connections */}
+                {i < 23 && (i + 1) % 6 !== 0 && (
+                  <line
+                    x1={`${baseX}%`}
+                    y1={`${baseY}%`}
+                    x2={`${baseX + 20}%`}
+                    y2={`${baseY + 20}%`}
                     stroke="#10b981"
                     strokeWidth="0.5"
-                    opacity="0.4"
-                  />
+                    opacity="0.3"
+                  >
+                    <animate
+                      attributeName="opacity"
+                      values="0.1;0.5;0.1"
+                      dur={`${animationDuration * 1.5}s`}
+                      repeatCount="indefinite"
+                      begin={`${animationDelay + 3}s`}
+                    />
+                  </line>
                 )}
               </g>
             );
           })}
+
+          {/* Additional floating particles */}
+          {[...Array(15)].map((_, i) => (
+            <circle
+              key={`particle-${i}`}
+              cx="0"
+              cy="0"
+              r="1"
+              fill="#0d9488"
+              opacity="0.6"
+            >
+              <animateTransform
+                attributeName="transform"
+                attributeType="XML"
+                type="translate"
+                values={`${Math.random() * 100},${Math.random() * 100}; ${Math.random() * 100},${Math.random() * 100}; ${Math.random() * 100},${Math.random() * 100}`}
+                dur={`${15 + Math.random() * 10}s`}
+                repeatCount="indefinite"
+                begin={`${Math.random() * 5}s`}
+              />
+              <animate
+                attributeName="opacity"
+                values="0.2;0.8;0.2"
+                dur={`${3 + Math.random() * 2}s`}
+                repeatCount="indefinite"
+              />
+            </circle>
+          ))}
         </svg>
       </div>
       
@@ -147,9 +265,9 @@ const Login = () => {
               Departamento médico
             </p>
             <div className="flex justify-center items-center mt-3 space-x-2">
-              <div className="w-2 h-2 bg-teal-400 rounded-full"></div>
-              <div className="w-2 h-2 bg-teal-400 rounded-full"></div>
-              <div className="w-2 h-2 bg-teal-400 rounded-full"></div>
+              <div className="w-2 h-2 bg-teal-400 rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-teal-400 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+              <div className="w-2 h-2 bg-teal-400 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
             </div>
           </div>
         </div>
