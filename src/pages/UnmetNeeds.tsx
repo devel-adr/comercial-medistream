@@ -6,7 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
-import { Filter, BarChart3, Search, Plus, Star } from 'lucide-react';
+import { Filter, BarChart3, Search, Plus, Star, ChevronDown } from 'lucide-react';
 import { Navigation } from '@/components/Navigation';
 import { useUnmetNeedsData } from '@/hooks/useUnmetNeedsData';
 import { ThemeProvider } from '@/components/ThemeProvider';
@@ -50,6 +50,7 @@ const UnmetNeeds = () => {
     numeroExperto: string;
     formato: string;
   }>>({});
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const { data: unmetNeeds, loading, error, refresh, toggleFavorite, deleteUnmetNeed } = useUnmetNeedsData();
 
@@ -87,6 +88,15 @@ const UnmetNeeds = () => {
       }
       return newFavorites;
     });
+  };
+
+  const handleScrollDown = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+    }
   };
 
   const filteredAndSortedData = useMemo(() => {
@@ -428,7 +438,7 @@ const UnmetNeeds = () => {
             unmetNeeds={unmetNeeds}
           />
 
-          <Card className="shadow-lg">
+          <Card className="shadow-lg" ref={scrollRef}>
             <CardHeader>
               <CardTitle className="text-xl font-semibold">
                 Unmet Needs ({filteredAndSortedData.length})
@@ -522,6 +532,17 @@ const UnmetNeeds = () => {
             }}
             onSuccess={refresh}
           />
+        </div>
+
+        {/* Scroll Down Button */}
+        <div className="fixed bottom-6 left-6 z-50">
+          <Button
+            onClick={handleScrollDown}
+            size="lg"
+            className="bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 w-12 h-12 p-0"
+          >
+            <ChevronDown className="w-5 h-5" />
+          </Button>
         </div>
       </div>
     </ThemeProvider>
