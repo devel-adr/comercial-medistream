@@ -20,6 +20,14 @@ interface UnmetNeedsCardsProps {
   onToggleLocalFavorite?: (id: string) => void;
 }
 
+// Custom icon component for subarea
+const SubareaIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M8 2L3 6V14H13V6L8 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M6 14V10H10V14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
 export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
   data,
   onSelectForTactics,
@@ -189,6 +197,15 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
                   <div className="bg-blue-50 dark:bg-blue-900/20 p-2 rounded border-l-2 border-blue-400">
                     <div className="text-blue-600 dark:text-blue-400 font-medium mb-1">Área Terapéutica</div>
                     <div className="text-gray-900 dark:text-gray-100 truncate">{item.area_terapeutica}</div>
+                  </div>
+                )}
+                {item.sub_area && (
+                  <div className="bg-violet-50 dark:bg-violet-900/20 p-2 rounded border-l-2 border-violet-400">
+                    <div className="text-violet-600 dark:text-violet-400 font-medium mb-1 flex items-center gap-1">
+                      <SubareaIcon />
+                      Subárea
+                    </div>
+                    <div className="text-gray-900 dark:text-gray-100 truncate">{item.sub_area}</div>
                   </div>
                 )}
                 {item.farmaco && (
