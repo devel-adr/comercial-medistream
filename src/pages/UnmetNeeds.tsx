@@ -29,7 +29,7 @@ interface UnmetNeedsFilters {
   favoritos?: string;
 }
 
-const formatOptions = ['Programa', 'Webinar', 'Podcast', 'Personalizado (DOCS only)'];
+const formatOptions = ['Programa', 'Webinar', 'Podcast', 'VNL (VideoNewsLetter)', 'Personalizado (DOCS only)'];
 
 const UnmetNeeds = () => {
   const [activeFilters, setActiveFilters] = useState<UnmetNeedsFilters>({});
