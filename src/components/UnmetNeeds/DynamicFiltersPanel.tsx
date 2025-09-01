@@ -4,16 +4,21 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Filter, X, Star } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Filter, X, Star, Search } from 'lucide-react';
 
 interface DynamicFiltersPanelProps {
   onFiltersChange: (filters: any) => void;
   unmetNeeds: any[];
+  searchTerm?: string;
+  onSearchChange?: (search: string) => void;
 }
 
 export const DynamicFiltersPanel: React.FC<DynamicFiltersPanelProps> = ({
   onFiltersChange,
-  unmetNeeds = []
+  unmetNeeds = [],
+  searchTerm = '',
+  onSearchChange
 }) => {
   const [filters, setFilters] = useState({
     laboratorio: '',
@@ -139,6 +144,21 @@ export const DynamicFiltersPanel: React.FC<DynamicFiltersPanelProps> = ({
             <Badge variant="secondary">{activeFiltersCount}</Badge>
           )}
         </div>
+
+        {/* Search Bar */}
+        {onSearchChange && (
+          <div className="mb-4">
+            <div className="relative">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <Input
+                placeholder="Buscar en Unmet Needs..."
+                value={searchTerm}
+                onChange={(e) => onSearchChange(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </div>
+        )}
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 xl:grid-cols-7 gap-4">
           <div>

@@ -5,9 +5,11 @@ import { Badge } from '@/components/ui/badge';
 
 interface UnmetNeedsKPIsProps {
   data: any[];
+  selectedCount?: number;
+  localFavorites?: Set<string>;
 }
 
-export const UnmetNeedsKPIs: React.FC<UnmetNeedsKPIsProps> = ({ data }) => {
+export const UnmetNeedsKPIs: React.FC<UnmetNeedsKPIsProps> = ({ data, selectedCount, localFavorites }) => {
   const totalNeeds = data.length;
   const highImpactNeeds = data.filter(item => item.impacto?.toLowerCase().includes('alto')).length;
   const mediumImpactNeeds = data.filter(item => item.impacto?.toLowerCase().includes('medio')).length;

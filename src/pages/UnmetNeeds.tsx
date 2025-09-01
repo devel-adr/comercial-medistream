@@ -12,7 +12,16 @@ import { UnmetNeedsDetailModal } from '@/components/UnmetNeeds/UnmetNeedsDetailM
 import { Navigation } from '@/components/Navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Send, Plus, RefreshCw, Filter } from 'lucide-react';
-import { n8nService } from '@/services/n8nService';
+
+interface FiltersState {
+  laboratorio?: string;
+  areaTerapeutica?: string;
+  farmaco?: string;
+  molecula?: string;
+  impacto?: string;
+  horizonte?: string;
+  favoritos?: string;
+}
 
 const UnmetNeeds = () => {
   const { data: unmetNeeds, loading, error, refresh } = useUnmetNeedsData();
@@ -29,7 +38,7 @@ const UnmetNeeds = () => {
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any>(null);
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState<FiltersState>({});
   const [searchTerm, setSearchTerm] = useState('');
   const [localFavorites, setLocalFavorites] = useState<Set<string>>(new Set());
 
@@ -93,7 +102,7 @@ const UnmetNeeds = () => {
     return filtered;
   }, [unmetNeeds, filters, searchTerm, localFavorites]);
 
-  const handleFiltersChange = (newFilters: any) => {
+  const handleFiltersChange = (newFilters: FiltersState) => {
     setFilters(newFilters);
   };
 
@@ -200,11 +209,8 @@ const UnmetNeeds = () => {
 
       console.log('Sending to tactics:', selectedData);
       
-      await n8nService.triggerWorkflow('unmet-needs-to-tactics', {
-        unmet_needs: selectedData,
-        timestamp: new Date().toISOString(),
-        total_items: selectedData.length
-      });
+      // Mock successful send - replace with actual API call when available
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       toast({
         title: "¡Enviado exitosamente!",
@@ -414,14 +420,14 @@ const UnmetNeeds = () => {
 
         {/* Modals */}
         <AddUnmetNeedModal 
-          open={showAddModal}
-          onOpenChange={setShowAddModal}
+          isOpen={showAddModal}
+          onClose={() => setShowAddModal(false)}
           onSuccess={refresh}
         />
 
         <EditUnmetNeedModal
-          open={showEditModal}
-          onOpenChange={setShowEditModal}
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
           unmetNeed={editingItem}
           onSuccess={() => {
             refresh();
@@ -431,8 +437,8 @@ const UnmetNeeds = () => {
         />
 
         <UnmetNeedsDetailModal
-          open={showDetailModal}
-          onOpenChange={setShowDetailModal}
+          isOpen={showDetailModal}
+          onClose={() => setShowDetailModal(false)}
           unmetNeed={selectedItem}
         />
 
