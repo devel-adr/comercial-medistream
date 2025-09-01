@@ -91,12 +91,10 @@ const UnmetNeeds = () => {
   };
 
   const handleScrollDown = () => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'start' 
-      });
-    }
+    window.scrollTo({ 
+      top: document.body.scrollHeight, 
+      behavior: 'smooth' 
+    });
   };
 
   const filteredAndSortedData = useMemo(() => {
@@ -535,7 +533,7 @@ const UnmetNeeds = () => {
         </div>
 
         {/* Scroll Down Button */}
-        <div className="fixed bottom-6 left-6 z-50">
+        <div className="fixed bottom-6 right-6 z-50">
           <Button
             onClick={handleScrollDown}
             size="lg"
