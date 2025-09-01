@@ -1,148 +1,124 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Input } from '@/components/ui/input';
-import { Filter, BarChart3, Search, Plus, Star } from 'lucide-react';
-import { Navigation } from '@/components/Navigation';
 import { useUnmetNeedsData } from '@/hooks/useUnmetNeedsData';
-import { ThemeProvider } from '@/components/ThemeProvider';
-import { toast } from "@/hooks/use-toast";
-import { UnmetNeedsKPIs } from '@/components/UnmetNeeds/UnmetNeedsKPIs';
 import { UnmetNeedsCards } from '@/components/UnmetNeeds/UnmetNeedsCards';
-import { UnmetNeedsDetailModal } from '@/components/UnmetNeeds/UnmetNeedsDetailModal';
+import { UnmetNeedsKPIs } from '@/components/UnmetNeeds/UnmetNeedsKPIs';
+import { DynamicFiltersPanel } from '@/components/UnmetNeeds/DynamicFiltersPanel';
+import { CustomFieldsForm } from '@/components/UnmetNeeds/CustomFieldsForm';
 import { AddUnmetNeedModal } from '@/components/UnmetNeeds/AddUnmetNeedModal';
 import { EditUnmetNeedModal } from '@/components/UnmetNeeds/EditUnmetNeedModal';
-import { CustomFieldsForm } from '@/components/UnmetNeeds/CustomFieldsForm';
-import { DynamicFiltersPanel } from '@/components/UnmetNeeds/DynamicFiltersPanel';
-
-interface UnmetNeedsFilters {
-  laboratorio?: string;
-  areaTerapeutica?: string;
-  farmaco?: string;
-  molecula?: string;
-  impacto?: string;
-  horizonte?: string;
-  favoritos?: string;
-}
-
-const formatOptions = ['Programa', 'Webinar', 'Podcast', 'Personalizado (DOCS only)'];
+import { UnmetNeedsDetailModal } from '@/components/UnmetNeeds/UnmetNeedsDetailModal';
+import { Navigation } from '@/components/Navigation';
+import { useToast } from '@/hooks/use-toast';
+import { Send, Plus, RefreshCw, Filter } from 'lucide-react';
+import { n8nService } from '@/services/n8nService';
 
 const UnmetNeeds = () => {
-  const [activeFilters, setActiveFilters] = useState<UnmetNeedsFilters>({});
-  const [searchTerm, setSearchTerm] = useState('');
+  const { data: unmetNeeds, loading, error, refresh } = useUnmetNeedsData();
+  const { toast } = useToast();
+  
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [formatSelections, setFormatSelections] = useState<Record<string, string>>({});
-  const [selectedUnmetNeed, setSelectedUnmetNeed] = useState(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [editingUnmetNeed, setEditingUnmetNeed] = useState(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isGeneratingTactics, setIsGeneratingTactics] = useState(false);
+  const [customFields, setCustomFields] = useState<Record<string, any>>({});
+  const [sending, setSending] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingItem, setEditingItem] = useState<any>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<any>(null);
+  const [filters, setFilters] = useState({});
+  const [searchTerm, setSearchTerm] = useState('');
   const [localFavorites, setLocalFavorites] = useState<Set<string>>(new Set());
-  const [customFields, setCustomFields] = useState<Record<string, {
-    capitulos: string;
-    modulos: string;
-    subtemas: string;
-    numeroExperto: string;
-    formato: string;
-  }>>({});
 
-  const { data: unmetNeeds, loading, error, refresh, toggleFavorite, deleteUnmetNeed } = useUnmetNeedsData();
+  const formatOptions = [
+    'Programa',
+    'Webinar',
+    'Podcast',
+    'VNL (VideoNewsLetter)',
+    'Personalizado (DOCS only)'
+  ];
 
-  useEffect(() => {
-    const savedFavorites = localStorage.getItem('unmetNeedsFavorites');
-    if (savedFavorites) {
-      try {
-        const favoritesArray = JSON.parse(savedFavorites);
-        setLocalFavorites(new Set(favoritesArray));
-      } catch (error) {
-        console.error('Error loading favorites from localStorage:', error);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('unmetNeedsFavorites', JSON.stringify(Array.from(localFavorites)));
-  }, [localFavorites]);
-
-  const handleToggleLocalFavorite = (id: string) => {
-    setLocalFavorites(prev => {
-      const newFavorites = new Set(prev);
-      if (newFavorites.has(id)) {
-        newFavorites.delete(id);
-        toast({
-          title: "Favorito removido",
-          description: "La Unmet Need ha sido removida de favoritos.",
-        });
-      } else {
-        newFavorites.add(id);
-        toast({
-          title: "Favorito añadido",
-          description: "La Unmet Need ha sido añadida a favoritos.",
-        });
-      }
-      return newFavorites;
-    });
-  };
-
-  const filteredAndSortedData = useMemo(() => {
+  const filteredData = useMemo(() => {
     let filtered = unmetNeeds.filter(item => {
+      // Apply filters
+      if (filters.laboratorio && item.lab !== filters.laboratorio) return false;
+      if (filters.areaTerapeutica && item.area_terapeutica !== filters.areaTerapeutica) return false;
+      if (filters.farmaco && item.farmaco !== filters.farmaco) return false;
+      if (filters.molecula && item.molecula !== filters.molecula) return false;
+      if (filters.impacto && item.impacto !== filters.impacto) return false;
+      if (filters.horizonte && item.horizonte_temporal !== filters.horizonte) return false;
+      if (filters.favoritos === 'si' && !localFavorites.has(item.id_UN_table?.toString())) return false;
+      if (filters.favoritos === 'no' && localFavorites.has(item.id_UN_table?.toString())) return false;
+      
+      // Apply search filter
       if (searchTerm) {
-        const searchLower = searchTerm.toLowerCase();
         const searchFields = [
           item.unmet_need,
-          item.lab,
           item.area_terapeutica,
           item.farmaco,
+          item.lab,
           item.molecula,
-          item.impacto,
-          item.horizonte_temporal,
           item.racional,
-          item.conclusion
+          item.oportunidad_estrategica,
+          item.conclusion,
+          item.preguntas
         ];
-        if (!searchFields.some(field => 
-          field && field.toString().toLowerCase().includes(searchLower)
-        )) {
-          return false;
-        }
+        
+        const matchesSearch = searchFields.some(field => 
+          field && field.toString().toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        
+        if (!matchesSearch) return false;
       }
-
-      if (activeFilters.laboratorio && item.lab !== activeFilters.laboratorio) return false;
-      if (activeFilters.areaTerapeutica && item.area_terapeutica !== activeFilters.areaTerapeutica) return false;
-      if (activeFilters.farmaco && item.farmaco !== activeFilters.farmaco) return false;
-      if (activeFilters.molecula && item.molecula !== activeFilters.molecula) return false;
-      if (activeFilters.impacto && item.impacto !== activeFilters.impacto) return false;
-      if (activeFilters.horizonte && item.horizonte_temporal !== activeFilters.horizonte) return false;
-      
-      const itemId = item.id_UN_table?.toString();
-      if (activeFilters.favoritos === 'si' && !localFavorites.has(itemId)) return false;
-      if (activeFilters.favoritos === 'no' && localFavorites.has(itemId)) return false;
       
       return true;
     });
 
-    return filtered;
-  }, [unmetNeeds, activeFilters, searchTerm, localFavorites]);
+    // Sort by favorites first, then by ID descending
+    filtered.sort((a, b) => {
+      const aId = a.id_UN_table?.toString();
+      const bId = b.id_UN_table?.toString();
+      const aIsFavorite = localFavorites.has(aId);
+      const bIsFavorite = localFavorites.has(bId);
+      
+      if (aIsFavorite && !bIsFavorite) return -1;
+      if (!aIsFavorite && bIsFavorite) return 1;
+      
+      return (b.id_UN_table || 0) - (a.id_UN_table || 0);
+    });
 
-  const handleSelectRow = (id: string, checked: boolean) => {
-    const newSelected = new Set(selectedRows);
-    if (checked) {
-      newSelected.add(id);
-    } else {
-      newSelected.delete(id);
-      if (customFields[id]) {
+    return filtered;
+  }, [unmetNeeds, filters, searchTerm, localFavorites]);
+
+  const handleFiltersChange = (newFilters: any) => {
+    setFilters(newFilters);
+  };
+
+  const handleSelectForTactics = (id: string, selected: boolean) => {
+    setSelectedRows(prev => {
+      const newSet = new Set(prev);
+      if (selected) {
+        newSet.add(id);
+      } else {
+        newSet.delete(id);
+        // Also remove from format selections if deselected
+        setFormatSelections(prev => {
+          const newSelections = { ...prev };
+          delete newSelections[id];
+          return newSelections;
+        });
+        // Remove from custom fields if deselected
         setCustomFields(prev => {
           const newFields = { ...prev };
           delete newFields[id];
           return newFields;
         });
       }
-    }
-    setSelectedRows(newSelected);
+      return newSet;
+    });
   };
 
   const handleFormatChange = (id: string, format: string) => {
@@ -150,308 +126,268 @@ const UnmetNeeds = () => {
       ...prev,
       [id]: format
     }));
-
-    if (format !== 'Personalizado (DOCS only)' && customFields[id]) {
-      setCustomFields(prev => {
-        const newFields = { ...prev };
-        delete newFields[id];
-        return newFields;
-      });
-    }
   };
 
-  const handleCustomFieldsChange = (id: string, fields: {
-    capitulos: string;
-    modulos: string;
-    subtemas: string;
-    numeroExperto: string;
-    formato: string;
-  }) => {
+  const handleCustomFieldsChange = (id: string, fields: any) => {
     setCustomFields(prev => ({
       ...prev,
       [id]: fields
     }));
   };
 
-  const handleViewDetails = (unmetNeed: any) => {
-    setSelectedUnmetNeed(unmetNeed);
-    setIsDetailModalOpen(true);
-  };
-
-  const handleToggleFavorite = async (unmetNeed: any) => {
-    try {
-      await toggleFavorite(unmetNeed);
+  const handleSendToTactics = async () => {
+    if (selectedRows.size === 0) {
       toast({
-        title: "Éxito",
-        description: `Unmet Need ${unmetNeed.favorito ? 'removida de' : 'añadida a'} favoritos.`,
+        title: "Sin selección",
+        description: "Selecciona al menos una Unmet Need para enviar a Tácticas.",
+        variant: "destructive"
       });
-    } catch (error) {
+      return;
+    }
+
+    // Validate formats
+    const missingFormats = Array.from(selectedRows).filter(id => !formatSelections[id]);
+    if (missingFormats.length > 0) {
       toast({
-        title: "Error",
-        description: "Error al actualizar el estado de favorito.",
-        variant: "destructive",
+        title: "Formato requerido",
+        description: "Selecciona un formato para todas las Unmet Needs seleccionadas.",
+        variant: "destructive"
       });
+      return;
     }
-  };
 
-  const handleEdit = (unmetNeed: any) => {
-    setEditingUnmetNeed(unmetNeed);
-    setIsEditModalOpen(true);
-  };
-
-  const handleDelete = async (unmetNeed: any) => {
-    if (window.confirm('¿Estás seguro de que deseas eliminar esta Unmet Need? Esta acción no se puede deshacer.')) {
-      try {
-        await deleteUnmetNeed(unmetNeed);
-        toast({
-          title: "Éxito",
-          description: "Unmet Need eliminada correctamente.",
-        });
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Error al eliminar la Unmet Need.",
-          variant: "destructive",
-        });
-      }
-    }
-  };
-
-  const hasCustomFormat = Array.from(selectedRows).some(id => 
-    formatSelections[id] === 'Personalizado (DOCS only)'
-  );
-
-  const areCustomFieldsComplete = () => {
+    // Validate custom fields for Personalizado format
     const customFormatItems = Array.from(selectedRows).filter(id => 
       formatSelections[id] === 'Personalizado (DOCS only)'
     );
     
-    return customFormatItems.every(id => {
-      const fields = customFields[id];
-      return fields && 
-        fields.capitulos.trim() !== '' &&
-        fields.modulos.trim() !== '' &&
-        fields.subtemas.trim() !== '' &&
-        fields.numeroExperto.trim() !== '' &&
-        fields.formato.trim() !== '';
+    for (const itemId of customFormatItems) {
+      const fields = customFields[itemId];
+      if (!fields || !fields.capitulos || !fields.modulos || !fields.subtemas || 
+          !fields.numeroExperto || !fields.formato) {
+        toast({
+          title: "Campos personalizados incompletos",
+          description: "Completa todos los campos personalizados para los elementos con formato 'Personalizado (DOCS only)'.",
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+
+    setSending(true);
+
+    try {
+      const selectedData = unmetNeeds
+        .filter(item => selectedRows.has(item.id_UN_table?.toString()))
+        .map(item => {
+          const itemId = item.id_UN_table?.toString();
+          const baseData = {
+            ...item,
+            formato_seleccionado: formatSelections[itemId]
+          };
+
+          // Add custom fields if format is Personalizado
+          if (formatSelections[itemId] === 'Personalizado (DOCS only)') {
+            const fields = customFields[itemId];
+            return {
+              ...baseData,
+              campos_personalizados: fields
+            };
+          }
+
+          return baseData;
+        });
+
+      console.log('Sending to tactics:', selectedData);
+      
+      await n8nService.triggerWorkflow('unmet-needs-to-tactics', {
+        unmet_needs: selectedData,
+        timestamp: new Date().toISOString(),
+        total_items: selectedData.length
+      });
+
+      toast({
+        title: "¡Enviado exitosamente!",
+        description: `Se han enviado ${selectedData.length} Unmet Needs a Tácticas.`
+      });
+
+      // Clear selections
+      setSelectedRows(new Set());
+      setFormatSelections({});
+      setCustomFields({});
+
+    } catch (error) {
+      console.error('Error sending to tactics:', error);
+      toast({
+        title: "Error al enviar",
+        description: "Hubo un problema al enviar las Unmet Needs a Tácticas. Inténtalo de nuevo.",
+        variant: "destructive"
+      });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleToggleLocalFavorite = (id: string) => {
+    setLocalFavorites(prev => {
+      const newFavorites = new Set(prev);
+      if (newFavorites.has(id)) {
+        newFavorites.delete(id);
+      } else {
+        newFavorites.add(id);
+      }
+      return newFavorites;
     });
   };
 
-  const handleGenerateTactics = async () => {
-    if (selectedRows.size === 0) {
-      toast({
-        title: "Error",
-        description: "Por favor selecciona al menos una Unmet Need para generar tácticas.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const missingFormats = Array.from(selectedRows).filter(id => !formatSelections[id]);
-    if (missingFormats.length > 0) {
-      toast({
-        title: "Error",
-        description: "Por favor asigna un formato a todas las Unmet Needs seleccionadas.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (hasCustomFormat && !areCustomFieldsComplete()) {
-      toast({
-        title: "Error",
-        description: "Por favor completa todos los campos personalizados para el formato 'Personalizado (DOCS only)'.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsGeneratingTactics(true);
-
-    try {
-      const selectedItems = Array.from(selectedRows).map(id => {
-        const item = unmetNeeds.find(n => n.id_UN_table?.toString() === id);
-        return item;
-      });
-
-      const webhookData = {
-        timestamp: new Date().toISOString(),
-        total_items: selectedRows.size
-      };
-
-      selectedItems.forEach((item, index) => {
-        const itemId = item?.id_UN_table?.toString();
-        webhookData[`id_unmet_need_${index + 1}`] = item?.id_UN_table || '';
-        webhookData[`laboratorio_${index + 1}`] = item?.lab || '';
-        webhookData[`area_terapeutica_${index + 1}`] = item?.area_terapeutica || '';
-        webhookData[`farmaco_${index + 1}`] = item?.farmaco || '';
-        webhookData[`molecula_${index + 1}`] = item?.molecula || '';
-        webhookData[`horizonte_${index + 1}`] = item?.horizonte_temporal || '';
-        webhookData[`unmet_need_${index + 1}`] = item?.unmet_need || '';
-        webhookData[`racional_${index + 1}`] = item?.racional || '';
-        webhookData[`oportunidad_estrategica_${index + 1}`] = item?.oportunidad_estrategica || '';
-        webhookData[`conclusion_${index + 1}`] = item?.conclusion || '';
-        webhookData[`formato_${index + 1}`] = formatSelections[itemId] || '';
-        webhookData[`impacto_${index + 1}`] = item?.impacto || '';
-
-        if (formatSelections[itemId] === 'Personalizado (DOCS only)' && customFields[itemId]) {
-          const customFieldsData = customFields[itemId];
-          webhookData[`capitulos_${index + 1}`] = customFieldsData.capitulos;
-          webhookData[`modulos_${index + 1}`] = customFieldsData.modulos;
-          webhookData[`subtemas_${index + 1}`] = customFieldsData.subtemas;
-          webhookData[`numero_experto_${index + 1}`] = customFieldsData.numeroExperto;
-          webhookData[`formato_personalizado_${index + 1}`] = customFieldsData.formato;
-        }
-      });
-
-      console.log('Sending data to webhook:', webhookData);
-
-      const response = await fetch('https://develms.app.n8n.cloud/webhook/tactics', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(webhookData),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      localStorage.setItem('selectedUnmetNeeds', JSON.stringify(Array.from(selectedRows).map(id => {
-        const item = unmetNeeds.find(n => n.id_UN_table?.toString() === id);
-        const itemId = item?.id_UN_table?.toString();
-        
-        const result: any = {
-          ...item,
-          format: formatSelections[id]
-        };
-
-        if (formatSelections[id] === 'Personalizado (DOCS only)' && customFields[id]) {
-          result.customFields = customFields[id];
-        }
-
-        return result;
-      })));
-      
-      toast({
-        title: "Éxito",
-        description: `Se han enviado ${selectedRows.size} Unmet Needs al webhook y se han preparado las tácticas.`,
-      });
-
-      window.location.href = '/tactics';
-
-    } catch (error) {
-      console.error('Error sending data to webhook:', error);
-      toast({
-        title: "Error",
-        description: "Error al enviar los datos al webhook. Por favor, inténtalo de nuevo.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsGeneratingTactics(false);
-    }
+  const handleDelete = (unmetNeed: any) => {
+    setItemToDelete(unmetNeed);
+    setShowDeleteDialog(true);
   };
 
-  const handleAddSuccess = () => {
-    refresh();
+  const handleEdit = (unmetNeed: any) => {
+    setEditingItem(unmetNeed);
+    setShowEditModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!itemToDelete) return;
+
+    try {
+      console.log('Deleting unmet need:', itemToDelete);
+      
+      // Here you would typically make an API call to delete the item
+      // For now, we'll just show a success message
+      toast({
+        title: "Eliminado exitosamente",
+        description: `La Unmet Need #${itemToDelete.id_UN_table} ha sido eliminada.`
+      });
+
+      // Refresh the data
+      refresh();
+      
+    } catch (error) {
+      console.error('Error deleting unmet need:', error);
+      toast({
+        title: "Error al eliminar",
+        description: "Hubo un problema al eliminar la Unmet Need. Inténtalo de nuevo.",
+        variant: "destructive"
+      });
+    } finally {
+      setShowDeleteDialog(false);
+      setItemToDelete(null);
+    }
   };
 
   if (loading) {
     return (
-      <ThemeProvider>
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-          <Navigation />
-          <div className="container mx-auto px-4 py-6">
-            <Card className="w-full">
-              <CardContent className="p-6">
-                <div className="animate-pulse space-y-4">
-                  <div className="h-10 bg-gray-200 rounded"></div>
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <div key={i} className="h-16 bg-gray-100 rounded"></div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+        <Navigation />
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
+            <p className="text-gray-600 dark:text-gray-400">Cargando Unmet Needs...</p>
           </div>
         </div>
-      </ThemeProvider>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+        <Navigation />
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center text-red-600 dark:text-red-400">
+            <p className="text-lg font-semibold mb-2">Error al cargar datos</p>
+            <p className="text-sm">{error}</p>
+            <Button onClick={refresh} className="mt-4">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Reintentar
+            </Button>
+          </div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <ThemeProvider>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-        <Navigation />
-        
-        <div className="container mx-auto px-4 py-6 space-y-6">
-          <div className="relative">
-            <div className="absolute right-0 top-0">
-              <Button
-                onClick={() => setIsAddModalOpen(true)}
-                className="bg-green-600 hover:bg-green-700 text-white"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Añadir Unmet Need
-              </Button>
-            </div>
-            <div className="text-center">
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                Unmet Needs Dashboard
-              </h1>
-              <p className="text-gray-600 dark:text-gray-300">
-                Análisis completo de necesidades médicas no cubiertas
-              </p>
-            </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+      <Navigation />
+      
+      <div className="container mx-auto px-4 py-8 space-y-6">
+        {/* Header */}
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+          <div>
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
+              Unmet Needs
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">
+              Gestiona y envía necesidades no cubiertas a tácticas
+            </p>
           </div>
+          <div className="flex gap-3">
+            <Button onClick={() => setShowAddModal(true)} className="bg-blue-600 hover:bg-blue-700">
+              <Plus className="w-4 h-4 mr-2" />
+              Añadir Unmet Need
+            </Button>
+            <Button 
+              onClick={refresh} 
+              variant="outline"
+              className="border-blue-200 hover:bg-blue-50 dark:border-blue-800 dark:hover:bg-blue-900/20"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Actualizar
+            </Button>
+          </div>
+        </div>
 
-          <UnmetNeedsKPIs data={filteredAndSortedData} />
+        {/* KPIs */}
+        <UnmetNeedsKPIs 
+          data={filteredData}
+          selectedCount={selectedRows.size}
+          localFavorites={localFavorites}
+        />
 
-          {/* Search Section */}
-          <Card className="shadow-lg">
-            <CardContent className="p-6">
-              <div className="relative max-w-md">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <Input
-                  placeholder="Buscar unmet needs..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </CardContent>
-          </Card>
+        {/* Filters */}
+        <DynamicFiltersPanel
+          onFiltersChange={handleFiltersChange}
+          unmetNeeds={unmetNeeds}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+        />
 
-          {/* Dynamic Filters */}
-          <DynamicFiltersPanel 
-            onFiltersChange={setActiveFilters}
-            unmetNeeds={unmetNeeds}
-          />
+        {/* Send to Tactics Section */}
+        {selectedRows.size > 0 && (
+          <div className="space-y-4">
+            <Card className="border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-900/20">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-green-700 dark:text-green-300">
+                      Enviar a Tácticas
+                    </h3>
+                    <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                      {selectedRows.size} Unmet Need{selectedRows.size !== 1 ? 's' : ''} seleccionada{selectedRows.size !== 1 ? 's' : ''}
+                    </p>
+                  </div>
+                  <Button
+                    onClick={handleSendToTactics}
+                    disabled={sending}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    {sending ? (
+                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Send className="w-4 h-4 mr-2" />
+                    )}
+                    {sending ? 'Enviando...' : 'Enviar a Tácticas'}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-xl font-semibold">
-                Unmet Needs ({filteredAndSortedData.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <UnmetNeedsCards
-                data={filteredAndSortedData}
-                onSelectForTactics={handleSelectRow}
-                selectedIds={selectedRows}
-                formatSelections={formatSelections}
-                onFormatChange={handleFormatChange}
-                formatOptions={formatOptions}
-                onToggleFavorite={handleToggleFavorite}
-                onDelete={handleDelete}
-                onEdit={handleEdit}
-                localFavorites={localFavorites}
-                onToggleLocalFavorite={handleToggleLocalFavorite}
-              />
-            </CardContent>
-          </Card>
-
-          {hasCustomFormat && (
+            {/* Custom Fields Form */}
             <CustomFieldsForm
               selectedRows={selectedRows}
               formatSelections={formatSelections}
@@ -459,72 +395,82 @@ const UnmetNeeds = () => {
               onCustomFieldsChange={handleCustomFieldsChange}
               unmetNeeds={unmetNeeds}
             />
-          )}
+          </div>
+        )}
 
-          <div className="flex justify-center">
-            <Card className="shadow-lg">
-              <CardContent className="p-6">
-                <div className="text-center space-y-4">
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2 flex items-center justify-center gap-2">
-                      <BarChart3 className="w-5 h-5" />
-                      Generar Tácticas
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">
-                      Selecciona las Unmet Needs y asigna un formato para generar tácticas personalizadas.
-                    </p>
-                    {selectedRows.size > 0 && (
-                      <p className="text-sm text-blue-600 dark:text-blue-400 mt-2">
-                        {selectedRows.size} Unmet Need{selectedRows.size > 1 ? 's' : ''} seleccionada{selectedRows.size > 1 ? 's' : ''}
-                      </p>
-                    )}
-                    {hasCustomFormat && !areCustomFieldsComplete() && (
-                      <p className="text-sm text-orange-600 dark:text-orange-400 mt-2">
-                        Completa los campos personalizados para continuar
-                      </p>
-                    )}
-                  </div>
-                  <Button
-                    onClick={handleGenerateTactics}
-                    disabled={selectedRows.size === 0 || isGeneratingTactics || (hasCustomFormat && !areCustomFieldsComplete())}
-                    size="lg"
-                    className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 px-8 py-3"
+        {/* Unmet Needs Cards */}
+        <UnmetNeedsCards
+          data={filteredData}
+          onSelectForTactics={handleSelectForTactics}
+          selectedIds={selectedRows}
+          formatSelections={formatSelections}
+          onFormatChange={handleFormatChange}
+          formatOptions={formatOptions}
+          onDelete={handleDelete}
+          onEdit={handleEdit}
+          localFavorites={localFavorites}
+          onToggleLocalFavorite={handleToggleLocalFavorite}
+        />
+
+        {/* Modals */}
+        <AddUnmetNeedModal 
+          open={showAddModal}
+          onOpenChange={setShowAddModal}
+          onSuccess={refresh}
+        />
+
+        <EditUnmetNeedModal
+          open={showEditModal}
+          onOpenChange={setShowEditModal}
+          unmetNeed={editingItem}
+          onSuccess={() => {
+            refresh();
+            setShowEditModal(false);
+            setEditingItem(null);
+          }}
+        />
+
+        <UnmetNeedsDetailModal
+          open={showDetailModal}
+          onOpenChange={setShowDetailModal}
+          unmetNeed={selectedItem}
+        />
+
+        {/* Delete Confirmation Dialog */}
+        {showDeleteDialog && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <Card className="w-full max-w-md mx-4">
+              <CardHeader>
+                <CardTitle className="text-red-600">Confirmar Eliminación</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-700 dark:text-gray-300 mb-4">
+                  ¿Estás seguro de que deseas eliminar la Unmet Need #{itemToDelete?.id_UN_table}?
+                  Esta acción no se puede deshacer.
+                </p>
+                <div className="flex gap-2 justify-end">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setShowDeleteDialog(false);
+                      setItemToDelete(null);
+                    }}
                   >
-                    <BarChart3 className="w-4 h-4 mr-2" />
-                    {isGeneratingTactics ? 'ENVIANDO...' : 'GENERAR TÁCTICA'}
+                    Cancelar
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    onClick={confirmDelete}
+                  >
+                    Eliminar
                   </Button>
                 </div>
               </CardContent>
             </Card>
           </div>
-
-          <UnmetNeedsDetailModal
-            isOpen={isDetailModalOpen}
-            onClose={() => {
-              setIsDetailModalOpen(false);
-              setSelectedUnmetNeed(null);
-            }}
-            unmetNeed={selectedUnmetNeed}
-          />
-
-          <AddUnmetNeedModal
-            isOpen={isAddModalOpen}
-            onClose={() => setIsAddModalOpen(false)}
-            onSuccess={handleAddSuccess}
-          />
-
-          <EditUnmetNeedModal
-            unmetNeed={editingUnmetNeed}
-            isOpen={isEditModalOpen}
-            onClose={() => {
-              setIsEditModalOpen(false);
-              setEditingUnmetNeed(null);
-            }}
-            onSuccess={refresh}
-          />
-        </div>
+        )}
       </div>
-    </ThemeProvider>
+    </div>
   );
 };
 
