@@ -182,21 +182,12 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
                 </div>
               </div>
 
-              {/* Basic Info Grid - Only show fields that have content */}
+              {/* Basic Info Grid - Only show fields that have content, excluding subarea */}
               <div className="grid grid-cols-2 gap-2 text-xs">
                 {item.area_terapeutica && (
                   <div className="bg-blue-50 dark:bg-blue-900/20 p-2 rounded border-l-2 border-blue-400">
                     <div className="text-blue-600 dark:text-blue-400 font-medium mb-1">Área Terapéutica</div>
                     <div className="text-gray-900 dark:text-gray-100 truncate">{item.area_terapeutica}</div>
-                  </div>
-                )}
-                {item.sub_area && (
-                  <div className="bg-violet-50 dark:bg-violet-900/20 p-2 rounded border-l-2 border-violet-400">
-                    <div className="text-violet-600 dark:text-violet-400 font-medium mb-1 flex items-center gap-1">
-                      <Sparkles className="w-3 h-3" />
-                      Subárea
-                    </div>
-                    <div className="text-gray-900 dark:text-gray-100 truncate">{item.sub_area}</div>
                   </div>
                 )}
                 {item.farmaco && (
