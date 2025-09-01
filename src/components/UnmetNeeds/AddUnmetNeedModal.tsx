@@ -54,7 +54,8 @@ export const AddUnmetNeedModal: React.FC<AddUnmetNeedModalProps> = ({
       
       const dataToInsert = {
         ...formData,
-        id_UN_NUM: uniqueId
+        id_UN_NUM: uniqueId,
+        manually_added: true
       };
 
       const { error } = await supabase
