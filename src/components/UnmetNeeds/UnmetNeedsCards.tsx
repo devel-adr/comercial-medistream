@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BarChart3, FileText, Users, Target, Clock, Lightbulb, Star, Atom, Trash2, HelpCircle, Edit, User, Bot } from 'lucide-react';
+import { BarChart3, FileText, Users, Target, Clock, Lightbulb, Star, Atom, Trash2, HelpCircle, Edit, User, Bot, Sparkles } from 'lucide-react';
 
 interface UnmetNeedsCardsProps {
   data: any[];
@@ -19,14 +18,6 @@ interface UnmetNeedsCardsProps {
   localFavorites?: Set<string>;
   onToggleLocalFavorite?: (id: string) => void;
 }
-
-// Custom icon component for subarea
-const SubareaIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M8 2L3 6V14H13V6L8 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M6 14V10H10V14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
 
 export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
   data,
@@ -202,7 +193,7 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
                 {item.sub_area && (
                   <div className="bg-violet-50 dark:bg-violet-900/20 p-2 rounded border-l-2 border-violet-400">
                     <div className="text-violet-600 dark:text-violet-400 font-medium mb-1 flex items-center gap-1">
-                      <SubareaIcon />
+                      <Sparkles className="w-3 h-3" />
                       Subárea
                     </div>
                     <div className="text-gray-900 dark:text-gray-100 truncate">{item.sub_area}</div>
@@ -228,16 +219,31 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
                 )}
               </div>
 
-              {/* Molécula Section - Only show if exists */}
+              {/* Molécula Section - Only show if exists, now in a 2-column layout */}
               {item.molecula && item.molecula.trim() !== '' && (
                 <div className="bg-pink-50 dark:bg-pink-900/20 p-3 rounded-lg border border-pink-200 dark:border-pink-800">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Atom className="w-4 h-4 text-pink-600 dark:text-pink-400" />
-                    <span className="text-sm font-semibold text-pink-700 dark:text-pink-300">Molécula</span>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Atom className="w-4 h-4 text-pink-600 dark:text-pink-400" />
+                        <span className="text-sm font-semibold text-pink-700 dark:text-pink-300">Molécula</span>
+                      </div>
+                      <p className="text-sm text-gray-800 dark:text-gray-200 font-medium">
+                        {item.molecula}
+                      </p>
+                    </div>
+                    {item.sub_area && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Sparkles className="w-4 h-4 text-violet-600 dark:text-violet-400" />
+                          <span className="text-sm font-semibold text-violet-700 dark:text-violet-300">Subárea</span>
+                        </div>
+                        <p className="text-sm text-gray-800 dark:text-gray-200 font-medium">
+                          {item.sub_area}
+                        </p>
+                      </div>
+                    )}
                   </div>
-                  <p className="text-sm text-gray-800 dark:text-gray-200 font-medium">
-                    {item.molecula}
-                  </p>
                 </div>
               )}
 
