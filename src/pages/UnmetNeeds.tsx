@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -282,33 +283,60 @@ const UnmetNeeds = () => {
         return item;
       });
 
+      // Nueva estructura: arrays en lugar de variables numeradas
       const webhookData = {
         timestamp: new Date().toISOString(),
-        total_items: selectedRows.size
+        total_items: selectedRows.size,
+        id_unmet_need: [],
+        laboratorio: [],
+        area_terapeutica: [],
+        farmaco: [],
+        molecula: [],
+        horizonte: [],
+        unmet_need: [],
+        racional: [],
+        oportunidad_estrategica: [],
+        conclusion: [],
+        formato: [],
+        impacto: [],
+        capitulos: [],
+        modulos: [],
+        subtemas: [],
+        numero_experto: [],
+        formato_personalizado: []
       };
 
-      selectedItems.forEach((item, index) => {
+      selectedItems.forEach((item) => {
         const itemId = item?.id_UN_table?.toString();
-        webhookData[`id_unmet_need_${index + 1}`] = item?.id_UN_table || '';
-        webhookData[`laboratorio_${index + 1}`] = item?.lab || '';
-        webhookData[`area_terapeutica_${index + 1}`] = item?.area_terapeutica || '';
-        webhookData[`farmaco_${index + 1}`] = item?.farmaco || '';
-        webhookData[`molecula_${index + 1}`] = item?.molecula || '';
-        webhookData[`horizonte_${index + 1}`] = item?.horizonte_temporal || '';
-        webhookData[`unmet_need_${index + 1}`] = item?.unmet_need || '';
-        webhookData[`racional_${index + 1}`] = item?.racional || '';
-        webhookData[`oportunidad_estrategica_${index + 1}`] = item?.oportunidad_estrategica || '';
-        webhookData[`conclusion_${index + 1}`] = item?.conclusion || '';
-        webhookData[`formato_${index + 1}`] = formatSelections[itemId] || '';
-        webhookData[`impacto_${index + 1}`] = item?.impacto || '';
+        
+        webhookData.id_unmet_need.push(item?.id_UN_table || '');
+        webhookData.laboratorio.push(item?.lab || '');
+        webhookData.area_terapeutica.push(item?.area_terapeutica || '');
+        webhookData.farmaco.push(item?.farmaco || '');
+        webhookData.molecula.push(item?.molecula || '');
+        webhookData.horizonte.push(item?.horizonte_temporal || '');
+        webhookData.unmet_need.push(item?.unmet_need || '');
+        webhookData.racional.push(item?.racional || '');
+        webhookData.oportunidad_estrategica.push(item?.oportunidad_estrategica || '');
+        webhookData.conclusion.push(item?.conclusion || '');
+        webhookData.formato.push(formatSelections[itemId] || '');
+        webhookData.impacto.push(item?.impacto || '');
 
+        // Campos personalizados - agregar valores solo si existen
         if (formatSelections[itemId] === 'Personalizado (DOCS only)' && customFields[itemId]) {
           const customFieldsData = customFields[itemId];
-          webhookData[`capitulos_${index + 1}`] = customFieldsData.capitulos;
-          webhookData[`modulos_${index + 1}`] = customFieldsData.modulos;
-          webhookData[`subtemas_${index + 1}`] = customFieldsData.subtemas;
-          webhookData[`numero_experto_${index + 1}`] = customFieldsData.numeroExperto;
-          webhookData[`formato_personalizado_${index + 1}`] = customFieldsData.formato;
+          webhookData.capitulos.push(customFieldsData.capitulos);
+          webhookData.modulos.push(customFieldsData.modulos);
+          webhookData.subtemas.push(customFieldsData.subtemas);
+          webhookData.numero_experto.push(customFieldsData.numeroExperto);
+          webhookData.formato_personalizado.push(customFieldsData.formato);
+        } else {
+          // Agregar valores vacíos para mantener consistencia en los arrays
+          webhookData.capitulos.push('');
+          webhookData.modulos.push('');
+          webhookData.subtemas.push('');
+          webhookData.numero_experto.push('');
+          webhookData.formato_personalizado.push('');
         }
       });
 
