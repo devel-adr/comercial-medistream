@@ -2,9 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Settings, Search, Activity } from 'lucide-react';
+import { Settings, Search, Activity, Newspaper } from 'lucide-react';
 import { SettingsPanel } from './SettingsPanel';
 import { WorkflowProgressPanel } from './WorkflowProgressPanel';
+import { NewsModal } from './NewsModal';
 import { useWorkflowStatus } from '@/hooks/useWorkflowStatus';
 
 interface HeaderProps {
@@ -14,6 +15,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ onToggleFilters }) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isWorkflowPanelOpen, setIsWorkflowPanelOpen] = useState(false);
+  const [isNewsModalOpen, setIsNewsModalOpen] = useState(false);
   const { workflowStatuses } = useWorkflowStatus();
 
   // Count running workflows
@@ -24,6 +26,10 @@ export const Header: React.FC<HeaderProps> = ({ onToggleFilters }) => {
 
   const handleWorkflowClick = () => {
     setIsWorkflowPanelOpen(true);
+  };
+
+  const handleNewsClick = () => {
+    setIsNewsModalOpen(true);
   };
 
   return (
@@ -48,6 +54,20 @@ export const Header: React.FC<HeaderProps> = ({ onToggleFilters }) => {
             </div>
 
             <div className="flex items-center space-x-4">
+              <div className="relative">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={handleNewsClick}
+                  className="relative"
+                >
+                  <Newspaper className="w-5 h-5" />
+                  <Badge className="absolute -top-1 -right-1 w-5 h-5 p-0 flex items-center justify-center text-xs bg-red-500 text-white animate-pulse">
+                    NEW
+                  </Badge>
+                </Button>
+              </div>
+
               <div className="relative">
                 <Button 
                   variant="ghost" 
@@ -84,6 +104,11 @@ export const Header: React.FC<HeaderProps> = ({ onToggleFilters }) => {
       <WorkflowProgressPanel
         isOpen={isWorkflowPanelOpen}
         onClose={() => setIsWorkflowPanelOpen(false)}
+      />
+
+      <NewsModal
+        isOpen={isNewsModalOpen}
+        onClose={() => setIsNewsModalOpen(false)}
       />
     </>
   );
