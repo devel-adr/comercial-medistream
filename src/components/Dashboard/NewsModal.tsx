@@ -50,14 +50,12 @@ const newsData: Record<NewsCategory, NewsItem[]> = {
     {
       title: "Problemas en el Funcionamiento",
       description: "Se han corregido los problemas que ocasionalmente en las automatizaciones no permitían continuar el proceso. El sistema ahora es más robusto y confiable en sus operaciones automatizadas.",
-      icon: RefreshCw,
-      image: "/lovable-uploads/104ce5d3-5692-4181-80cb-f919bc27f3d2.png"
+      icon: RefreshCw
     },
     {
       title: "Múltiples Unmet Needs a la Vez",
       description: "Ya vuelve a estar disponible la funcionalidad de poder seleccionar múltiples Unmet Needs simultáneamente, restaurando esta característica esencial para el flujo de trabajo eficiente.",
-      icon: Target,
-      image: "/lovable-uploads/b4b2d2d3-7932-4469-abcc-3ec100544e08.png"
+      icon: Target
     },
     {
       title: "Múltiples Tácticas a la Vez",
@@ -112,7 +110,7 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm" onClick={onClose}>
       <div 
-        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[900px] h-[600px] bg-white/95 dark:bg-gray-900/95 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50"
+        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[900px] h-[600px] bg-white/95 dark:bg-gray-900/95 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
         style={{
           backgroundImage: `
@@ -149,7 +147,7 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
 
         <div className="flex h-[calc(100%-88px)]">
           {/* Sidebar */}
-          <div className="w-64 bg-gray-50/50 dark:bg-gray-800/50 border-r border-gray-200/50 dark:border-gray-700/50 p-4">
+          <div className="w-64 bg-gray-50/50 dark:bg-gray-800/50 border-r border-gray-200/50 dark:border-gray-700/50 p-4 flex-shrink-0">
             <div className="space-y-2">
               {(Object.keys(categoryConfig) as NewsCategory[]).map((category) => {
                 const config = categoryConfig[category];
@@ -169,8 +167,8 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
                     <div className={`w-8 h-8 ${config.color} rounded-md flex items-center justify-center flex-shrink-0`}>
                       <IconComponent className="w-4 h-4 text-white" />
                     </div>
-                    <div className="flex-1 text-left">
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">
+                    <div className="flex-1 text-left min-w-0">
+                      <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
                         {config.title}
                       </div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">
@@ -178,7 +176,7 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
                       </div>
                     </div>
                     {isActive && (
-                      <ChevronRight className="w-4 h-4 text-gray-400" />
+                      <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
                     )}
                   </button>
                 );
@@ -187,7 +185,7 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
           </div>
 
           {/* Main Content */}
-          <div className="flex-1 p-6">
+          <div className="flex-1 p-6 min-w-0 overflow-hidden">
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                 {categoryConfig[activeCategory].title}
@@ -197,7 +195,7 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
               </p>
             </div>
 
-            <ScrollArea className="h-[420px]">
+            <ScrollArea className="h-[420px] pr-4">
               <div className="space-y-4">
                 {newsData[activeCategory].map((item, index) => {
                   const IconComponent = item.icon;
@@ -211,7 +209,7 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
                               <IconComponent className="w-5 h-5 text-white" />
                             </div>
                           </div>
-                          <div className="flex-1">
+                          <div className="flex-1 min-w-0">
                             <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
                               {item.title}
                             </h3>
@@ -223,7 +221,7 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
                                 <img 
                                   src={item.image} 
                                   alt={item.title}
-                                  className="w-full max-w-md h-32 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
+                                  className="w-full max-w-sm h-40 object-contain rounded-lg border border-gray-200 dark:border-gray-700 bg-white/50"
                                 />
                               </div>
                             )}
@@ -235,19 +233,6 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
                 })}
               </div>
             </ScrollArea>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="absolute bottom-4 left-6 right-6 flex justify-between items-center text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200/50 dark:border-gray-700/50 pt-4">
-          <span>© 2025 Medistream System. Acceso autorizado únicamente.</span>
-          <div className="flex gap-4">
-            <Button variant="outline" size="sm" className="text-xs">
-              VER TODAS LAS NOTICIAS
-            </Button>
-            <Button size="sm" className="text-xs bg-gradient-to-r from-blue-600 to-purple-600">
-              CERRAR
-            </Button>
           </div>
         </div>
       </div>
