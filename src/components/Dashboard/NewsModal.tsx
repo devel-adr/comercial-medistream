@@ -1,7 +1,7 @@
 
 
 import React, { useState } from 'react';
-import { X, Monitor, Bug, Cog, ChevronRight, Sparkles, Eye, RotateCcw, Palette, ArrowDown, Settings, Filter, RefreshCw, Target, Bell, FileText, Bot, User } from 'lucide-react';
+import { X, Monitor, Bug, Cog, ChevronRight, Sparkles, Eye, RotateCcw, Palette, ArrowDown, Settings, Filter, RefreshCw, Target, Bell, FileText, Bot, User, Presentation, Video } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -81,6 +81,18 @@ const newsData: Record<NewsCategory, NewsItem[]> = {
       title: "Diferenciador entre IA & Humano",
       description: "Se han añadido símbolos distintivos que determinan claramente si un dato ha sido introducido manualmente por un usuario o generado automáticamente por la IA, mejorando la transparencia del sistema.",
       icon: Bot
+    },
+    {
+      title: "PTTs Disponibles",
+      description: "Actualmente todos los formatos de salida ya cuentan con el soporte correcto de PPTs el cual ya está listo para el uso, prescindiendo del Gamma (Menos el formato 'Personalizado').",
+      icon: Presentation,
+      image: "/lovable-uploads/34f70e4b-d6f5-437c-8517-64ab005aa832.png"
+    },
+    {
+      title: "Nuevo Formato",
+      description: "Ya tienen disponible el nuevo formato Video Newsletter totalmente funcional (También la PPT).",
+      icon: Video,
+      image: "/lovable-uploads/c4de5710-b755-46b1-858c-4e2ef62dc81b.png"
     }
   ]
 };
