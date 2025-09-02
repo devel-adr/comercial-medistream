@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { X, Monitor, Bug, Cog, ChevronRight, Sparkles, Eye, RotateCcw, Palette, ArrowDown, Settings, Filter, RefreshCw, Target, Bell, FileText, Bot, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -110,7 +111,7 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm" onClick={onClose}>
       <div 
-        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[900px] h-[600px] bg-white/95 dark:bg-gray-900/95 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden relative"
+        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[900px] h-[650px] bg-white/95 dark:bg-gray-900/95 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden relative"
         onClick={(e) => e.stopPropagation()}
         style={{
           backgroundImage: `
@@ -199,14 +200,14 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
               </p>
             </div>
 
-            <ScrollArea className="h-[420px] pr-4">
-              <div className="space-y-4">
+            <ScrollArea className="h-[470px] pr-4">
+              <div className="space-y-6">
                 {newsData[activeCategory].map((item, index) => {
                   const IconComponent = item.icon;
                   
                   return (
                     <Card key={index} className="border border-gray-200/50 dark:border-gray-700/50 bg-white/50 dark:bg-gray-800/50">
-                      <CardContent className="p-4">
+                      <CardContent className="p-5">
                         <div className="flex gap-4">
                           <div className="flex-shrink-0">
                             <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
@@ -214,18 +215,18 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
                             </div>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                            <h3 className="font-semibold text-gray-900 dark:text-white mb-3 text-base">
                               {item.title}
                             </h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-3">
+                            <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-4 break-words">
                               {item.description}
                             </p>
                             {item.image && (
-                              <div className="mt-3">
+                              <div className="mt-4">
                                 <img 
                                   src={item.image} 
                                   alt={item.title}
-                                  className="w-full max-w-sm h-40 object-contain rounded-lg border border-gray-200 dark:border-gray-700 bg-white/50"
+                                  className="w-full max-w-md h-auto max-h-48 object-contain rounded-lg border border-gray-200 dark:border-gray-700 bg-white/50"
                                 />
                               </div>
                             )}
@@ -243,3 +244,4 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
     </div>
   );
 };
+
