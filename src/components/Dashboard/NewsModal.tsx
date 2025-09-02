@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { X, Monitor, Bug, Cog, ChevronRight, Sparkles, Eye, RotateCcw, Palette, ArrowDown, Settings, Filter, RefreshCw, Target, Bell, FileText, Bot, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -110,7 +109,7 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm" onClick={onClose}>
       <div 
-        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[900px] h-[600px] bg-white/95 dark:bg-gray-900/95 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden"
+        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[900px] h-[600px] bg-white/95 dark:bg-gray-900/95 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden relative"
         onClick={(e) => e.stopPropagation()}
         style={{
           backgroundImage: `
@@ -120,6 +119,13 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
           `
         }}
       >
+        {/* NEW Label - Rotated in top-right corner */}
+        <div className="absolute -top-2 -right-2 z-10">
+          <div className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2 text-sm font-bold transform rotate-12 shadow-lg">
+            NEW
+          </div>
+        </div>
+
         {/* Header */}
         <div className="relative p-6 border-b border-gray-200/50 dark:border-gray-700/50">
           <div className="flex items-center justify-between">
@@ -135,9 +141,6 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white px-3 py-1 text-sm font-medium rounded-full animate-pulse">
-                ACTUALIZACIÓN DISPONIBLE
-              </Badge>
               <Button variant="ghost" size="sm" onClick={onClose}>
                 <X className="w-5 h-5" />
               </Button>
