@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -283,75 +282,56 @@ const UnmetNeeds = () => {
         return item;
       });
 
-      // Nueva estructura: arrays en lugar de variables numeradas
-      const webhookData = {
-        timestamp: new Date().toISOString(),
-        total_items: selectedRows.size,
-        id_unmet_need: [],
-        laboratorio: [],
-        area_terapeutica: [],
-        farmaco: [],
-        molecula: [],
-        horizonte: [],
-        unmet_need: [],
-        racional: [],
-        oportunidad_estrategica: [],
-        conclusion: [],
-        formato: [],
-        impacto: [],
-        capitulos: [],
-        modulos: [],
-        subtemas: [],
-        numero_experto: [],
-        formato_personalizado: []
-      };
-
-      selectedItems.forEach((item) => {
+      // Enviar cada Unmet Need por separado manteniendo los nombres originales con _1
+      for (let i = 0; i < selectedItems.length; i++) {
+        const item = selectedItems[i];
         const itemId = item?.id_UN_table?.toString();
         
-        webhookData.id_unmet_need.push(item?.id_UN_table || '');
-        webhookData.laboratorio.push(item?.lab || '');
-        webhookData.area_terapeutica.push(item?.area_terapeutica || '');
-        webhookData.farmaco.push(item?.farmaco || '');
-        webhookData.molecula.push(item?.molecula || '');
-        webhookData.horizonte.push(item?.horizonte_temporal || '');
-        webhookData.unmet_need.push(item?.unmet_need || '');
-        webhookData.racional.push(item?.racional || '');
-        webhookData.oportunidad_estrategica.push(item?.oportunidad_estrategica || '');
-        webhookData.conclusion.push(item?.conclusion || '');
-        webhookData.formato.push(formatSelections[itemId] || '');
-        webhookData.impacto.push(item?.impacto || '');
+        const webhookData = {
+          timestamp: new Date().toISOString(),
+          total_items: 1,
+          id_unmet_need_1: item?.id_UN_table || '',
+          laboratorio_1: item?.lab || '',
+          area_terapeutica_1: item?.area_terapeutica || '',
+          farmaco_1: item?.farmaco || '',
+          molecula_1: item?.molecula || '',
+          horizonte_1: item?.horizonte_temporal || '',
+          unmet_need_1: item?.unmet_need || '',
+          racional_1: item?.racional || '',
+          oportunidad_estrategica_1: item?.oportunidad_estrategica || '',
+          conclusion_1: item?.conclusion || '',
+          formato_1: formatSelections[itemId] || '',
+          impacto_1: item?.impacto || ''
+        };
 
-        // Campos personalizados - agregar valores solo si existen
+        // Agregar campos personalizados solo si existen
         if (formatSelections[itemId] === 'Personalizado (DOCS only)' && customFields[itemId]) {
           const customFieldsData = customFields[itemId];
-          webhookData.capitulos.push(customFieldsData.capitulos);
-          webhookData.modulos.push(customFieldsData.modulos);
-          webhookData.subtemas.push(customFieldsData.subtemas);
-          webhookData.numero_experto.push(customFieldsData.numeroExperto);
-          webhookData.formato_personalizado.push(customFieldsData.formato);
-        } else {
-          // Agregar valores vacíos para mantener consistencia en los arrays
-          webhookData.capitulos.push('');
-          webhookData.modulos.push('');
-          webhookData.subtemas.push('');
-          webhookData.numero_experto.push('');
-          webhookData.formato_personalizado.push('');
+          webhookData.capitulos_1 = customFieldsData.capitulos;
+          webhookData.modulos_1 = customFieldsData.modulos;
+          webhookData.subtemas_1 = customFieldsData.subtemas;
+          webhookData.numero_experto_1 = customFieldsData.numeroExperto;
+          webhookData.formato_personalizado_1 = customFieldsData.formato;
         }
-      });
 
-      console.log('Sending data to webhook:', webhookData);
+        console.log(`Sending data to webhook (item ${i + 1}/${selectedItems.length}):`, webhookData);
 
-      const response = await fetch('https://develms.app.n8n.cloud/webhook/tactics', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(webhookData),
-      });
+        const response = await fetch('https://develms.app.n8n.cloud/webhook/tactics', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(webhookData),
+        });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status} for item ${i + 1}`);
+        }
+
+        // Pequeña pausa entre envíos para no sobrecargar el webhook
+        if (i < selectedItems.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
       }
 
       localStorage.setItem('selectedUnmetNeeds', JSON.stringify(Array.from(selectedRows).map(id => {
@@ -372,7 +352,7 @@ const UnmetNeeds = () => {
       
       toast({
         title: "Éxito",
-        description: `Se han enviado ${selectedRows.size} Unmet Needs al webhook y se han preparado las tácticas.`,
+        description: `Se han enviado ${selectedRows.size} Unmet Needs al webhook (${selectedRows.size} envíos separados) y se han preparado las tácticas.`,
       });
 
       window.location.href = '/tactics';
@@ -381,7 +361,7 @@ const UnmetNeeds = () => {
       console.error('Error sending data to webhook:', error);
       toast({
         title: "Error",
-        description: "Error al enviar los datos al webhook. Por favor, inténtalo de nuevo.",
+        description: `Error al enviar los datos al webhook: ${error.message}`,
         variant: "destructive",
       });
     } finally {
