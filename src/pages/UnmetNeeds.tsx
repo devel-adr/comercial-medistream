@@ -287,7 +287,7 @@ const UnmetNeeds = () => {
         const item = selectedItems[i];
         const itemId = item?.id_UN_table?.toString();
         
-        const webhookData = {
+        const webhookData: any = {
           timestamp: new Date().toISOString(),
           total_items: 1,
           id_unmet_need_1: item?.id_UN_table || '',
