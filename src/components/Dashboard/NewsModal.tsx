@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { X, Monitor, Bug, Cog, ChevronRight, Sparkles, Eye, RotateCcw, Palette, ArrowDown, Settings, Filter, RefreshCw, Target, Bell, FileText, Bot, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -137,7 +138,7 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
                 MEDISTREAM Analytics
               </h1>
               <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                Versión 3.1.5 • 2024.11.15
+                v0.3 • 02/09/2025
               </p>
             </div>
             <div className="flex items-center gap-3">
