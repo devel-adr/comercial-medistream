@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Navigation } from '@/components/Navigation';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { Search, BarChart3 } from 'lucide-react';
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { usePharmaTacticsData } from '@/hooks/usePharmaTacticsData';
 import { useTacticsFavorites } from '@/hooks/useTacticsFavorites';
 import { TacticsKPIs } from '@/components/Tactics/TacticsKPIs';
@@ -25,6 +26,65 @@ const Tactics = () => {
   const { favorites, toggleFavorite, isFavorite } = useTacticsFavorites();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilters, setActiveFilters] = useState<TacticsFilters>({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
+
+  // Filter the data based on current filters
+  const filteredData = React.useMemo(() => {
+    let filtered = data || [];
+    
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      filtered = filtered.filter(item => {
+        const searchableFields = [
+          item.unmet_need,
+          item.laboratorio,
+          item.area_terapeutica,
+          item.farmaco,
+          item.molecula,
+          item.formato
+        ];
+        return searchableFields.some(field => 
+          field && field.toString().toLowerCase().includes(searchLower)
+        );
+      });
+    }
+
+    if (activeFilters.laboratorio) {
+      filtered = filtered.filter(item => item.laboratorio === activeFilters.laboratorio);
+    }
+    if (activeFilters.areaTerapeutica) {
+      filtered = filtered.filter(item => item.area_terapeutica === activeFilters.areaTerapeutica);
+    }
+    if (activeFilters.farmaco) {
+      filtered = filtered.filter(item => item.farmaco === activeFilters.farmaco);
+    }
+    if (activeFilters.molecula) {
+      filtered = filtered.filter(item => item.molecula === activeFilters.molecula);
+    }
+    if (activeFilters.formato) {
+      filtered = filtered.filter(item => item.formato === activeFilters.formato);
+    }
+    if (activeFilters.favoritos === 'si') {
+      filtered = filtered.filter(item => isFavorite(item.id_tabla?.toString() || ''));
+    }
+    
+    return filtered;
+  }, [data, searchTerm, activeFilters, isFavorite]);
+
+  // Reset to page 1 when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [activeFilters, searchTerm]);
+
+  // Paginate the filtered data
+  const paginatedData = React.useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredData.slice(startIndex, endIndex);
+  }, [filteredData, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
   if (error) {
     return (
@@ -84,20 +144,88 @@ const Tactics = () => {
           />
 
           {/* Tactics Cards */}
-          <TacticsCards
-            data={data}
-            loading={loading}
-            searchTerm={searchTerm}
-            selectedLab={activeFilters.laboratorio || ''}
-            selectedArea={activeFilters.areaTerapeutica || ''}
-            selectedFarmaco={activeFilters.farmaco || ''}
-            selectedMolecula={activeFilters.molecula || ''}
-            selectedFormat={activeFilters.formato || ''}
-            showOnlyFavorites={activeFilters.favoritos === 'si'}
-            favorites={favorites}
-            toggleFavorite={toggleFavorite}
-            isFavorite={isFavorite}
-          />
+          <Card className="shadow-lg">
+            <TacticsCards
+              data={paginatedData}
+              loading={loading}
+              searchTerm=""
+              selectedLab=""
+              selectedArea=""
+              selectedFarmaco=""
+              selectedMolecula=""
+              selectedFormat=""
+              showOnlyFavorites={false}
+              favorites={favorites}
+              toggleFavorite={toggleFavorite}
+              isFavorite={isFavorite}
+            />
+            
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="p-6 pt-0 flex justify-center">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (currentPage > 1) {
+                            setCurrentPage(currentPage - 1);
+                          }
+                        }}
+                        className={currentPage <= 1 ? "pointer-events-none opacity-50" : ""}
+                      />
+                    </PaginationItem>
+                    
+                    {[...Array(totalPages)].map((_, index) => {
+                      const page = index + 1;
+                      const showPage = page === 1 || page === totalPages || (page >= currentPage - 1 && page <= currentPage + 1);
+                      
+                      if (!showPage) {
+                        if (page === currentPage - 2 || page === currentPage + 2) {
+                          return (
+                            <PaginationItem key={page}>
+                              <PaginationEllipsis />
+                            </PaginationItem>
+                          );
+                        }
+                        return null;
+                      }
+                      
+                      return (
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            href="#"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setCurrentPage(page);
+                            }}
+                            isActive={currentPage === page}
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    })}
+                    
+                    <PaginationItem>
+                      <PaginationNext 
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (currentPage < totalPages) {
+                            setCurrentPage(currentPage + 1);
+                          }
+                        }}
+                        className={currentPage >= totalPages ? "pointer-events-none opacity-50" : ""}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
+          </Card>
         </div>
       </div>
     </ThemeProvider>
