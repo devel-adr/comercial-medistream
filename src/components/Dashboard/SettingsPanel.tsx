@@ -71,7 +71,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose })
   };
 
   const handleContactDeveloper = () => {
-    window.open('mailto:devel@medistream.tv?subject=Medistream - Consulta&body=Hola, tengo una consulta sobre la aplicación Medistream.', '_blank');
+    window.open('https://general-incidencias.lovable.app/', '_blank');
   };
 
   const handleLogout = () => {
