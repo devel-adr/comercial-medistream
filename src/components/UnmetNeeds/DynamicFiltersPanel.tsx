@@ -183,6 +183,42 @@ export const DynamicFiltersPanel: React.FC<DynamicFiltersPanelProps> = ({
           </div>
 
           <div>
+            <label className="text-sm font-medium mb-1 block">Área</label>
+            <Select
+              value={filters.area}
+              onValueChange={(value) => handleFilterChange('area', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Todas" />
+              </SelectTrigger>
+              <SelectContent className="max-h-[300px]">
+                <SelectItem value="all">Todas las áreas</SelectItem>
+                {dynamicOptions.areas.map((area) => (
+                  <SelectItem key={area} value={area}>{area}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium mb-1 block">Subárea</label>
+            <Select
+              value={filters.subarea}
+              onValueChange={(value) => handleFilterChange('subarea', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Todas" />
+              </SelectTrigger>
+              <SelectContent className="max-h-[300px]">
+                <SelectItem value="all">Todas las subáreas</SelectItem>
+                {dynamicOptions.subareas.map((subarea) => (
+                  <SelectItem key={subarea} value={subarea}>{subarea}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
             <label className="text-sm font-medium mb-1 block">Fármaco</label>
             <Select
               value={filters.farmaco}
@@ -233,42 +269,6 @@ export const DynamicFiltersPanel: React.FC<DynamicFiltersPanelProps> = ({
                 <SelectItem value="all">Todos los impactos</SelectItem>
                 {dynamicOptions.impactos.map((impacto) => (
                   <SelectItem key={impacto} value={impacto}>{impacto}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium mb-1 block">Área</label>
-            <Select
-              value={filters.area}
-              onValueChange={(value) => handleFilterChange('area', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Todas" />
-              </SelectTrigger>
-              <SelectContent className="max-h-[300px]">
-                <SelectItem value="all">Todas las áreas</SelectItem>
-                {dynamicOptions.areas.map((area) => (
-                  <SelectItem key={area} value={area}>{area}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium mb-1 block">Subárea</label>
-            <Select
-              value={filters.subarea}
-              onValueChange={(value) => handleFilterChange('subarea', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Todas" />
-              </SelectTrigger>
-              <SelectContent className="max-h-[300px]">
-                <SelectItem value="all">Todas las subáreas</SelectItem>
-                {dynamicOptions.subareas.map((subarea) => (
-                  <SelectItem key={subarea} value={subarea}>{subarea}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
