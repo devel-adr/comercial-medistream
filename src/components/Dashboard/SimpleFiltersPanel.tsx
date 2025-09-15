@@ -4,8 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Filter, X, Star, Brain } from 'lucide-react';
-import { useAreaClassification } from '@/hooks/useAreaClassification';
+import { Filter, X, Star } from 'lucide-react';
 
 interface SimpleFiltersPanelProps {
   onFiltersChange: (filters: any) => void;
@@ -18,7 +17,6 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
 }) => {
   const [filters, setFilters] = useState({
     laboratorio: '',
-    areaIA: '',
     areaTerapeutica: '',
     farmaco: '',
     molecula: '',
@@ -26,25 +24,12 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
     favoritos: ''
   });
 
-  // Clasificación automática de áreas usando IA
-  const { itemsWithAreas, availableAreas, isLoading: classifyingAreas } = useAreaClassification(
-    medications,
-    (med) => ({
-      areaTerapeutica: med.area_terapeutica,
-      farmaco: med.nombre_del_farmaco,
-      molecula: med.nombre_de_la_molecula
-    })
-  );
-
   // Filtrar datos basándose en las selecciones previas
   const filteredData = useMemo(() => {
-    let filtered = [...itemsWithAreas];
+    let filtered = [...medications];
     
     if (filters.laboratorio) {
       filtered = filtered.filter(med => med.nombre_lab === filters.laboratorio);
-    }
-    if (filters.areaIA) {
-      filtered = filtered.filter(med => med.areaIA === filters.areaIA);
     }
     if (filters.areaTerapeutica) {
       filtered = filtered.filter(med => med.area_terapeutica === filters.areaTerapeutica);
@@ -57,37 +42,24 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
     }
     
     return filtered;
-  }, [itemsWithAreas, filters]);
+  }, [medications, filters]);
 
   // Opciones dinámicas basadas en filtros anteriores
   const dynamicOptions = useMemo(() => {
     // Para laboratorios, siempre mostrar todos
-    const laboratorios = [...new Set(itemsWithAreas.map(med => med.nombre_lab).filter(Boolean))].sort();
+    const laboratorios = [...new Set(medications.map(med => med.nombre_lab).filter(Boolean))].sort();
     
-    // Para áreas IA, filtrar por laboratorio seleccionado
-    let dataForAreaIA = itemsWithAreas;
+    // Para áreas terapéuticas, filtrar por laboratorio seleccionado
+    let dataForAreas = medications;
     if (filters.laboratorio) {
-      dataForAreaIA = itemsWithAreas.filter(med => med.nombre_lab === filters.laboratorio);
-    }
-    const areasIA = [...new Set(dataForAreaIA.map(med => med.areaIA).filter(Boolean))].sort();
-    
-    // Para áreas terapéuticas, filtrar por laboratorio y área IA seleccionados
-    let dataForAreas = itemsWithAreas;
-    if (filters.laboratorio) {
-      dataForAreas = dataForAreas.filter(med => med.nombre_lab === filters.laboratorio);
-    }
-    if (filters.areaIA) {
-      dataForAreas = dataForAreas.filter(med => med.areaIA === filters.areaIA);
+      dataForAreas = medications.filter(med => med.nombre_lab === filters.laboratorio);
     }
     const areasTerapeuticas = [...new Set(dataForAreas.map(med => med.area_terapeutica).filter(Boolean))].sort();
     
-    // Para fármacos, filtrar por laboratorio, área IA y área terapéutica seleccionados
-    let dataForFarmacos = itemsWithAreas;
+    // Para fármacos, filtrar por laboratorio y área seleccionados
+    let dataForFarmacos = medications;
     if (filters.laboratorio) {
       dataForFarmacos = dataForFarmacos.filter(med => med.nombre_lab === filters.laboratorio);
-    }
-    if (filters.areaIA) {
-      dataForFarmacos = dataForFarmacos.filter(med => med.areaIA === filters.areaIA);
     }
     if (filters.areaTerapeutica) {
       dataForFarmacos = dataForFarmacos.filter(med => med.area_terapeutica === filters.areaTerapeutica);
@@ -95,12 +67,9 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
     const farmacos = [...new Set(dataForFarmacos.map(med => med.nombre_del_farmaco).filter(Boolean))].sort();
     
     // Para moléculas, filtrar por todas las selecciones anteriores
-    let dataForMoleculas = itemsWithAreas;
+    let dataForMoleculas = medications;
     if (filters.laboratorio) {
       dataForMoleculas = dataForMoleculas.filter(med => med.nombre_lab === filters.laboratorio);
-    }
-    if (filters.areaIA) {
-      dataForMoleculas = dataForMoleculas.filter(med => med.areaIA === filters.areaIA);
     }
     if (filters.areaTerapeutica) {
       dataForMoleculas = dataForMoleculas.filter(med => med.area_terapeutica === filters.areaTerapeutica);
@@ -115,24 +84,18 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
 
     return {
       laboratorios,
-      areasIA,
       areasTerapeuticas,
       farmacos,
       moleculas,
       estados
     };
-  }, [itemsWithAreas, filters, filteredData]);
+  }, [medications, filters, filteredData]);
 
   const handleFilterChange = (key: string, value: any) => {
     const newFilters = { ...filters, [key]: value };
     
     // Limpiar filtros dependientes cuando se cambia un filtro padre
     if (key === 'laboratorio') {
-      newFilters.areaIA = '';
-      newFilters.areaTerapeutica = '';
-      newFilters.farmaco = '';
-      newFilters.molecula = '';
-    } else if (key === 'areaIA') {
       newFilters.areaTerapeutica = '';
       newFilters.farmaco = '';
       newFilters.molecula = '';
@@ -150,7 +113,6 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
   const clearFilters = () => {
     const emptyFilters = {
       laboratorio: '',
-      areaIA: '',
       areaTerapeutica: '',
       farmaco: '',
       molecula: '',
@@ -169,13 +131,12 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
         <div className="flex items-center gap-2 mb-4">
           <Filter className="w-5 h-5 text-blue-600" />
           <h3 className="text-lg font-semibold">Filtros Dinámicos</h3>
-          {classifyingAreas && <Brain className="w-4 h-4 text-purple-500 animate-pulse" />}
           {activeFiltersCount > 0 && (
             <Badge variant="secondary">{activeFiltersCount}</Badge>
           )}
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 xl:grid-cols-8 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 xl:grid-cols-7 gap-4">
           <div>
             <label className="text-sm font-medium mb-1 block">Laboratorio</label>
             <Select
@@ -194,46 +155,14 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
           </div>
 
           <div>
-            <label className="text-sm font-medium mb-1 block flex items-center gap-1">
-              Área <Brain className="w-3 h-3 text-purple-500" />
-            </label>
-            <Select
-              value={filters.areaIA}
-              onValueChange={(value) => handleFilterChange('areaIA', value)}
-              disabled={classifyingAreas || (!filters.laboratorio && dynamicOptions.areasIA.length === 0)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={classifyingAreas ? "Clasificando..." : (filters.laboratorio ? "Seleccionar área" : "Todas")} />
-              </SelectTrigger>
-              <SelectContent className="max-h-[300px]">
-                {dynamicOptions.areasIA.map((area) => (
-                  <SelectItem key={area} value={area}>
-                    {area === 'breast' ? 'Mama' :
-                     area === 'lung' ? 'Pulmón' :
-                     area === 'GI' ? 'Gastroenterología' :
-                     area === 'GU' ? 'Genitourinario' :
-                     area === 'cardio' ? 'Cardiología' :
-                     area === 'neuro' ? 'Neurología' :
-                     area === 'onco' ? 'Oncología' :
-                     area === 'immuno' ? 'Inmunología' :
-                     area === 'endo' ? 'Endocrinología' :
-                     area === 'derma' ? 'Dermatología' :
-                     'Otros'}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
             <label className="text-sm font-medium mb-1 block">Área Terapéutica</label>
             <Select
               value={filters.areaTerapeutica}
               onValueChange={(value) => handleFilterChange('areaTerapeutica', value)}
-              disabled={!filters.areaIA && dynamicOptions.areasTerapeuticas.length === 0}
+              disabled={!filters.laboratorio && dynamicOptions.areasTerapeuticas.length === 0}
             >
               <SelectTrigger>
-                <SelectValue placeholder={filters.areaIA ? "Seleccionar área terapéutica" : "Todas"} />
+                <SelectValue placeholder={filters.laboratorio ? "Seleccionar área" : "Todas"} />
               </SelectTrigger>
               <SelectContent className="max-h-[300px]">
                 {dynamicOptions.areasTerapeuticas.map((area) => (
