@@ -261,6 +261,7 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
           ID_NUM: medication?.ID_NUM,
           laboratorio: medication?.nombre_lab,
           area_terapeutica: medication?.area_terapeutica,
+          area: medication?.area,
           farmaco: medication?.nombre_del_farmaco,
           molecula: medication?.nombre_de_la_molecula
         };
