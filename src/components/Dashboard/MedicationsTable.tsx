@@ -59,6 +59,7 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
         const searchFields = [
           med.nombre_lab,
           med.area_terapeutica,
+          med.area,
           med.nombre_del_farmaco,
           med.nombre_de_la_molecula,
           med.mecanismo_de_accion,
@@ -81,6 +82,10 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
       }
       
       if (activeFilters.areaTerapeutica && med.area_terapeutica !== activeFilters.areaTerapeutica) {
+        return false;
+      }
+      
+      if (activeFilters.area && med.area !== activeFilters.area) {
         return false;
       }
       
@@ -337,7 +342,7 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
           <div className="w-full">
             <ScrollArea className="w-full">
               <div className="w-full overflow-x-auto">
-                <div className="min-w-[1600px]">
+                <div className="min-w-[1700px]">
                   <Table className="w-full">
                     <TableHeader className="sticky top-0 z-10 bg-gray-50 dark:bg-gray-800">
                       <TableRow className="border-b">
@@ -360,24 +365,33 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                             <SortIcon column="nombre_lab" />
                           </div>
                         </TableHead>
-                        <TableHead 
-                          className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[140px]"
-                          onClick={() => handleSort('area_terapeutica')}
-                        >
-                          <div className="flex items-center space-x-2">
-                            <span className="font-semibold">Área Terapéutica</span>
-                            <SortIcon column="area_terapeutica" />
-                          </div>
-                        </TableHead>
-                        <TableHead 
-                          className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[200px]"
-                          onClick={() => handleSort('sub_area_de_tratamiento')}
-                        >
-                          <div className="flex items-center space-x-2">
-                            <span className="font-semibold">Subárea</span>
-                            <SortIcon column="sub_area_de_tratamiento" />
-                          </div>
-                        </TableHead>
+                         <TableHead 
+                           className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[140px]"
+                           onClick={() => handleSort('area_terapeutica')}
+                         >
+                           <div className="flex items-center space-x-2">
+                             <span className="font-semibold">Área Terapéutica</span>
+                             <SortIcon column="area_terapeutica" />
+                           </div>
+                         </TableHead>
+                         <TableHead 
+                           className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[120px]"
+                           onClick={() => handleSort('area')}
+                         >
+                           <div className="flex items-center space-x-2">
+                             <span className="font-semibold">Área</span>
+                             <SortIcon column="area" />
+                           </div>
+                         </TableHead>
+                         <TableHead 
+                           className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[200px]"
+                           onClick={() => handleSort('sub_area_de_tratamiento')}
+                         >
+                           <div className="flex items-center space-x-2">
+                             <span className="font-semibold">Subárea</span>
+                             <SortIcon column="sub_area_de_tratamiento" />
+                           </div>
+                         </TableHead>
                         <TableHead 
                           className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-[150px]"
                           onClick={() => handleSort('nombre_del_farmaco')}
@@ -481,16 +495,21 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
                                 {medication.nombre_lab || 'N/A'}
                               </div>
                             </TableCell>
-                            <TableCell>
-                              <div className="w-[120px] truncate" title={medication.area_terapeutica}>
-                                {medication.area_terapeutica || 'N/A'}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="w-[180px] text-sm leading-tight py-1" title={medication.sub_area_de_tratamiento}>
-                                {medication.sub_area_de_tratamiento || 'N/A'}
-                              </div>
-                            </TableCell>
+                             <TableCell>
+                               <div className="w-[120px] truncate" title={medication.area_terapeutica}>
+                                 {medication.area_terapeutica || 'N/A'}
+                               </div>
+                             </TableCell>
+                             <TableCell>
+                               <div className="w-[100px] truncate" title={medication.area}>
+                                 {medication.area || 'N/A'}
+                               </div>
+                             </TableCell>
+                             <TableCell>
+                               <div className="w-[180px] text-sm leading-tight py-1" title={medication.sub_area_de_tratamiento}>
+                                 {medication.sub_area_de_tratamiento || 'N/A'}
+                               </div>
+                             </TableCell>
                             <TableCell>
                               <div className="w-[130px] truncate" title={medication.nombre_del_farmaco}>
                                 {medication.nombre_del_farmaco || 'N/A'}
