@@ -24,6 +24,7 @@ export const EditMedicationModal: React.FC<EditMedicationModalProps> = ({
   const [formData, setFormData] = useState({
     nombre_lab: '',
     area_terapeutica: '',
+    area: '',
     nombre_del_farmaco: '',
     nombre_de_la_molecula: '',
     mecanismo_de_accion: '',
@@ -42,6 +43,7 @@ export const EditMedicationModal: React.FC<EditMedicationModalProps> = ({
       setFormData({
         nombre_lab: medication.nombre_lab || '',
         area_terapeutica: medication.area_terapeutica || '',
+        area: medication.area || '',
         nombre_del_farmaco: medication.nombre_del_farmaco || '',
         nombre_de_la_molecula: medication.nombre_de_la_molecula || '',
         mecanismo_de_accion: medication.mecanismo_de_accion || '',
@@ -121,6 +123,15 @@ export const EditMedicationModal: React.FC<EditMedicationModalProps> = ({
                 id="area_terapeutica"
                 value={formData.area_terapeutica}
                 onChange={(e) => handleChange('area_terapeutica', e.target.value)}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="area">Área</Label>
+              <Input
+                id="area"
+                value={formData.area}
+                onChange={(e) => handleChange('area', e.target.value)}
               />
             </div>
 

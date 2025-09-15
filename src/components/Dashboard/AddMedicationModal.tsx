@@ -27,6 +27,7 @@ export const AddMedicationModal: React.FC<AddMedicationModalProps> = ({
     nombre_de_la_molecula: '',
     nombre_lab: '',
     area_terapeutica: '',
+    area: '',
     sub_area_de_tratamiento: '',
     mecanismo_de_accion: '',
     linea_de_tratamiento: '',
@@ -71,6 +72,7 @@ export const AddMedicationModal: React.FC<AddMedicationModalProps> = ({
         nombre_de_la_molecula: '',
         nombre_lab: '',
         area_terapeutica: '',
+        area: '',
         sub_area_de_tratamiento: '',
         mecanismo_de_accion: '',
         linea_de_tratamiento: '',
@@ -143,6 +145,15 @@ export const AddMedicationModal: React.FC<AddMedicationModalProps> = ({
                 id="area_terapeutica"
                 value={formData.area_terapeutica}
                 onChange={(e) => handleInputChange('area_terapeutica', e.target.value)}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="area">Área</Label>
+              <Input
+                id="area"
+                value={formData.area}
+                onChange={(e) => handleInputChange('area', e.target.value)}
               />
             </div>
 
