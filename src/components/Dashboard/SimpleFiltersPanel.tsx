@@ -17,7 +17,6 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
 }) => {
   const [filters, setFilters] = useState({
     laboratorio: '',
-    area: '',
     areaTerapeutica: '',
     farmaco: '',
     molecula: '',
@@ -31,9 +30,6 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
     
     if (filters.laboratorio) {
       filtered = filtered.filter(med => med.nombre_lab === filters.laboratorio);
-    }
-    if (filters.area) {
-      filtered = filtered.filter(med => med.area === filters.area);
     }
     if (filters.areaTerapeutica) {
       filtered = filtered.filter(med => med.area_terapeutica === filters.areaTerapeutica);
@@ -53,30 +49,17 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
     // Para laboratorios, siempre mostrar todos
     const laboratorios = [...new Set(medications.map(med => med.nombre_lab).filter(Boolean))].sort();
     
-    // Para áreas, filtrar por laboratorio seleccionado
-    let dataForArea = medications;
-    if (filters.laboratorio) {
-      dataForArea = medications.filter(med => med.nombre_lab === filters.laboratorio);
-    }
-    const areas = [...new Set(dataForArea.map(med => med.area).filter(Boolean))].sort();
-    
-    // Para áreas terapéuticas, filtrar por laboratorio y área seleccionados
+    // Para áreas terapéuticas, filtrar por laboratorio seleccionado
     let dataForAreas = medications;
     if (filters.laboratorio) {
-      dataForAreas = dataForAreas.filter(med => med.nombre_lab === filters.laboratorio);
-    }
-    if (filters.area) {
-      dataForAreas = dataForAreas.filter(med => med.area === filters.area);
+      dataForAreas = medications.filter(med => med.nombre_lab === filters.laboratorio);
     }
     const areasTerapeuticas = [...new Set(dataForAreas.map(med => med.area_terapeutica).filter(Boolean))].sort();
     
-    // Para fármacos, filtrar por laboratorio, área y área terapéutica seleccionados
+    // Para fármacos, filtrar por laboratorio y área seleccionados
     let dataForFarmacos = medications;
     if (filters.laboratorio) {
       dataForFarmacos = dataForFarmacos.filter(med => med.nombre_lab === filters.laboratorio);
-    }
-    if (filters.area) {
-      dataForFarmacos = dataForFarmacos.filter(med => med.area === filters.area);
     }
     if (filters.areaTerapeutica) {
       dataForFarmacos = dataForFarmacos.filter(med => med.area_terapeutica === filters.areaTerapeutica);
@@ -87,9 +70,6 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
     let dataForMoleculas = medications;
     if (filters.laboratorio) {
       dataForMoleculas = dataForMoleculas.filter(med => med.nombre_lab === filters.laboratorio);
-    }
-    if (filters.area) {
-      dataForMoleculas = dataForMoleculas.filter(med => med.area === filters.area);
     }
     if (filters.areaTerapeutica) {
       dataForMoleculas = dataForMoleculas.filter(med => med.area_terapeutica === filters.areaTerapeutica);
@@ -104,7 +84,6 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
 
     return {
       laboratorios,
-      areas,
       areasTerapeuticas,
       farmacos,
       moleculas,
@@ -117,11 +96,6 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
     
     // Limpiar filtros dependientes cuando se cambia un filtro padre
     if (key === 'laboratorio') {
-      newFilters.area = '';
-      newFilters.areaTerapeutica = '';
-      newFilters.farmaco = '';
-      newFilters.molecula = '';
-    } else if (key === 'area') {
       newFilters.areaTerapeutica = '';
       newFilters.farmaco = '';
       newFilters.molecula = '';
@@ -139,7 +113,6 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
   const clearFilters = () => {
     const emptyFilters = {
       laboratorio: '',
-      area: '',
       areaTerapeutica: '',
       farmaco: '',
       molecula: '',
@@ -163,7 +136,7 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
           )}
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 xl:grid-cols-8 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 xl:grid-cols-7 gap-4">
           <div>
             <label className="text-sm font-medium mb-1 block">Laboratorio</label>
             <Select
@@ -182,32 +155,14 @@ export const SimpleFiltersPanel: React.FC<SimpleFiltersPanelProps> = ({
           </div>
 
           <div>
-            <label className="text-sm font-medium mb-1 block">Área</label>
-            <Select
-              value={filters.area}
-              onValueChange={(value) => handleFilterChange('area', value)}
-              disabled={!filters.laboratorio && dynamicOptions.areas.length === 0}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={filters.laboratorio ? "Seleccionar área" : "Todas"} />
-              </SelectTrigger>
-              <SelectContent className="max-h-[300px]">
-                {dynamicOptions.areas.map((area) => (
-                  <SelectItem key={area} value={area}>{area}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
             <label className="text-sm font-medium mb-1 block">Área Terapéutica</label>
             <Select
               value={filters.areaTerapeutica}
               onValueChange={(value) => handleFilterChange('areaTerapeutica', value)}
-              disabled={!filters.area && dynamicOptions.areasTerapeuticas.length === 0}
+              disabled={!filters.laboratorio && dynamicOptions.areasTerapeuticas.length === 0}
             >
               <SelectTrigger>
-                <SelectValue placeholder={filters.area ? "Seleccionar área terapéutica" : "Todas"} />
+                <SelectValue placeholder={filters.laboratorio ? "Seleccionar área" : "Todas"} />
               </SelectTrigger>
               <SelectContent className="max-h-[300px]">
                 {dynamicOptions.areasTerapeuticas.map((area) => (
