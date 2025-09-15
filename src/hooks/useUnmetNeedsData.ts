@@ -20,6 +20,7 @@ type UnmetNeedWithFavorito = {
   preguntas?: string;
   user_email?: string;
   sub_area?: string;
+  area?: string;
 };
 
 export const useUnmetNeedsData = (refreshInterval = 30000) => {

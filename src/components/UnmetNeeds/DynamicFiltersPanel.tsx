@@ -21,7 +21,8 @@ export const DynamicFiltersPanel: React.FC<DynamicFiltersPanelProps> = ({
     farmaco: '',
     molecula: '',
     impacto: '',
-    horizonte: '',
+    area: '',
+    subarea: '',
     favoritos: ''
   });
 
@@ -80,9 +81,10 @@ export const DynamicFiltersPanel: React.FC<DynamicFiltersPanelProps> = ({
     }
     const moleculas = [...new Set(dataForMoleculas.map(un => un.molecula).filter(Boolean))].sort();
     
-    // Para impacto y horizonte, usar los datos filtrados
+    // Para impacto, área y subárea, usar los datos filtrados
     const impactos = [...new Set(filteredData.map(un => un.impacto).filter(Boolean))].sort();
-    const horizontes = [...new Set(filteredData.map(un => un.horizonte_temporal).filter(Boolean))].sort();
+    const areas = [...new Set(filteredData.map(un => un.area).filter(Boolean))].sort();
+    const subareas = [...new Set(filteredData.map(un => un.sub_area).filter(Boolean))].sort();
 
     return {
       laboratorios,
@@ -90,7 +92,8 @@ export const DynamicFiltersPanel: React.FC<DynamicFiltersPanelProps> = ({
       farmacos,
       moleculas,
       impactos,
-      horizontes
+      areas,
+      subareas
     };
   }, [unmetNeeds, filters, filteredData]);
 
@@ -120,7 +123,8 @@ export const DynamicFiltersPanel: React.FC<DynamicFiltersPanelProps> = ({
       farmaco: '',
       molecula: '',
       impacto: '',
-      horizonte: '',
+      area: '',
+      subarea: '',
       favoritos: ''
     };
     setFilters(emptyFilters);
@@ -140,7 +144,7 @@ export const DynamicFiltersPanel: React.FC<DynamicFiltersPanelProps> = ({
           )}
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 xl:grid-cols-7 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 xl:grid-cols-8 gap-4">
           <div>
             <label className="text-sm font-medium mb-1 block">Laboratorio</label>
             <Select
@@ -235,18 +239,36 @@ export const DynamicFiltersPanel: React.FC<DynamicFiltersPanelProps> = ({
           </div>
 
           <div>
-            <label className="text-sm font-medium mb-1 block">Horizonte</label>
+            <label className="text-sm font-medium mb-1 block">Área</label>
             <Select
-              value={filters.horizonte}
-              onValueChange={(value) => handleFilterChange('horizonte', value)}
+              value={filters.area}
+              onValueChange={(value) => handleFilterChange('area', value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Todos" />
+                <SelectValue placeholder="Todas" />
               </SelectTrigger>
               <SelectContent className="max-h-[300px]">
-                <SelectItem value="all">Todos los horizontes</SelectItem>
-                {dynamicOptions.horizontes.map((horizonte) => (
-                  <SelectItem key={horizonte} value={horizonte}>{horizonte}</SelectItem>
+                <SelectItem value="all">Todas las áreas</SelectItem>
+                {dynamicOptions.areas.map((area) => (
+                  <SelectItem key={area} value={area}>{area}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium mb-1 block">Subárea</label>
+            <Select
+              value={filters.subarea}
+              onValueChange={(value) => handleFilterChange('subarea', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Todas" />
+              </SelectTrigger>
+              <SelectContent className="max-h-[300px]">
+                <SelectItem value="all">Todas las subáreas</SelectItem>
+                {dynamicOptions.subareas.map((subarea) => (
+                  <SelectItem key={subarea} value={subarea}>{subarea}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

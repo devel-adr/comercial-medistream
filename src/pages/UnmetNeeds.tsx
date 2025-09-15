@@ -26,7 +26,8 @@ interface UnmetNeedsFilters {
   farmaco?: string;
   molecula?: string;
   impacto?: string;
-  horizonte?: string;
+  area?: string;
+  subarea?: string;
   favoritos?: string;
 }
 
@@ -111,7 +112,8 @@ const UnmetNeeds = () => {
           item.farmaco,
           item.molecula,
           item.impacto,
-          item.horizonte_temporal,
+          item.area,
+          item.sub_area,
           item.racional,
           item.conclusion
         ];
@@ -127,7 +129,8 @@ const UnmetNeeds = () => {
       if (activeFilters.farmaco && item.farmaco !== activeFilters.farmaco) return false;
       if (activeFilters.molecula && item.molecula !== activeFilters.molecula) return false;
       if (activeFilters.impacto && item.impacto !== activeFilters.impacto) return false;
-      if (activeFilters.horizonte && item.horizonte_temporal !== activeFilters.horizonte) return false;
+      if (activeFilters.area && item.area !== activeFilters.area) return false;
+      if (activeFilters.subarea && item.sub_area !== activeFilters.subarea) return false;
       
       const itemId = item.id_UN_table?.toString();
       if (activeFilters.favoritos === 'si' && !localFavorites.has(itemId)) return false;

@@ -196,10 +196,10 @@ export const UnmetNeedsCards: React.FC<UnmetNeedsCardsProps> = ({
                     <div className="text-gray-900 dark:text-gray-100 truncate">{item.farmaco}</div>
                   </div>
                 )}
-                {item.horizonte_temporal && (
+                {item.area && (
                   <div className="bg-green-50 dark:bg-green-900/20 p-2 rounded border-l-2 border-green-400">
-                    <div className="text-green-600 dark:text-green-400 font-medium mb-1">Horizonte</div>
-                    <div className="text-gray-900 dark:text-gray-100 truncate">{item.horizonte_temporal}</div>
+                    <div className="text-green-600 dark:text-green-400 font-medium mb-1">Área</div>
+                    <div className="text-gray-900 dark:text-gray-100 truncate">{item.area}</div>
                   </div>
                 )}
                 {item.lab && (
