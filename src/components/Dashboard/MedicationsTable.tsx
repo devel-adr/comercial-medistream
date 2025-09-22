@@ -263,13 +263,14 @@ export const MedicationsTable: React.FC<MedicationsTableProps> = ({
           area_terapeutica: medication?.area_terapeutica,
           area: medication?.area,
           farmaco: medication?.nombre_del_farmaco,
-          molecula: medication?.nombre_de_la_molecula
+          molecula: medication?.nombre_de_la_molecula,
+          contexto: medication?.contexto
         };
       }).filter(Boolean); // Remove any undefined entries
 
       console.log('Sending medication data to webhook:', selectedMedicationsData);
 
-      const response = await fetch('https://develms.app.n8n.cloud/webhook/unmet_needs', {
+      const response = await fetch('https://develms.app.n8n.cloud/webhook-test/unmet_needs_desarrolo', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
