@@ -35,7 +35,8 @@ export const AddMedicationModal: React.FC<AddMedicationModalProps> = ({
     estado_en_espana: '',
     fecha_de_aprobacion_espana: '',
     ensayos_clinicos_relevantes: '',
-    fuente_url: ''
+    fuente_url: '',
+    contexto: ''
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -80,7 +81,8 @@ export const AddMedicationModal: React.FC<AddMedicationModalProps> = ({
         estado_en_espana: '',
         fecha_de_aprobacion_espana: '',
         ensayos_clinicos_relevantes: '',
-        fuente_url: ''
+        fuente_url: '',
+        contexto: ''
       });
 
       onSuccess(); // Trigger data refresh
@@ -230,6 +232,16 @@ export const AddMedicationModal: React.FC<AddMedicationModalProps> = ({
               id="ensayos_clinicos_relevantes"
               value={formData.ensayos_clinicos_relevantes}
               onChange={(e) => handleInputChange('ensayos_clinicos_relevantes', e.target.value)}
+              rows={3}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="contexto">Contexto</Label>
+            <Textarea
+              id="contexto"
+              value={formData.contexto}
+              onChange={(e) => handleInputChange('contexto', e.target.value)}
               rows={3}
             />
           </div>

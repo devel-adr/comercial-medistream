@@ -34,7 +34,8 @@ export const EditMedicationModal: React.FC<EditMedicationModalProps> = ({
     estado_en_espana: '',
     ensayos_clinicos_relevantes: '',
     fecha_de_aprobacion_espana: '',
-    fuente_url: ''
+    fuente_url: '',
+    contexto: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -53,7 +54,8 @@ export const EditMedicationModal: React.FC<EditMedicationModalProps> = ({
         estado_en_espana: medication.estado_en_espana || '',
         ensayos_clinicos_relevantes: medication.ensayos_clinicos_relevantes || '',
         fecha_de_aprobacion_espana: medication.fecha_de_aprobacion_espana || '',
-        fuente_url: medication.fuente_url || ''
+        fuente_url: medication.fuente_url || '',
+        contexto: medication.contexto || ''
       });
     }
   }, [medication]);
@@ -228,6 +230,16 @@ export const EditMedicationModal: React.FC<EditMedicationModalProps> = ({
               id="ensayos_clinicos_relevantes"
               value={formData.ensayos_clinicos_relevantes}
               onChange={(e) => handleChange('ensayos_clinicos_relevantes', e.target.value)}
+              rows={3}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="contexto">Contexto</Label>
+            <Textarea
+              id="contexto"
+              value={formData.contexto}
+              onChange={(e) => handleChange('contexto', e.target.value)}
               rows={3}
             />
           </div>
